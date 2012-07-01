@@ -1,0 +1,12 @@
+name: ExchangeMarket
+main: com.cyprias.exchangemarket.ExchangeMarket
+version: 0.0.1
+
+commands:
+  em:
+    description: Exchange Market
+    usage: /<command>
+
+permissions:
+  exchangemarket.*:
+    default: false

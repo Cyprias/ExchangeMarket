@@ -1,0 +1,7 @@
+mysql:
+  port: 3306
+  username: root
+  hostname: localhost
+  password: ''
+  database: minecraft
+  prefix: "EM_"
