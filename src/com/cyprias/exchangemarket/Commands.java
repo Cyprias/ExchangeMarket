@@ -162,7 +162,7 @@ class Commands implements CommandExecutor {
 					}
 				}
 				item.setAmount(amount);
-				plugin.sendMessage(sender, "amount: " + amount);
+				//plugin.sendMessage(sender, "amount: " + amount);
 				
 				double price = 0;
 				if (args.length > 1) {
@@ -177,7 +177,7 @@ class Commands implements CommandExecutor {
 					plugin.sendMessage(sender, "You need a price.");
 					return true;
 				}
-				plugin.sendMessage(sender, "price: " + price);
+				//plugin.sendMessage(sender, "price: " + price);
 				
 				
 				
@@ -281,7 +281,7 @@ class Commands implements CommandExecutor {
 					return true;
 				}
 				
-				plugin.sendMessage(sender, "stock: " + stock);
+				//plugin.sendMessage(sender, "stock: " + stock);
 
 				int amount = 1;
 				if (args.length > 1) {
@@ -294,7 +294,7 @@ class Commands implements CommandExecutor {
 					}
 				}
 				stock.setAmount(amount);
-				plugin.sendMessage(sender, "amount: " + amount);
+				//plugin.sendMessage(sender, "amount: " + amount);
 				
 				double price = 0;
 				if (args.length > 1) {
@@ -309,7 +309,7 @@ class Commands implements CommandExecutor {
 					plugin.sendMessage(sender, "You need a price.");
 					return true;
 				}
-				plugin.sendMessage(sender, "price: " + price);
+				//plugin.sendMessage(sender, "price: " + price);
 				
 				
 				String itemName = plugin.itemdb.getItemName(stock.getTypeId(), stock.getDurability());

@@ -111,7 +111,7 @@ public class ExchangeMarket extends JavaPlugin {
 		String itemName = itemdb.getItemName(itemID, itemDur);
 		if (player != null){
 			//sendMessage(player, "Your " + itemName+"x"+amount+" just sold for $" +(price*amount) + " ($"+price+"e)");
-			sendMessage(player, "Someone sold " + itemName+"x"+amount+" to you for $" +(price*amount) + " ($"+price+"e)");
+			sendMessage(player, "You bought " + itemName+"x"+amount+" for $" +(price*amount) + " ($"+price+"e)");
 			
 		}
 	}
@@ -121,7 +121,7 @@ public class ExchangeMarket extends JavaPlugin {
 		String itemName = itemdb.getItemName(itemID, itemDur);
 		if (player != null){
 			//sendMessage(player, "Your " + itemName+"x"+amount+" just sold for $" +(price*amount) + " ($"+price+"e)");
-			sendMessage(player, "Someone bought " + itemName+"x"+amount+" from you for $" +(price*amount) + " ($"+price+"e)");
+			sendMessage(player, "You sold " + itemName+"x"+amount+" for $" +(price*amount) + " ($"+price+"e)");
 			
 		}
 	}
