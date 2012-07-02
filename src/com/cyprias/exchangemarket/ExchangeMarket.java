@@ -93,6 +93,39 @@ public class ExchangeMarket extends JavaPlugin {
 		return 0;
 	}
 	
+	public Player findPlayerByName(String name) {
+
+		for (Player p : getServer().getOnlinePlayers()) {
+			if (p.getName().equalsIgnoreCase(name))
+				return p;
+
+			if (p.getDisplayName().equalsIgnoreCase(name))
+				return p;
+		}
+
+		return null;
+	}
+	
+	public void notifyBuyerOfExchange(String buyerName, int itemID, int itemDur, int amount, double price){
+		Player player = findPlayerByName(buyerName);
+		String itemName = itemdb.getItemName(itemID, itemDur);
+		if (player != null){
+			//sendMessage(player, "Your " + itemName+"x"+amount+" just sold for $" +(price*amount) + " ($"+price+"e)");
+			sendMessage(player, "Someone sold " + itemName+"x"+amount+" to you for $" +(price*amount) + " ($"+price+"e)");
+			
+		}
+	}
+	
+	public void notifySellerOfExchange(String buyerName, int itemID, int itemDur, int amount, double price){
+		Player player = findPlayerByName(buyerName);
+		String itemName = itemdb.getItemName(itemID, itemDur);
+		if (player != null){
+			//sendMessage(player, "Your " + itemName+"x"+amount+" just sold for $" +(price*amount) + " ($"+price+"e)");
+			sendMessage(player, "Someone bought " + itemName+"x"+amount+" from you for $" +(price*amount) + " ($"+price+"e)");
+			
+		}
+	}
+	
 	public boolean payPlayer(String pName, double amount) {
 		pName = pName.toLowerCase();
 		if (setupEconomy()) {

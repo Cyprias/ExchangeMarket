@@ -101,6 +101,26 @@ class Commands implements CommandExecutor {
 				
 				
 				return true;
+			} else if (args[0].equalsIgnoreCase("cancel")) {
+				if (!hasCommandPermission(sender, "exchangemarket.cancel")) {
+					return true;
+				}
+				
+				if (args.length < 2){
+					plugin.sendMessage(sender, "Include the order number.");
+					return true;
+				}
+				
+				if (!isInt(args[1])){
+					plugin.sendMessage(sender, "Invalid order number: " + args[1]);
+					return true;
+				}
+				
+				
+				
+				plugin.database.cancelOrder(sender, Integer.parseInt(args[1]));
+				
+				return true;
 			} else if (args[0].equalsIgnoreCase("orders")) {
 				if (!hasCommandPermission(sender, "exchangemarket.orders")) {
 					return true;
@@ -294,12 +314,17 @@ class Commands implements CommandExecutor {
 				
 				String itemName = plugin.itemdb.getItemName(stock.getTypeId(), stock.getDurability());
 				if (InventoryUtil.getAmount(stock, player.getInventory()) < amount){
-					plugin.sendMessage(sender,"You do not have " + itemName + "x" + amount + " in your inv.");
-
-					return true;
+					//plugin.sendMessage(sender,"You do not have " + itemName + "x" + amount + " in your inv.");
+					
+					amount = InventoryUtil.getAmount(stock, player.getInventory());
 				}
 				
 				
+
+				plugin.database.processSellOrder(sender, stock.getTypeId(), stock.getDurability(), amount, price);
+				
+				
+				/*
 				String playerName = sender.getName(); 
 				int success = plugin.database.insertOrder(
 					1,
@@ -318,7 +343,7 @@ class Commands implements CommandExecutor {
 					double each = plugin.Round(price/amount,2);
 					plugin.sendMessage(sender, "Selling "  + itemName + "x" + amount + " for $" + price + " each.");
 					
-				}
+				}*/
 				
 				return true;
 			} else if (args[0].equalsIgnoreCase("sellhand")) {
