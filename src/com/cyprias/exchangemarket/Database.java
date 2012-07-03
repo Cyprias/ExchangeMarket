@@ -930,9 +930,9 @@ public class Database {
 					toCollect = "";
 				}
 				
-				plugin.sendMessage(sender, F("playerOrder", TypeToString(type,infinite), id, itemName,amount,  price) + toCollect);
+				//.sendMessage(sender, F("playerOrder", TypeToString(type,infinite), id, itemName,amount,  price) + toCollect);
 					
-					
+				sender.sendMessage(F("playerOrder", TypeToString(type,infinite), id, itemName,amount,  price) + toCollect);
 	
 				
 			}
@@ -1091,7 +1091,9 @@ public class Database {
 				amount = result.getInt(9);
 				itemName = plugin.itemdb.getItemName(itemID, itemDur);
 
-				plugin.sendMessage(sender, F("playerOrder", TypeToString(type,infinite), id, itemName, amount, price));
+				sender.sendMessage(F("playerOrder", TypeToString(type,infinite), id, itemName, amount, price));
+				
+				//plugin.sendMessage(sender, );
 				
 			}
 

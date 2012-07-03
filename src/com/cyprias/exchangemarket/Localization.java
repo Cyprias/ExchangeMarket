@@ -29,6 +29,8 @@ public class Localization {
 
 	public void loadLocales() {
 
+		Strings.clear();
+		
 		FileConfiguration locales = plugin.yml.getYMLConfig(Config.locale, true); //
 
 		if (locales != null){

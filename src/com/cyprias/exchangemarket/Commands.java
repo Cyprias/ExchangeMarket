@@ -58,12 +58,26 @@ class Commands implements CommandExecutor {
 		return Localization.L(string);
 	}
 
+	public static String getFinalArg(final String[] args, final int start) {
+		final StringBuilder bldr = new StringBuilder();
+		for (int i = start; i < args.length; i++) {
+			if (i != start) {
+				bldr.append(" ");
+			}
+			bldr.append(args[i]);
+		}
+		return bldr.toString();
+	}
 
 	
 	public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
 		// TODO Auto-generated method stub
 		
 		if (commandLabel.equalsIgnoreCase("em")) {
+			final String message = getFinalArg(args, 0);
+			plugin.info(sender.getName() + ": /"+cmd.getName() + " " + message);
+			
+			
 			if (args.length == 0) {
 				
 				plugin.sendMessage(sender, F("pluginsCommands", plugin.pluginName));
