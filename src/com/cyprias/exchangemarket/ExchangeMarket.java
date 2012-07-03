@@ -16,6 +16,9 @@ public class ExchangeMarket extends JavaPlugin {
 	public Commands commands;
 	public ItemDb itemdb;
 	
+	public YML yml;
+	public Localization localization;
+	
 	public String pluginName;
 	public static Economy econ = null;
 	
@@ -24,6 +27,10 @@ public class ExchangeMarket extends JavaPlugin {
 		this.database = new Database(this);
 		this.commands = new Commands(this);
 		this.itemdb = new ItemDb(this);
+		
+		this.yml = new YML(this);
+		this.localization = new Localization(this);
+		
 		
 		getCommand("em").setExecutor(this.commands);
 		
@@ -106,22 +113,22 @@ public class ExchangeMarket extends JavaPlugin {
 		return null;
 	}
 	
-	public void notifyBuyerOfExchange(String buyerName, int itemID, int itemDur, int amount, double price){
+	public void notifyBuyerOfExchange(String buyerName, int itemID, int itemDur, int amount, double price, String trader){
 		Player player = findPlayerByName(buyerName);
 		String itemName = itemdb.getItemName(itemID, itemDur);
 		if (player != null){
 			//sendMessage(player, "Your " + itemName+"x"+amount+" just sold for $" +(price*amount) + " ($"+price+"e)");
-			sendMessage(player, "You bought " + itemName+"x"+amount+" for $" +(price*amount) + " ($"+price+"e)");
+			sendMessage(player, "You bought " + itemName+"x"+amount+" for $" +(price*amount) + " ($"+price+"e) from " + trader + ".");
 			
 		}
 	}
 	
-	public void notifySellerOfExchange(String buyerName, int itemID, int itemDur, int amount, double price){
+	public void notifySellerOfExchange(String buyerName, int itemID, int itemDur, int amount, double price, String trader){
 		Player player = findPlayerByName(buyerName);
 		String itemName = itemdb.getItemName(itemID, itemDur);
 		if (player != null){
 			//sendMessage(player, "Your " + itemName+"x"+amount+" just sold for $" +(price*amount) + " ($"+price+"e)");
-			sendMessage(player, "You sold " + itemName+"x"+amount+" for $" +(price*amount) + " ($"+price+"e)");
+			sendMessage(player, "You sold " + itemName+"x"+amount+" for $" +(price*amount) + " ($"+price+"e) to " + trader + ".");
 			
 		}
 	}

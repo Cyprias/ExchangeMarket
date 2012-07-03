@@ -103,7 +103,7 @@ public class Database {
 			itemStack.addEnchantments(MaterialUtil.Enchantment.getEnchantments(enchants));
 		}
 
-		if (InventoryUtil.getAmount(itemStack, player.getInventory()) > amount) {
+		if (InventoryUtil.getAmount(itemStack, player.getInventory()) >= amount) {
 			InventoryUtil.remove(itemStack, player.getInventory());
 			return true;
 		}
@@ -167,8 +167,7 @@ public class Database {
 				price = result.getDouble(8);
 				amount = result.getInt(9);
 
-				// plugin.info("processBuyOrder id: " + id + ", price: " + price
-				// + ", amount: " + amount);
+				 plugin.info("processBuyOrder id: " + id + ", price: " + price + ", amount: " + amount);
 
 				if (infinite == true) {
 					amount = sellAmount;
@@ -184,15 +183,18 @@ public class Database {
 					if (infinite == false) {
 						decreaseInt(Config.sqlPrefix + "Orders", id, "amount", amount, con);
 						increaseInt(Config.sqlPrefix + "Orders", id, "exchanged", amount, con);
-						plugin.notifyBuyerOfExchange(trader, itemID, itemDur, amount, price);
+						plugin.notifyBuyerOfExchange(trader, itemID, itemDur, amount, price, trader);
 					}
-
+					
 					plugin.payPlayer(sender.getName(), amount * price);
+
 					// plugin.sendMessage(sender, "Sold " + itemName + "x" +
 					// amount + " for $" + (amount*price) + " ($" +price+"e)");
-					plugin.notifySellerOfExchange(sender.getName(), itemID, itemDur, amount, price);
+					plugin.notifySellerOfExchange(sender.getName(), itemID, itemDur, amount, price, trader);
 
 					// plugin.info("sellAmount: " + sellAmount);
+				}else{
+					plugin.info("Could not remove " + itemName + "x" + amount + " from inv.");
 				}
 				if (sellAmount <= 0)
 					break;
@@ -244,6 +246,34 @@ public class Database {
 
 	}
 
+	public int cleanBuyOrders() {
+		Connection con = getSQLConnection();
+		int value = cleanBuyOrders(con);
+		closeSQLConnection(con);
+		return value;
+	}
+	
+	public int cleanBuyOrders(Connection con) {
+		String SQL = "DELETE FROM " + Config.sqlPrefix + "Orders WHERE `type` = 2 AND `amount` <= 0 AND `exchanged` <= 0;";
+		int success = 0;
+
+		try {
+			PreparedStatement statement = con.prepareStatement(SQL);
+
+			success = statement.executeUpdate();
+
+			statement.close();
+
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		plugin.info("cleanBuyOrders: " + success);
+
+		return success;
+	}
+	
 	public int cleanSellOrders(Connection con) {
 		String SQL = "DELETE FROM " + Config.sqlPrefix + "Orders WHERE `type` = 1 AND `amount` = 0;";
 		int success = 0;
@@ -329,7 +359,8 @@ public class Database {
 						plugin
 							.sendMessage(sender, "Buying " + itemName + "x" + canBuy + " from " + trader + " for $" + (price * canBuy) + " ($" + price + "e)");
 						plugin.debtPlayer(sender.getName(), canBuy * price);
-						plugin.payPlayer(trader, canBuy * price);
+						if (infinite == false)
+							plugin.payPlayer(trader, canBuy * price);
 						
 						
 						InventoryUtil.add(itemStack, player.getInventory());
@@ -341,7 +372,7 @@ public class Database {
 							decreaseInt(Config.sqlPrefix + "Orders", id, "amount", canBuy);
 						increaseInt(Config.sqlPrefix + "Orders", id, "exchanged", canBuy);
 
-						plugin.notifySellerOfExchange(trader, itemID, itemDur, amount, price);
+						plugin.notifySellerOfExchange(trader, itemID, itemDur, amount, price, trader);
 
 						buyAmount -= canBuy;
 					}
@@ -356,7 +387,13 @@ public class Database {
 
 		return buyAmount;
 	}
+	private String F(String string, Object... args) {
+		return Localization.F(string, args);
+	}
 
+	private String L(String string) {
+		return Localization.L(string);
+	}
 	public int processBuyOrder(CommandSender sender, int itemID, short itemDur, int buyAmount, double buyPrice, Connection con) {
 		int updateSuccessful = 0;
 		
@@ -372,6 +409,12 @@ public class Database {
 		
 		
 		if (buyAmount > 0) {
+			
+			if (plugin.getBalance(sender.getName()) < (buyAmount*buyPrice)){
+				plugin.sendMessage(sender, L("buyNotEnoughFunds"));
+				return 0;
+			}
+			
 			updateSuccessful = insertOrder(2, false, sender.getName(), itemID, itemDur, null, buyPrice, buyAmount, con);
 			if (updateSuccessful > 0) {
 				plugin.sendMessage(sender, "Created buy order for " + itemName + "x" + buyAmount + " at $" + (buyPrice * buyAmount) + " ($" + buyPrice + "e)");
@@ -732,35 +775,124 @@ public class Database {
 		return myReturn;
 	}
 
+	public int collectPenderingBuys(CommandSender sender) {
+		Connection con = getSQLConnection();
+		int value = collectPenderingBuys(sender,  con);
+		closeSQLConnection(con);
+		return value;
+	}
+	
+	public int collectPenderingBuys(CommandSender sender, Connection con){
+		int success = 0;
+		
+		String SQL = "SELECT * FROM " + Config.sqlPrefix + "Orders WHERE `type` = 2 AND `player` LIKE ? AND `exchanged` > 0 ORDER BY `exchanged` DESC";
+		
+		Player player = (Player) sender;
+		
+		int count = 0;
+		try {
+			PreparedStatement statement = con.prepareStatement(SQL);
+			statement.setString(1, sender.getName());
+
+			ResultSet result = statement.executeQuery();
+
+			int id, type, itemID, mount,exchanged;
+			short itemDur;
+			double price;
+			String itemName;
+			Boolean infinite;
+			String toCollect;
+			while (result.next()) {
+				count +=1;
+				// patron = result.getString(1);
+				id = result.getInt(1);
+				type = result.getInt(2);
+				infinite = result.getBoolean(3);
+				itemID = result.getInt(5);
+				itemDur = result.getShort(6);
+				price = result.getDouble(8);
+			//	amount = result.getInt(9);
+				exchanged = result.getInt(10);
+				itemName = plugin.itemdb.getItemName(itemID, itemDur);
+				
+				//plugin.sendMessage(sender, id + ": "+itemName+"x"+exchanged);
+				if (exchanged > 0){
+					for (int i = exchanged; i >= 0; i--) {
+						if (plugin.database.giveItemToPlayer(player, itemID, itemDur, i) == true){
+							
+							plugin.sendMessage(sender, "Collected " + itemName + "x" + i);
+							plugin.database.decreaseInt(Config.sqlPrefix + "Orders", id, "exchanged", i);
+							break;
+						}
+					}
+				}
+				
+			}
+
+			result.close();
+			statement.close();
+
+			
+			
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		cleanBuyOrders();
+		
+		if (count == 0){
+			plugin.sendMessage(sender, "You have nothing to collect.");
+		}
+		
+		return success;
+	}
+	
 	public int listPlayerOrders(CommandSender sender, String trader) {
 		int updateSuccessful = 0;
 
 		Connection con = getSQLConnection();
 
-		String SQL = "SELECT *" + " FROM " + Config.sqlPrefix + "Orders WHERE `player` LIKE ? AND `amount` > 0 ORDER BY id ASC;";
-
+		String SQL = "SELECT * FROM " + Config.sqlPrefix + "Orders WHERE `player` LIKE ? ORDER BY id ASC;";//`amount` > 0
+		int count = 0;
 		try {
 			PreparedStatement statement = con.prepareStatement(SQL);
 			statement.setString(1, trader);
 
 			ResultSet result = statement.executeQuery();
 
-			int id, type, itemID, itemDur, amount;
+			int id, type, itemID, itemDur, amount,exchanged;
 			double price;
 			String itemName;
+			Boolean infinite;
+			String toCollect;
 			while (result.next()) {
+				count +=1;
 				// patron = result.getString(1);
 				id = result.getInt(1);
 				type = result.getInt(2);
+				infinite = result.getBoolean(3);
 				itemID = result.getInt(5);
 				itemDur = result.getInt(6);
 				price = result.getDouble(8);
 				amount = result.getInt(9);
+				exchanged = result.getInt(10);
 				itemName = plugin.itemdb.getItemName(itemID, itemDur);
-
-				plugin.sendMessage(sender, "[" + TypeToString(type) + "] #" + id + ": " + itemName + "x" + amount + " @ $" + price
-
-				);
+				
+				if (exchanged > 0){
+					
+					toCollect = " ("+exchanged+" to collect)";
+				}else{
+					toCollect = "";
+				}
+				
+				if (infinite== true){
+					plugin.sendMessage(sender, "[Inf" + TypeToString(type) + "] #" + id + ": " + itemName + " @ $" + price);
+				}else{
+					plugin.sendMessage(sender, "[" + TypeToString(type) + "] #" + id + ": " + itemName + "x" + amount + " @ $" + price + toCollect);
+						
+				}
+				
 			}
 
 			result.close();
@@ -771,6 +903,11 @@ public class Database {
 			e.printStackTrace();
 		}
 
+		
+		if (count == 0){
+			plugin.sendMessage(sender, "You have no active orders.");
+		}
+		
 		closeSQLConnection(con);
 
 		return updateSuccessful;
@@ -846,8 +983,18 @@ public class Database {
 
 					}
 					updateSuccessful = removeRow(Config.sqlPrefix + "Orders", orderID, con);
+					
+					if (updateSuccessful> 0){
+						if (infinite == true){
+							plugin.sendMessage(sender, "Canceled Inf" + TypeToString(type) + " order #"+orderID+" (" + itemName + "x" +amount + ").");
+						}else{
+							plugin.sendMessage(sender, "Canceled " + TypeToString(type) + " order #"+orderID+" (" + itemName + "x" +amount + ").");
+						}
 
-					plugin.info("cancelOrder updateSuccessful: " + updateSuccessful);
+						
+					}
+
+					//plugin.info("cancelOrder updateSuccessful: " + updateSuccessful);
 
 				}
 			}

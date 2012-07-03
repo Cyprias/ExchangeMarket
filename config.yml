@@ -5,3 +5,4 @@ mysql:
   password: ''
   database: minecraft
   prefix: "EM_"
+locale: enUS.yml

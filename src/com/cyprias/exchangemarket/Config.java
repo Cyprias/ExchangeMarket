@@ -23,11 +23,13 @@ public class Config {
 	}
 	
 	public static String sqlUsername, sqlPassword, sqlURL, sqlPrefix;
+	public static String locale;
 	private void loadConfigOpts(){
 		sqlUsername = config.getString("mysql.username");
 		sqlPassword = config.getString("mysql.password");
 		sqlURL = "jdbc:mysql://" + config.getString("mysql.hostname") + ":" + config.getInt("mysql.port") + "/" + config.getString("mysql.database");
 		sqlPrefix = config.getString("mysql.prefix"); 
 			
+		locale = config.getString("locale");
 	}
 }

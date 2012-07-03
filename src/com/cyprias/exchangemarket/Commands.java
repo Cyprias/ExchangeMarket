@@ -43,12 +43,37 @@ class Commands implements CommandExecutor {
 		return false;
 	}
 	
+	private String F(String string, Object... args) {
+		return Localization.F(string, args);
+	}
+
+	private String L(String string) {
+		return Localization.L(string);
+	}
+	
 	public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
 		// TODO Auto-generated method stub
 		
 		if (commandLabel.equalsIgnoreCase("em")) {
 			if (args.length == 0) {
-				plugin.sendMessage(sender, "  §aMissing command...");
+				
+				plugin.sendMessage(sender, "§a"+plugin.pluginName+" Commands.");
+				
+				if (plugin.hasPermission(sender, "exchangemarket.sell"))
+					plugin.sendMessage(sender, "  §a/"+commandLabel+" sell <itemName> <amount> <price> §7- "+L("cmdSellDesc"));
+				if (plugin.hasPermission(sender, "exchangemarket.buy"))
+					plugin.sendMessage(sender, "  §a/"+commandLabel+" buy <itemName> <amount> <price> §7- "+L("cmdBuyDesc"));
+				
+				if (plugin.hasPermission(sender, "exchangemarket.infbuy"))
+					plugin.sendMessage(sender, "  §a/"+commandLabel+" infbuy <itemName> <price> §7- "+L("cmdInfBuyDesc"));
+				if (plugin.hasPermission(sender, "exchangemarket.infsell"))
+					plugin.sendMessage(sender, "  §a/"+commandLabel+" infsell <itemName> <price> §7- "+L("cmdInfSellDesc"));
+				
+				if (plugin.hasPermission(sender, "exchangemarket.orders"))
+					plugin.sendMessage(sender, "  §a/"+commandLabel+" orders §7- "+L("cmdOrdersDesc"));
+				
+				
+				
 				return true;
 			}
 			
@@ -91,7 +116,7 @@ class Commands implements CommandExecutor {
 					}
 				}
 				stock.setAmount(amount);
-				plugin.sendMessage(sender, "amount: " + amount);
+				//plugin.sendMessage(sender, "amount: " + amount);
 				
 				
 				Database.itemStats stats = plugin.database.getItemStats(stock.getTypeId(), stock.getDurability());
@@ -265,13 +290,19 @@ class Commands implements CommandExecutor {
 				}
 				
 				return true;
+			} else if (args[0].equalsIgnoreCase("collect")) {
+				
+				plugin.database.collectPenderingBuys(sender);
+				
+				return true;
 			} else if (args[0].equalsIgnoreCase("sell")) {
 				if (!hasCommandPermission(sender, "exchangemarket.sell")) {
 					return true;
 				}
 				
-				if (args.length < 3) {
+				if (args.length < 4) {
 					plugin.sendMessage(sender, "Need more args.");
+					return true;
 				}
 				
 				ItemStack stock = ItemDb.getItemStack(args[1]);
@@ -319,7 +350,11 @@ class Commands implements CommandExecutor {
 					amount = InventoryUtil.getAmount(stock, player.getInventory());
 				}
 				
-				
+				if (amount == 0){
+					
+					plugin.sendMessage(sender, F("sellNotEnoughItems", itemName));
+					return true;
+				}
 
 				plugin.database.processSellOrder(sender, stock.getTypeId(), stock.getDurability(), amount, price);
 				
