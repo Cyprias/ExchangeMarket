@@ -15,6 +15,7 @@ public class ExchangeMarket extends JavaPlugin {
 	public Database database;
 	public Commands commands;
 	public ItemDb itemdb;
+	public Events events;
 	
 	public YML yml;
 	public Localization localization;
@@ -31,6 +32,8 @@ public class ExchangeMarket extends JavaPlugin {
 		this.yml = new YML(this);
 		this.localization = new Localization(this);
 		
+		this.events = new Events(this);
+		getServer().getPluginManager().registerEvents(this.events, this);
 		
 		getCommand("em").setExecutor(this.commands);
 		

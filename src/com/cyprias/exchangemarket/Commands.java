@@ -1,8 +1,12 @@
 package com.cyprias.exchangemarket;
 
+import java.util.HashMap;
+
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -14,9 +18,12 @@ class Commands implements CommandExecutor {
 
 	public Commands(ExchangeMarket plugin) {
 		this.plugin = plugin;
-
+		
 	}
 
+	
+
+	
 	private String getItemStatsMsg(Database.itemStats stats, int stackCount) {
 		int roundTo = 2;
 		if (stats.total == 0)
@@ -50,6 +57,8 @@ class Commands implements CommandExecutor {
 	private String L(String string) {
 		return Localization.L(string);
 	}
+
+
 	
 	public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
 		// TODO Auto-generated method stub
