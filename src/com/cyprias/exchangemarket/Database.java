@@ -196,9 +196,9 @@ public class Database {
 						//plugin.notifyBuyerOfExchange(trader, itemID, itemDur, amount, price, trader);
 						
 						if (infinite == true){
-							plugin.notifyBuyerOfExchange(sender.getName(), itemID, itemDur, amount, price, plugin.pluginName);
+							plugin.notifyBuyerOfExchange(trader, itemID, itemDur, amount, price, plugin.pluginName);
 						}else{
-							plugin.notifyBuyerOfExchange(sender.getName(), itemID, itemDur, amount, price, trader);
+							plugin.notifyBuyerOfExchange(trader, itemID, itemDur, amount, price, sender.getName());
 						}
 						
 					}
@@ -243,7 +243,7 @@ public class Database {
 
 			int success = insertOrder(1, false, sender.getName(), itemID, itemDur, null, sellPrice, sellAmount, con);
 			if (success > 0) {
-				plugin.sendMessage(sender, F("createdSellOrder", itemName, sellAmount, (sellAmount * sellPrice), sellPrice));
+				plugin.sendMessage(sender, F("createdSellOrder", itemName, sellAmount, plugin.Round(sellAmount * sellPrice,2), sellPrice));
 
 				
 				
@@ -395,7 +395,7 @@ public class Database {
 						}
 						
 						if (infinite == false)
-							plugin.sendMessage(sender, F("buyingItem", itemName, canBuy, (price * canBuy), price, trader));
+							plugin.sendMessage(sender, F("buyingItem", itemName, canBuy, plugin.Round(price * canBuy,2), price, trader));
 						
 						buyAmount -= canBuy;
 					}
@@ -440,7 +440,7 @@ public class Database {
 			
 			updateSuccessful = insertOrder(2, false, sender.getName(), itemID, itemDur, null, buyPrice, buyAmount, con);
 			if (updateSuccessful > 0) {
-				plugin.sendMessage(sender, F("createdBuyOrder", itemName, buyAmount, (buyPrice * buyAmount), buyPrice));
+				plugin.sendMessage(sender, F("createdBuyOrder", itemName, buyAmount, plugin.Round(buyPrice * buyAmount,2), buyPrice));
 
 				
 				

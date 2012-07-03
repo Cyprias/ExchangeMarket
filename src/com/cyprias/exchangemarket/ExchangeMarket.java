@@ -123,7 +123,7 @@ public class ExchangeMarket extends JavaPlugin {
 		String itemName = itemdb.getItemName(itemID, itemDur);
 		if (player != null){
 			//sendMessage(player, "Your " + itemName+"x"+amount+" just sold for $" +(price*amount) + " ($"+price+"e)");
-			sendMessage(player, F("youBought", itemName, amount, price*amount, price, trader));
+			sendMessage(player, F("youBought", itemName, amount, Round(price*amount,2), price, trader));
 			
 		}
 	}
@@ -133,7 +133,7 @@ public class ExchangeMarket extends JavaPlugin {
 		String itemName = itemdb.getItemName(itemID, itemDur);
 		if (player != null){
 			//sendMessage(player, "Your " + itemName+"x"+amount+" just sold for $" +(price*amount) + " ($"+price+"e)");
-			sendMessage(player, F("youSold", itemName, amount, price*amount, price, trader));
+			sendMessage(player, F("youSold", itemName, amount, Round(price*amount,2), price, trader));
 			
 			
 			
