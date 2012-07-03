@@ -38,3 +38,4 @@ notEnoughInvSpace: "&7You do not have enough inventory space to recieve &f%s&7x&
 cmdCancelDesc: "&7Cancel one of your orders."
 cmdReloadDesc: "&7Reload plugin configs."
 buyFromSelf: "&7Canceled sell order &f%s&7x&f%s&7 for $&f%s&7 ($&f%s&7e)."
+mustSupplyAPrice: "&7You must input a price."

@@ -1139,14 +1139,27 @@ public class Database {
 		return value;
 	}
 
-	public int listOrders(CommandSender sender, Connection con) {
+	public int listOrders(CommandSender sender, int getType, Connection con) {
 		int updateSuccessful = 0;
 
-		String SQL = "SELECT *" + " FROM " + Config.sqlPrefix + "Orders ORDER BY id ASC;";
+		String SQL = "SELECT * FROM " + Config.sqlPrefix + "Orders ORDER BY id ASC;";
+		
+		if (getType > 0) {
+			//query = "SELECT * FROM " + Config.sqlPrefix
+			//	+ "Orders WHERE `itemID` = ? AND `itemDur` = ? AND `itemEnchants` IS NULL AND `amount` > 0 AND `type` = ?;";
+			
+			
+			SQL = "SELECT * FROM " + Config.sqlPrefix + "Orders WHERE `type` = ? ORDER BY id ASC;";
+		}
+		
 		int count = 0;
 		try {
 			PreparedStatement statement = con.prepareStatement(SQL);
 
+			if (getType > 0){
+				statement.setInt(1, getType);
+			}
+			
 			ResultSet result = statement.executeQuery();
 
 			int type, itemID, itemDur, amount, id;
@@ -1165,7 +1178,10 @@ public class Database {
 				amount = result.getInt(9);
 				itemName = plugin.itemdb.getItemName(itemID, itemDur);
 
-				sender.sendMessage(F("playerOrder", TypeToString(type, infinite), id, itemName, amount, price));
+				//plugin.info("id: " + id + ", type: " + type + ", infinite: " + infinite + ", itemName: " + itemName + ", amount: " + amount + ", price: " + price);
+				
+				
+				sender.sendMessage(F("playerOrder", TypeToString(type, infinite), id, itemName, amount, plugin.Round(amount * price, Config.priceRounding), plugin.Round(price,Config.priceRounding)));
 
 				// plugin.sendMessage(sender, );
 
@@ -1186,9 +1202,9 @@ public class Database {
 		return updateSuccessful;
 	}
 
-	public int listOrders(CommandSender sender) {
+	public int listOrders(CommandSender sender, int getType) {
 		Connection con = getSQLConnection();
-		int value = listOrders(sender, con);
+		int value = listOrders(sender, getType, con);
 		closeSQLConnection(con);
 		return value;
 	}
