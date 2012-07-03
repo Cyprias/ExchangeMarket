@@ -224,10 +224,10 @@ public class Database {
 	public void processSellOrder(CommandSender sender, int itemID, short itemDur, int sellAmount, double sellPrice) {
 		Connection con = getSQLConnection();
 
-		plugin.info("sellAmountA: " + sellAmount);
+		//plugin.info("sellAmountA: " + sellAmount);
 		sellAmount = checkBuyOrders(sender, itemID, itemDur, sellAmount, sellPrice, con);
 
-		plugin.info("sellAmountB: " + sellAmount);
+		//plugin.info("sellAmountB: " + sellAmount);
 
 		String itemName = plugin.itemdb.getItemName(itemID, itemDur);
 		Player player = (Player) sender;
@@ -238,7 +238,7 @@ public class Database {
 			itemStack.setDurability(itemDur);
 
 			sellAmount = Math.min(sellAmount, InventoryUtil.getAmount(itemStack, player.getInventory()));
-			plugin.info("sellAmountC: " + sellAmount);
+			//plugin.info("sellAmountC: " + sellAmount);
 			itemStack.setAmount(sellAmount);
 
 			int success = insertOrder(1, false, sender.getName(), itemID, itemDur, null, sellPrice, sellAmount, con);
@@ -303,7 +303,7 @@ public class Database {
 			e.printStackTrace();
 		}
 
-		plugin.info("cleanSellOrders: " + success);
+		//plugin.info("cleanSellOrders: " + success);
 
 		return success;
 	}
@@ -352,14 +352,14 @@ public class Database {
 				plugin.info("processBuyOrder id: " + id + ", price: " + price + ", amount: " + amount);
 
 				senderBalance = plugin.getBalance(sender.getName());
-				plugin.info("senderBalance:" + senderBalance);
+				//plugin.info("senderBalance:" + senderBalance);
 
 				canBuy = (int) Math.floor(senderBalance / price);
 				canBuy = Math.min(canBuy, buyAmount);
 				if (infinite == false)
 					canBuy = Math.min(canBuy, amount);
 
-				plugin.info("canBuy:" + canBuy);
+				//plugin.info("canBuy:" + canBuy);
 
 				/**/
 
@@ -422,10 +422,10 @@ public class Database {
 		
 		
 		
-		plugin.info("buyAmountA: " + buyAmount);
+		//plugin.info("buyAmountA: " + buyAmount);
 		
 		buyAmount = checkSellOrders(sender, itemID, itemDur, buyAmount, buyPrice, con);
-		plugin.info("buyAmountB: " + buyAmount);
+		//plugin.info("buyAmountB: " + buyAmount);
 		
 		
 		String itemName = plugin.itemdb.getItemName(itemID, itemDur);
