@@ -8,7 +8,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
-
 public class ExchangeMarket extends JavaPlugin {
 	public static String chatPrefix = "§f[§6EM§f] ";
 	public Config config;
@@ -26,6 +25,9 @@ public class ExchangeMarket extends JavaPlugin {
 	public void onEnable() {
 		this.config = new Config(this);
 		this.database = new Database(this);
+		if (this.isEnabled() == false)
+			return;
+		
 		this.commands = new Commands(this);
 		this.itemdb = new ItemDb(this);
 		

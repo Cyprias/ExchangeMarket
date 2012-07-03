@@ -14,7 +14,7 @@ permissions:
     default: false
   exchangemarket.buy:
     default: false
-  exchangemarket.oruce:
+  exchangemarket.price:
     default: false
   exchangemarket.infbuy:
     default: false
