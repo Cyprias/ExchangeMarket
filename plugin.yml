@@ -1,6 +1,6 @@
 name: ExchangeMarket
 main: com.cyprias.exchangemarket.ExchangeMarket
-version: 0.0.1
+version: 0.1.0
 
 commands:
   em:
@@ -9,4 +9,26 @@ commands:
 
 permissions:
   exchangemarket.*:
+    default: false
+  exchangemarket.sell:
+    default: false
+  exchangemarket.buy:
+    default: false
+  exchangemarket.oruce:
+    default: false
+  exchangemarket.infbuy:
+    default: false
+  exchangemarket.infsell:
+    default: false
+  exchangemarket.orders:
+    default: false
+  exchangemarket.collect:
+    default: false
+  exchangemarket.list:
+    default: false
+  exchangemarket.sellhand:
+    default: false
+  exchangemarket.cancel:
+    default: false
+  exchangemarket.reload:
     default: false

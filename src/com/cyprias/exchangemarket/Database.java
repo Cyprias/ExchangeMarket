@@ -167,7 +167,7 @@ public class Database {
 				price = result.getDouble(8);
 				amount = result.getInt(9);
 
-				 plugin.info("processBuyOrder id: " + id + ", price: " + price + ", amount: " + amount);
+				// plugin.info("processBuyOrder id: " + id + ", price: " + price + ", amount: " + amount);
 
 				if (infinite == true) {
 					amount = sellAmount;
@@ -282,7 +282,7 @@ public class Database {
 			e.printStackTrace();
 		}
 
-		plugin.info("cleanBuyOrders: " + success);
+		//plugin.info("cleanBuyOrders: " + success);
 
 		return success;
 	}
@@ -944,7 +944,7 @@ public class Database {
 
 		
 		if (count == 0){
-			plugin.sendMessage(sender, "You have no active orders.");
+			plugin.sendMessage(sender, L("noActiveOrders"));
 		}
 		
 		closeSQLConnection(con);
@@ -972,6 +972,7 @@ public class Database {
 			String itemName, trader;
 			Boolean infinite;
 			String enchants;
+			
 			while (result.next()) {
 				// patron = result.getString(1);
 
@@ -1005,19 +1006,27 @@ public class Database {
 							}
 
 							if (!InventoryUtil.fits(is, player.getInventory())) {
-								plugin.sendMessage(sender, "You do not have enough inventory space to recieve " + itemName + "x" + amount);
+								plugin.sendMessage(sender, F("notEnoughInvSpace", itemName, amount));
+								
+								
+								
 								return 0;
 							}
 
 							InventoryUtil.add(is, player.getInventory());
 
-							plugin.sendMessage(sender, "Returned your " + itemName + "x" + amount + ".");
+							plugin.sendMessage(sender, F("returnedYourItem", itemName, amount));
 
+							
+							
 						} else if (type == 2) {// Buy, return money.
 							double money = price * amount;
 
 							plugin.payPlayer(sender.getName(), money);
-							plugin.sendMessage(sender, "Returned your $" + money + ".");
+							plugin.sendMessage(sender, F("refundedYourMoney", money));
+							
+							
+							
 						}
 
 					}
@@ -1025,8 +1034,6 @@ public class Database {
 					
 					if (updateSuccessful> 0){
 						plugin.sendMessage(sender, F("canceledOrder", TypeToString(type,infinite), orderID, itemName, amount));
-
-						
 					}
 
 					//plugin.info("cancelOrder updateSuccessful: " + updateSuccessful);
@@ -1034,6 +1041,9 @@ public class Database {
 				}
 			}
 
+			if (updateSuccessful == 0)
+				plugin.sendMessage(sender, F("cannotCancelOrder", orderID));
+			
 			result.close();
 			statement.close();
 
@@ -1056,7 +1066,7 @@ public class Database {
 		int updateSuccessful = 0;
 
 		String SQL = "SELECT *" + " FROM " + Config.sqlPrefix + "Orders ORDER BY id ASC;";
-
+		int count = 0;
 		try {
 			PreparedStatement statement = con.prepareStatement(SQL);
 
@@ -1067,6 +1077,7 @@ public class Database {
 			double price;
 			String itemName;
 			while (result.next()) {
+				count+=1;
 				// patron = result.getString(1);
 				id = result.getInt(1);
 				type = result.getInt(2);
@@ -1089,6 +1100,10 @@ public class Database {
 			e.printStackTrace();
 		}
 
+		if (count == 0){
+			plugin.sendMessage(sender, L("noActiveList"));
+		}
+		
 		return updateSuccessful;
 	}
 

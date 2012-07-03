@@ -83,11 +83,17 @@ class Commands implements CommandExecutor {
 				if (plugin.hasPermission(sender, "exchangemarket.infsell"))
 					plugin.sendMessage(sender, "  §a/"+commandLabel+" infsell <itemName> <price> §7- "+L("cmdInfSellDesc"));
 				
+				if (plugin.hasPermission(sender, "exchangemarket.list"))
+					plugin.sendMessage(sender, "  §a/"+commandLabel+" list §7- "+L("cmdListDesc"));
 				if (plugin.hasPermission(sender, "exchangemarket.orders"))
 					plugin.sendMessage(sender, "  §a/"+commandLabel+" orders §7- "+L("cmdOrdersDesc"));
 				if (plugin.hasPermission(sender, "exchangemarket.collect"))
 					plugin.sendMessage(sender, "  §a/"+commandLabel+" collect §7- "+L("cmdCollectDesc"));
+				if (plugin.hasPermission(sender, "exchangemarket.cancel"))
+					plugin.sendMessage(sender, "  §a/"+commandLabel+" cancel <ID> §7- "+L("cmdCancelDesc"));
 				
+				if (plugin.hasPermission(sender, "exchangemarket.reload"))
+					plugin.sendMessage(sender, "  §a/"+commandLabel+" reload §7- "+L("cmdReloadDesc"));
 				
 				return true;
 			}
@@ -95,6 +101,10 @@ class Commands implements CommandExecutor {
 			Player player = (Player) sender;
 			if (args[0].equalsIgnoreCase("price")) {
 				if (!hasCommandPermission(sender, "exchangemarket.price")) {
+					return true;
+				}
+				if (args.length < 2) {
+					plugin.sendMessage(sender, "§a/"+commandLabel +" price <itemName> [amount] [Buy/Sale] §7- "+L("cmdPriceDesc"));
 					return true;
 				}
 				
@@ -121,7 +131,7 @@ class Commands implements CommandExecutor {
 				
 				int type = 0;
 				if (args.length > 3) {
-					if (args[3].equalsIgnoreCase("sale")){
+					if (args[3].equalsIgnoreCase("sell")){
 						type = 1;
 					}else if (args[3].equalsIgnoreCase("buy")){
 						type = 2;
@@ -181,6 +191,10 @@ class Commands implements CommandExecutor {
 				if (!hasCommandPermission(sender, "exchangemarket.buy")) {
 					return true;
 				}
+				if (args.length < 4) {
+					plugin.sendMessage(sender, "§a/"+commandLabel +" buy <itemName> <amount> <price> §7- "+L("cmdBuyDesc"));
+					return true;
+				}
 				
 				ItemStack item = ItemDb.getItemStack(args[1]);
 				
@@ -203,14 +217,18 @@ class Commands implements CommandExecutor {
 				//plugin.sendMessage(sender, "amount: " + amount);
 				
 				double price = 0;
-				if (args.length > 1) {
-					if (isDouble(args[3])){
-						price = Double.parseDouble(args[3]);
-					}else{
-						plugin.sendMessage(sender, F("invalidPrice", args[3]));
-						return true;
+				//if (args.length > 2) {
+				
+				
+					if (args.length > 1) {
+						if (isDouble(args[3])){
+							price = Double.parseDouble(args[3]);
+						}else{
+							plugin.sendMessage(sender, F("invalidPrice", args[3]));
+							return true;
+						}
 					}
-				}
+				//}
 				if (price == 0){
 					plugin.sendMessage(sender, F("invalidPrice", 0));
 					return true;
@@ -227,10 +245,11 @@ class Commands implements CommandExecutor {
 				if (!hasCommandPermission(sender, "exchangemarket.infbuy")) {
 					return true;
 				}
-				if (args.length < 2) {
+				if (args.length < 3) {
 					plugin.sendMessage(sender, "  §a/"+commandLabel+" infbuy <itemName> <price> §7- "+L("cmdInfBuyDesc"));
 					return true;
 				}
+				
 				ItemStack stock = ItemDb.getItemStack(args[1]);
 				
 				if (stock == null){
@@ -261,14 +280,15 @@ class Commands implements CommandExecutor {
 				if (success> 0){
 					plugin.sendMessage(sender, F("infiniteBuyCreated", itemName, price));
 				}
-
+				return true;
 			} else if (args[0].equalsIgnoreCase("infsell")) {
 				if (!hasCommandPermission(sender, "exchangemarket.infsell")) {
 					return true;
 				}
 				
-				if (args.length < 2) {
+				if (args.length < 3) {
 					plugin.sendMessage(sender, "  §a/"+commandLabel+" infsell <itemName> <price> §7- "+L("cmdInfSellDesc"));
+					return true;
 				}
 				ItemStack stock = ItemDb.getItemStack(args[1]);
 				
@@ -325,7 +345,7 @@ class Commands implements CommandExecutor {
 				}
 				
 				if (args.length < 4) {
-					plugin.sendMessage(sender, "  §a/"+commandLabel+" sell <itemName> <amount> <price> §7- "+L("cmdSellDesc"));
+					plugin.sendMessage(sender, "§a/"+commandLabel+" sell <itemName> <amount> <price> §7- "+L("cmdSellDesc"));
 					return true;
 				}
 				
