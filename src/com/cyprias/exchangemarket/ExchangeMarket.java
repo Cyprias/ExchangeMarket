@@ -121,7 +121,7 @@ public class ExchangeMarket extends JavaPlugin {
 		String itemName = itemdb.getItemName(itemID, itemDur);
 		if (player != null){
 			//sendMessage(player, "Your " + itemName+"x"+amount+" just sold for $" +(price*amount) + " ($"+price+"e)");
-			sendMessage(player, "You bought " + itemName+"x"+amount+" for $" +(price*amount) + " ($"+price+"e) from " + trader + ".");
+			sendMessage(player, F("youBought", itemName, amount, price*amount, price, trader));
 			
 		}
 	}
@@ -131,11 +131,19 @@ public class ExchangeMarket extends JavaPlugin {
 		String itemName = itemdb.getItemName(itemID, itemDur);
 		if (player != null){
 			//sendMessage(player, "Your " + itemName+"x"+amount+" just sold for $" +(price*amount) + " ($"+price+"e)");
-			sendMessage(player, "You sold " + itemName+"x"+amount+" for $" +(price*amount) + " ($"+price+"e) to " + trader + ".");
+			sendMessage(player, F("youSold", itemName, amount, price*amount, price, trader));
+			
+			
 			
 		}
 	}
-	
+	private String F(String string, Object... args) {
+		return Localization.F(string, args);
+	}
+
+	private String L(String string) {
+		return Localization.L(string);
+	}
 	public boolean payPlayer(String pName, double amount) {
 		pName = pName.toLowerCase();
 		if (setupEconomy()) {

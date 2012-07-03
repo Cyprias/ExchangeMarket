@@ -180,17 +180,29 @@ public class Database {
 				if (removeItemFromPlayer(player, itemID, itemDur, amount) == true) {
 					sellAmount -= amount;
 
-					if (infinite == false) {
-						decreaseInt(Config.sqlPrefix + "Orders", id, "amount", amount, con);
-						increaseInt(Config.sqlPrefix + "Orders", id, "exchanged", amount, con);
-						plugin.notifyBuyerOfExchange(trader, itemID, itemDur, amount, price, trader);
-					}
-					
 					plugin.payPlayer(sender.getName(), amount * price);
 
 					// plugin.sendMessage(sender, "Sold " + itemName + "x" +
 					// amount + " for $" + (amount*price) + " ($" +price+"e)");
-					plugin.notifySellerOfExchange(sender.getName(), itemID, itemDur, amount, price, trader);
+					if (infinite == true){
+						plugin.notifySellerOfExchange(sender.getName(), itemID, itemDur, amount, price, plugin.pluginName);
+					}else{
+						plugin.notifySellerOfExchange(sender.getName(), itemID, itemDur, amount, price, trader);
+					}
+					
+					if (infinite == false) {
+						decreaseInt(Config.sqlPrefix + "Orders", id, "amount", amount, con);
+						increaseInt(Config.sqlPrefix + "Orders", id, "exchanged", amount, con);
+						//plugin.notifyBuyerOfExchange(trader, itemID, itemDur, amount, price, trader);
+						
+						if (infinite == true){
+							plugin.notifyBuyerOfExchange(sender.getName(), itemID, itemDur, amount, price, plugin.pluginName);
+						}else{
+							plugin.notifyBuyerOfExchange(sender.getName(), itemID, itemDur, amount, price, trader);
+						}
+						
+					}
+					
 
 					// plugin.info("sellAmount: " + sellAmount);
 				}else{
@@ -231,9 +243,10 @@ public class Database {
 
 			int success = insertOrder(1, false, sender.getName(), itemID, itemDur, null, sellPrice, sellAmount, con);
 			if (success > 0) {
-				plugin
-					.sendMessage(sender, "Created sell order " + itemName + "x" + sellAmount + " for $" + (sellAmount * sellPrice) + " ($" + sellPrice + "e)");
+				plugin.sendMessage(sender, F("createdSellOrder", itemName, sellAmount, (sellAmount * sellPrice), sellPrice));
 
+				
+				
 				// plugin.debtPlayer(sender.getName(), sellPrice * sellPrice);
 
 				InventoryUtil.remove(itemStack, player.getInventory());
@@ -356,8 +369,10 @@ public class Database {
 					itemStack.setAmount(canBuy);
 
 					if (InventoryUtil.fits(itemStack, player.getInventory())) {
-						plugin
-							.sendMessage(sender, "Buying " + itemName + "x" + canBuy + " from " + trader + " for $" + (price * canBuy) + " ($" + price + "e)");
+
+						
+						
+						
 						plugin.debtPlayer(sender.getName(), canBuy * price);
 						if (infinite == false)
 							plugin.payPlayer(trader, canBuy * price);
@@ -368,12 +383,20 @@ public class Database {
 						// setInt(Config.sqlPrefix+"Orders", id, "amount",
 						// amount-canBuy);
 
-						if (infinite == false)
+						if (infinite == false){
 							decreaseInt(Config.sqlPrefix + "Orders", id, "amount", canBuy);
-						increaseInt(Config.sqlPrefix + "Orders", id, "exchanged", canBuy);
-
-						plugin.notifySellerOfExchange(trader, itemID, itemDur, amount, price, trader);
-
+							increaseInt(Config.sqlPrefix + "Orders", id, "exchanged", canBuy);
+						}
+						
+						if (infinite == true){
+							plugin.notifySellerOfExchange(sender.getName(), itemID, itemDur, canBuy, price, plugin.pluginName);
+						}else{
+							plugin.notifySellerOfExchange(sender.getName(), itemID, itemDur, canBuy, price, trader);//buy when sale exists
+						}
+						
+						if (infinite == false)
+							plugin.sendMessage(sender, F("buyingItem", itemName, canBuy, (price * canBuy), price, trader));
+						
 						buyAmount -= canBuy;
 					}
 
@@ -417,8 +440,10 @@ public class Database {
 			
 			updateSuccessful = insertOrder(2, false, sender.getName(), itemID, itemDur, null, buyPrice, buyAmount, con);
 			if (updateSuccessful > 0) {
-				plugin.sendMessage(sender, "Created buy order for " + itemName + "x" + buyAmount + " at $" + (buyPrice * buyAmount) + " ($" + buyPrice + "e)");
+				plugin.sendMessage(sender, F("createdBuyOrder", itemName, buyAmount, (buyPrice * buyAmount), buyPrice));
 
+				
+				
 				plugin.debtPlayer(sender.getName(), buyAmount * buyPrice);
 
 			}
@@ -460,7 +485,7 @@ public class Database {
 					break;
 				}
 				if (id > 0) {
-					plugin.info("Order already in table, changing amount...");
+					//plugin.info("Order already in table, changing amount...");
 
 					increaseInt(Config.sqlPrefix + "Orders", id, "amount", amount, con);
 
@@ -513,20 +538,30 @@ public class Database {
 		}
 	}
 
-	public String TypeToString(int type) {
-		switch (type) {
-		case 1:
-			return "Sell";
-		case 2:
-			return "Buy";
-		case 3:
-			return "Infinite Sell";
-		case 4:
-			return "Infinite Buy";
+	public String TypeToString(int type, boolean infinite) {
+		if (infinite == true){
+			switch (type) {
+			case 1:
+				return "InfSell";
+			case 2:
+				return "InfBuy";
+			}
+		}else{
+			switch (type) {
+			case 1:
+				return "Sell";
+			case 2:
+				return "Buy";
+			}
 		}
+
 		return null;
 	}
 
+	public String TypeToString(int type) {
+		return TypeToString(type, false);
+	}
+	
 	public static double mean(double[] p) {
 		double sum = 0; // sum of all the elements
 		for (int i = 0; i < p.length; i++) {
@@ -826,8 +861,7 @@ public class Database {
 				if (exchanged > 0){
 					for (int i = exchanged; i >= 0; i--) {
 						if (plugin.database.giveItemToPlayer(player, itemID, itemDur, i) == true){
-							
-							plugin.sendMessage(sender, "Collected " + itemName + "x" + i);
+							plugin.sendMessage(sender, F("collectedItem", itemName, i));
 							plugin.database.decreaseInt(Config.sqlPrefix + "Orders", id, "exchanged", i);
 							break;
 						}
@@ -849,7 +883,7 @@ public class Database {
 		cleanBuyOrders();
 		
 		if (count == 0){
-			plugin.sendMessage(sender, "You have nothing to collect.");
+			plugin.sendMessage(sender, L("nothingToCollect"));
 		}
 		
 		return success;
@@ -888,17 +922,15 @@ public class Database {
 				
 				if (exchanged > 0){
 					
-					toCollect = " ("+exchanged+" to collect)";
+					toCollect = " " + F("toCollect", exchanged);
 				}else{
 					toCollect = "";
 				}
 				
-				if (infinite== true){
-					plugin.sendMessage(sender, "[Inf" + TypeToString(type) + "] #" + id + ": " + itemName + " @ $" + price);
-				}else{
-					plugin.sendMessage(sender, "[" + TypeToString(type) + "] #" + id + ": " + itemName + "x" + amount + " @ $" + price + toCollect);
-						
-				}
+				plugin.sendMessage(sender, F("playerOrder", TypeToString(type,infinite), id, itemName,amount,  price) + toCollect);
+					
+					
+	
 				
 			}
 
@@ -992,11 +1024,7 @@ public class Database {
 					updateSuccessful = removeRow(Config.sqlPrefix + "Orders", orderID, con);
 					
 					if (updateSuccessful> 0){
-						if (infinite == true){
-							plugin.sendMessage(sender, "Canceled Inf" + TypeToString(type) + " order #"+orderID+" (" + itemName + "x" +amount + ").");
-						}else{
-							plugin.sendMessage(sender, "Canceled " + TypeToString(type) + " order #"+orderID+" (" + itemName + "x" +amount + ").");
-						}
+						plugin.sendMessage(sender, F("canceledOrder", TypeToString(type,infinite), orderID, itemName, amount));
 
 						
 					}
@@ -1034,22 +1062,23 @@ public class Database {
 
 			ResultSet result = statement.executeQuery();
 
-			int type, itemID, itemDur, amount;
+			int type, itemID, itemDur, amount, id;
+			Boolean infinite;
 			double price;
 			String itemName;
 			while (result.next()) {
 				// patron = result.getString(1);
-
+				id = result.getInt(1);
 				type = result.getInt(2);
+				infinite = result.getBoolean(3);
 				itemID = result.getInt(5);
 				itemDur = result.getInt(6);
 				price = result.getDouble(8);
 				amount = result.getInt(9);
 				itemName = plugin.itemdb.getItemName(itemID, itemDur);
 
-				plugin.sendMessage(sender, TypeToString(type) + "] itemName: " + itemName + "x" + amount + " @ $" + price
-
-				);
+				plugin.sendMessage(sender, F("playerOrder", TypeToString(type,infinite), id, itemName, amount, price));
+				
 			}
 
 			result.close();

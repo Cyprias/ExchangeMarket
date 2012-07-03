@@ -45,7 +45,7 @@ class Commands implements CommandExecutor {
 			return true;
 		}
 		//sendMessage(player, F("stNoPermission", permission));
-		plugin.sendMessage(player, "You do not have access to " + permission);
+		plugin.sendMessage(player, F("noPermission",permission));
 		
 		return false;
 	}
@@ -66,7 +66,9 @@ class Commands implements CommandExecutor {
 		if (commandLabel.equalsIgnoreCase("em")) {
 			if (args.length == 0) {
 				
-				plugin.sendMessage(sender, "§a"+plugin.pluginName+" Commands.");
+				plugin.sendMessage(sender, F("pluginsCommands", plugin.pluginName));
+				
+				
 				
 				if (plugin.hasPermission(sender, "exchangemarket.sell"))
 					plugin.sendMessage(sender, "  §a/"+commandLabel+" sell <itemName> <amount> <price> §7- "+L("cmdSellDesc"));
@@ -91,30 +93,14 @@ class Commands implements CommandExecutor {
 			}
 			
 			Player player = (Player) sender;
-			if (args[0].equalsIgnoreCase("test1")) {
-				if (!hasCommandPermission(sender, "exchangemarket.test1")) {
-					return true;
-				}
-				
-				ItemStack item = player.getItemInHand();
-				
-				plugin.sendMessage(sender, "a: " + MaterialUtil.getName(item));
-				plugin.sendMessage(sender, "b: " + MaterialUtil.getSignName(item));
-				plugin.sendMessage(sender, "b: " + MaterialUtil.Enchantment.encodeEnchantment(item));
-				
-				
-				
-				
-				
-				return true;
-			} else if (args[0].equalsIgnoreCase("price")) {
+			if (args[0].equalsIgnoreCase("price")) {
 				if (!hasCommandPermission(sender, "exchangemarket.price")) {
 					return true;
 				}
 				
 				ItemStack stock = ItemDb.getItemStack(args[1]);
 				if (stock == null){
-					plugin.info("Invalid item: " + args[1]);
+					plugin.sendMessage(sender, F("invalidItem", args[1]));
 					return true;
 				}
 				
@@ -124,7 +110,9 @@ class Commands implements CommandExecutor {
 					if (isInt(args[2])){
 						amount = Integer.parseInt(args[2]);
 					}else{
-						plugin.sendMessage(sender, "Invalid amount: " + args[2]);
+						plugin.sendMessage(sender, F("invalidAmount", args[2]));
+						
+						
 						return true;
 					}
 				}
@@ -139,7 +127,7 @@ class Commands implements CommandExecutor {
 						type = 2;
 						
 					}else{
-						plugin.sendMessage(sender, "Invalid type: " + args[3]);
+						plugin.sendMessage(sender, F("invalidType", args[3] ));
 						return true;
 					}
 				}
@@ -157,12 +145,12 @@ class Commands implements CommandExecutor {
 				}
 				
 				if (args.length < 2){
-					plugin.sendMessage(sender, "Include the order number.");
+					plugin.sendMessage(sender, L("includeOrderNumber"));
 					return true;
 				}
 				
 				if (!isInt(args[1])){
-					plugin.sendMessage(sender, "Invalid order number: " + args[1]);
+					plugin.sendMessage(sender, F("invalidOrderNumber", args[1]));
 					return true;
 				}
 				
@@ -197,7 +185,7 @@ class Commands implements CommandExecutor {
 				ItemStack item = ItemDb.getItemStack(args[1]);
 				
 				if (item == null){
-					plugin.info("Invalid item: " + args[1]);
+					plugin.sendMessage(sender, F("invalidItem", args[1]));
 					return true;
 				}
 				
@@ -207,7 +195,7 @@ class Commands implements CommandExecutor {
 					if (isInt(args[2])){
 						amount = Integer.parseInt(args[2]);
 					}else{
-						plugin.sendMessage(sender, "Invalid amount: " + args[2]);
+						plugin.sendMessage(sender, F("invalidAmount", args[2]));
 						return true;
 					}
 				}
@@ -219,12 +207,12 @@ class Commands implements CommandExecutor {
 					if (isDouble(args[3])){
 						price = Double.parseDouble(args[3]);
 					}else{
-						plugin.sendMessage(sender, "Invalid price: " + args[3]);
+						plugin.sendMessage(sender, F("invalidPrice", args[3]));
 						return true;
 					}
 				}
 				if (price == 0){
-					plugin.sendMessage(sender, "You need a price.");
+					plugin.sendMessage(sender, F("invalidPrice", 0));
 					return true;
 				}
 				//plugin.sendMessage(sender, "price: " + price);
@@ -240,12 +228,13 @@ class Commands implements CommandExecutor {
 					return true;
 				}
 				if (args.length < 2) {
-					plugin.sendMessage(sender, "Need more args.");
+					plugin.sendMessage(sender, "  §a/"+commandLabel+" infbuy <itemName> <price> §7- "+L("cmdInfBuyDesc"));
+					return true;
 				}
 				ItemStack stock = ItemDb.getItemStack(args[1]);
 				
 				if (stock == null){
-					plugin.info("Invalid item: " + args[1]);
+					plugin.sendMessage(sender, F("invalidItem", args[1]));
 					return true;
 				}
 				double price = 0;
@@ -253,15 +242,15 @@ class Commands implements CommandExecutor {
 					if (isDouble(args[2])){
 						price = Double.parseDouble(args[2]);
 					}else{
-						plugin.sendMessage(sender, "Invalid price: " + args[2]);
+						plugin.sendMessage(sender, F("invalidPrice",args[2]));
 						return true;
 					}
 				}
 				if (price == 0){
-					plugin.sendMessage(sender, "You need a price.");
+					plugin.sendMessage(sender, F("invalidPrice",0));
 					return true;
 				}
-				plugin.sendMessage(sender, "price: " + price);
+				//plugin.sendMessage(sender, "price: " + price);
 				
 				String itemName = plugin.itemdb.getItemName(stock.getTypeId(), stock.getDurability());
 				
@@ -270,7 +259,7 @@ class Commands implements CommandExecutor {
 				int success = plugin.database.insertOrder(2, true, sender.getName(), stock.getTypeId(), stock.getDurability(), null, price, 1);
 				
 				if (success> 0){
-					plugin.sendMessage(sender, "Infinite buy order created for " + itemName + " @ $" + price + " each.");
+					plugin.sendMessage(sender, F("infiniteBuyCreated", itemName, price));
 				}
 
 			} else if (args[0].equalsIgnoreCase("infsell")) {
@@ -279,12 +268,12 @@ class Commands implements CommandExecutor {
 				}
 				
 				if (args.length < 2) {
-					plugin.sendMessage(sender, "Need more args.");
+					plugin.sendMessage(sender, "  §a/"+commandLabel+" infsell <itemName> <price> §7- "+L("cmdInfSellDesc"));
 				}
 				ItemStack stock = ItemDb.getItemStack(args[1]);
 				
 				if (stock == null){
-					plugin.info("Invalid item: " + args[1]);
+					plugin.sendMessage(sender, F("invalidItem", args[1]));
 					return true;
 				}
 				double price = 0;
@@ -292,15 +281,15 @@ class Commands implements CommandExecutor {
 					if (isDouble(args[2])){
 						price = Double.parseDouble(args[2]);
 					}else{
-						plugin.sendMessage(sender, "Invalid price: " + args[2]);
+						plugin.sendMessage(sender, F("invalidPrice", args[2]));
 						return true;
 					}
 				}
 				if (price == 0){
-					plugin.sendMessage(sender, "You need a price.");
+					plugin.sendMessage(sender, F("invalidPrice", 0));
 					return true;
 				}
-				plugin.sendMessage(sender, "price: " + price);
+				//plugin.sendMessage(sender, "price: " + price);
 				
 				String itemName = plugin.itemdb.getItemName(stock.getTypeId(), stock.getDurability());
 				
@@ -309,9 +298,7 @@ class Commands implements CommandExecutor {
 				int success = plugin.database.insertOrder(1, true, sender.getName(), stock.getTypeId(), stock.getDurability(), null, price, 1);
 				
 				if (success> 0){
-					plugin.sendMessage(sender, "Infinite sell order created for " + itemName + " @ $" + price + " each.");
-					
-					
+					plugin.sendMessage(sender, F("infiniteSellCreated", itemName, price));
 				}
 				
 				return true;
@@ -320,20 +307,32 @@ class Commands implements CommandExecutor {
 				plugin.database.collectPenderingBuys(sender);
 				
 				return true;
+			} else if (args[0].equalsIgnoreCase("reload")) {
+				if (!hasCommandPermission(sender, "exchangemarket.reload")) {
+					return true;
+				}
+
+				plugin.config.reloadOurConfig();
+				plugin.localization.loadLocales();
+				plugin.sendMessage(sender, L("reloadedOurConfigs"));
+				
+				
+				
+				return true;
 			} else if (args[0].equalsIgnoreCase("sell")) {
 				if (!hasCommandPermission(sender, "exchangemarket.sell")) {
 					return true;
 				}
 				
 				if (args.length < 4) {
-					plugin.sendMessage(sender, "Need more args.");
+					plugin.sendMessage(sender, "  §a/"+commandLabel+" sell <itemName> <amount> <price> §7- "+L("cmdSellDesc"));
 					return true;
 				}
 				
 				ItemStack stock = ItemDb.getItemStack(args[1]);
 				
 				if (stock == null){
-					plugin.info("Invalid item: " + args[1]);
+					plugin.sendMessage(sender, F("invalidItem", args[1]));
 					return true;
 				}
 				
@@ -345,7 +344,7 @@ class Commands implements CommandExecutor {
 					if (isInt(args[2])){
 						amount = Integer.parseInt(args[2]);
 					}else{
-						plugin.sendMessage(sender, "Invalid amount: " + args[2]);
+						plugin.sendMessage(sender, F("invalidAmount", args[2]));
 						return true;
 					}
 				}
@@ -357,12 +356,12 @@ class Commands implements CommandExecutor {
 					if (isDouble(args[3])){
 						price = Double.parseDouble(args[3]);
 					}else{
-						plugin.sendMessage(sender, "Invalid price: " + args[3]);
+						plugin.sendMessage(sender, F("invalidPrice", args[3]));
 						return true;
 					}
 				}
 				if (price == 0){
-					plugin.sendMessage(sender, "You need a price.");
+					plugin.sendMessage(sender, F("invalidPrice", 0));
 					return true;
 				}
 				//plugin.sendMessage(sender, "price: " + price);
@@ -424,16 +423,15 @@ class Commands implements CommandExecutor {
 					if (isDouble(args[1])){
 						price = Double.parseDouble(args[1]);
 					}else{
-						plugin.sendMessage(sender, "Invalid price: " + args[1]);
+						plugin.sendMessage(sender, F("invalidPrice", args[1]));
 						return true;
 					}
 				}
 				if (price == 0){
-					plugin.sendMessage(sender, "You need a price.");
+					plugin.sendMessage(sender, F("invalidPrice", 0));
 					return true;
 				}
-				plugin.sendMessage(sender, "price: " + price);
-				
+
 				
 				int stock = item.getAmount();
 				
