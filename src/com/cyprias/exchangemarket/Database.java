@@ -684,13 +684,16 @@ public class Database {
 		return sucessful;
 	}
 
-	public itemStats getItemStats(int itemID, int itemDur) {
+	public itemStats getItemStats(int itemID, int itemDur, int getType) {
 		itemStats myReturn = new itemStats();
 
 		Connection con = getSQLConnection();
-
 		String query = "SELECT * FROM " + Config.sqlPrefix + "Orders WHERE `itemID` = ? AND `itemDur` = ? AND `itemEnchants` IS NULL AND `amount` > 0";
-
+		
+		if (getType > 0){
+			query = "SELECT * FROM " + Config.sqlPrefix + "Orders WHERE `itemID` = ? AND `itemDur` = ? AND `itemEnchants` IS NULL AND `amount` > 0 AND `type` = ?;";
+		}
+		
 		try {
 			int i = 0, type, amount;
 			double price, aPrice;
@@ -705,6 +708,10 @@ public class Database {
 			statement.setInt(1, itemID);
 			statement.setInt(2, itemDur);
 
+			if (getType > 0){
+				statement.setInt(3, getType);
+			}
+			
 			ResultSet result = statement.executeQuery();
 
 			while (result.next()) {

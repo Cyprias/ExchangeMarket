@@ -64,6 +64,9 @@ class Commands implements CommandExecutor {
 				if (plugin.hasPermission(sender, "exchangemarket.buy"))
 					plugin.sendMessage(sender, "  §a/"+commandLabel+" buy <itemName> <amount> <price> §7- "+L("cmdBuyDesc"));
 				
+				if (plugin.hasPermission(sender, "exchangemarket.price"))
+					plugin.sendMessage(sender, "  §a/"+commandLabel+" price <itemName> [amount] [sale/buy] §7- "+L("cmdPriceDesc"));
+				
 				if (plugin.hasPermission(sender, "exchangemarket.infbuy"))
 					plugin.sendMessage(sender, "  §a/"+commandLabel+" infbuy <itemName> <price> §7- "+L("cmdInfBuyDesc"));
 				if (plugin.hasPermission(sender, "exchangemarket.infsell"))
@@ -71,7 +74,8 @@ class Commands implements CommandExecutor {
 				
 				if (plugin.hasPermission(sender, "exchangemarket.orders"))
 					plugin.sendMessage(sender, "  §a/"+commandLabel+" orders §7- "+L("cmdOrdersDesc"));
-				
+				if (plugin.hasPermission(sender, "exchangemarket.collect"))
+					plugin.sendMessage(sender, "  §a/"+commandLabel+" collect §7- "+L("cmdCollectDesc"));
 				
 				
 				return true;
@@ -118,8 +122,20 @@ class Commands implements CommandExecutor {
 				stock.setAmount(amount);
 				//plugin.sendMessage(sender, "amount: " + amount);
 				
+				int type = 0;
+				if (args.length > 3) {
+					if (args[3].equalsIgnoreCase("sale")){
+						type = 1;
+					}else if (args[3].equalsIgnoreCase("buy")){
+						type = 2;
+						
+					}else{
+						plugin.sendMessage(sender, "Invalid type: " + args[3]);
+						return true;
+					}
+				}
 				
-				Database.itemStats stats = plugin.database.getItemStats(stock.getTypeId(), stock.getDurability());
+				Database.itemStats stats = plugin.database.getItemStats(stock.getTypeId(), stock.getDurability(), type);
 				
 				plugin.sendMessage(sender, getItemStatsMsg(stats, amount));
 				
