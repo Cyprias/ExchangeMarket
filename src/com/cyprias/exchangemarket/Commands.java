@@ -229,12 +229,18 @@ class Commands implements CommandExecutor {
 				}
 				item.setAmount(amount);
 				//plugin.sendMessage(sender, "amount: " + amount);
+				Boolean priceEach = false;
 				
 				double price = 0;
 				//if (args.length > 2) {
 				
-				
 					if (args.length > 1) {
+
+						if (args[3].substring(args[3].length()-1, args[3].length()).equalsIgnoreCase("e")){
+							priceEach = true;
+							args[3] = args[3].substring(0,args[3].length()-1);
+						}
+
 						if (isDouble(args[3])){
 							price = Double.parseDouble(args[3]);
 						}else{
@@ -249,7 +255,7 @@ class Commands implements CommandExecutor {
 				}
 				//plugin.sendMessage(sender, "price: " + price);
 				
-				if (Config.convertCreatePriceToPerItem == true)
+				if (priceEach == false && Config.convertCreatePriceToPerItem == true)
 					price = price / amount;
 				
 				
@@ -387,21 +393,33 @@ class Commands implements CommandExecutor {
 				stock.setAmount(amount);
 				//plugin.sendMessage(sender, "amount: " + amount);
 				
+				Boolean priceEach = false;
+				
 				double price = 0;
-				if (args.length > 1) {
-					if (isDouble(args[3])){
-						price = Double.parseDouble(args[3]);
-					}else{
-						plugin.sendMessage(sender, F("invalidPrice", args[3]));
-						return true;
+				//if (args.length > 2) {
+				
+					if (args.length > 1) {
+
+						if (args[3].substring(args[3].length()-1, args[3].length()).equalsIgnoreCase("e")){
+							priceEach = true;
+							args[3] = args[3].substring(0,args[3].length()-1);
+						}
+
+						if (isDouble(args[3])){
+							price = Double.parseDouble(args[3]);
+						}else{
+							plugin.sendMessage(sender, F("invalidPrice", args[3]));
+							return true;
+						}
 					}
-				}
+				//}
 				if (price == 0){
 					plugin.sendMessage(sender, F("invalidPrice", 0));
 					return true;
 				}
+				//plugin.sendMessage(sender, "price: " + price);
 				
-				if (Config.convertCreatePriceToPerItem == true)
+				if (priceEach == false && Config.convertCreatePriceToPerItem == true)
 					price = price / amount;
 				
 				//plugin.sendMessage(sender, "price: " + price);

@@ -424,7 +424,7 @@ public class Database {
 	public int checkPlayerSellOrders(CommandSender sender, int itemID, short itemDur, int buyAmount, double buyPrice, Connection con) {
 
 		String query = "SELECT * FROM " + Config.sqlPrefix
-			+ "Orders WHERE `type` = 1 AND `infinite` = 0 AND `itemID` = ? AND `itemDur` = ? AND `amount` > 0 AND `player` LIKE ? ORDER BY `price` DESC";
+			+ "Orders WHERE `type` = 1 AND `infinite` = 0 AND `itemID` = ? AND `itemDur` = ? AND `amount` > 0 AND `player` LIKE ? ORDER BY `price` ASC";//DESC
 
 		int updateSuccessful = 0;
 		String itemName = plugin.itemdb.getItemName(itemID, itemDur);
@@ -476,30 +476,11 @@ public class Database {
 					itemStack.setAmount(canBuy);
 
 					if (InventoryUtil.fits(itemStack, player.getInventory())) {
-
-						// plugin.debtPlayer(sender.getName(), canBuy * price);
-						// if (infinite == false)
-						// plugin.payPlayer(trader, canBuy * price);
-
 						InventoryUtil.add(itemStack, player.getInventory());
-
-						// setInt(Config.sqlPrefix+"Orders", id, "amount",
-						// amount-canBuy);
 
 						if (infinite == false) {
 							decreaseInt(Config.sqlPrefix + "Orders", id, "amount", canBuy);
-							// increaseInt(Config.sqlPrefix + "Orders", id,
-							// "exchanged", canBuy);
 						}
-
-						// if (infinite == true){
-						// plugin.notifySellerOfExchange(sender.getName(),
-						// itemID, itemDur, canBuy, price, plugin.pluginName);
-						// }else{
-						// plugin.notifySellerOfExchange(sender.getName(),
-						// itemID, itemDur, canBuy, price, trader);//buy when
-						// sale exists
-						// }
 
 						if (infinite == false)
 							plugin.sendMessage(sender, F("buyFromSelf", itemName, canBuy, plugin.Round(price * canBuy, Config.priceRounding), plugin.Round(price,Config.priceRounding)));
