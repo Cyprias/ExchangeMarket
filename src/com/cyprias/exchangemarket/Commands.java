@@ -25,7 +25,7 @@ class Commands implements CommandExecutor {
 
 	
 	private String getItemStatsMsg(Database.itemStats stats, int stackCount) {
-		int roundTo = 2;
+		int roundTo = Config.priceRounding;
 		if (stats.total == 0)
 			return "§7items: §f0";
 
@@ -36,8 +36,8 @@ class Commands implements CommandExecutor {
 			// "§7, price: $§f" + Database.Round(stats.avgPrice * stackCount,
 			// roundTo) + "/" + Database.Round(stats.median * stackCount,
 			// roundTo) + "/" + Database.Round(stats.mode * stackCount, roundTo)
-			+ "§7, avg: $§f" + plugin.Round(stats.avgPrice * stackCount, roundTo) + "§7, median: $§f" + plugin.Round(stats.median * stackCount, roundTo)
-			+ "§7, mode: $§f" + plugin.Round(stats.mode * stackCount, roundTo);
+			+ "§7, avg: $§f" + plugin.Round(stats.avgPrice * stackCount, roundTo) + "§7, med: $§f" + plugin.Round(stats.median * stackCount, roundTo)
+			+ "§7, mod: $§f" + plugin.Round(stats.mode * stackCount, roundTo);
 	}
 	
 	public boolean hasCommandPermission(CommandSender player, String permission){
@@ -249,6 +249,8 @@ class Commands implements CommandExecutor {
 				}
 				//plugin.sendMessage(sender, "price: " + price);
 				
+				if (Config.convertCreatePriceToPerItem == true)
+					price = price / amount;
 				
 				
 				
@@ -398,6 +400,10 @@ class Commands implements CommandExecutor {
 					plugin.sendMessage(sender, F("invalidPrice", 0));
 					return true;
 				}
+				
+				if (Config.convertCreatePriceToPerItem == true)
+					price = price / amount;
+				
 				//plugin.sendMessage(sender, "price: " + price);
 				
 				

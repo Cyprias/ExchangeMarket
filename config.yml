@@ -6,3 +6,6 @@ mysql:
   database: minecraft
   prefix: "EM_"
 locale: enUS.yml
+convertCreatePriceToPerItem: true
+cancelSelfSalesWhenBuying: true
+priceRounding: 3

@@ -24,6 +24,8 @@ public class Config {
 	
 	public static String sqlUsername, sqlPassword, sqlURL, sqlPrefix;
 	public static String locale;
+	public static Boolean convertCreatePriceToPerItem, cancelSelfSalesWhenBuying;
+	public static int priceRounding;
 	private void loadConfigOpts(){
 		sqlUsername = config.getString("mysql.username");
 		sqlPassword = config.getString("mysql.password");
@@ -31,5 +33,10 @@ public class Config {
 		sqlPrefix = config.getString("mysql.prefix"); 
 			
 		locale = config.getString("locale");
+		
+		convertCreatePriceToPerItem = config.getBoolean("convertCreatePriceToPerItem");
+		cancelSelfSalesWhenBuying = config.getBoolean("cancelSelfSalesWhenBuying");
+		
+		priceRounding = config.getInt("priceRounding");
 	}
 }
