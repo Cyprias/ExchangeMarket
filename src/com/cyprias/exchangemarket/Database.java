@@ -759,14 +759,14 @@ public class Database {
 				amount = result.getInt(9);
 				itemName = plugin.itemdb.getItemName(itemID, itemDur);
 
-				aPrice = price;// / amount;
+				aPrice = price * amount;// / amount;
 
 				totalPrice += aPrice;
 				totalAmount += amount;
 
 				// prices[i] = aPrice;
 
-				prices.add(aPrice);
+				prices.add(price);
 				amounts.add(amount);
 				i += 1;
 
@@ -777,9 +777,12 @@ public class Database {
 			myReturn.total = i;
 			myReturn.totalAmount = totalAmount;
 
-			double avgPrice = totalPrice / i;
-			// sender.sendMessage("avgPrice: " + Round(avgPrice,2));
-
+			double avgPrice = totalPrice / totalAmount;
+			//plugin.info("totalAmount: "+totalAmount );
+			//plugin.info("totalPrice: "+totalPrice );
+			//plugin.info("i: "+i );
+			//plugin.info("avgPrice: "+avgPrice );
+			
 			myReturn.avgPrice = avgPrice;
 
 			myReturn.mean = 0;
