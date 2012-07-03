@@ -404,6 +404,7 @@ class Commands implements CommandExecutor {
 					}
 				}
 				stock.setAmount(amount);
+				int rawAmount = amount;
 				// plugin.sendMessage(sender, "amount: " + amount);
 
 				Boolean priceEach = false;
@@ -467,7 +468,7 @@ class Commands implements CommandExecutor {
 
 				if (amount == 0) {
 
-					plugin.sendMessage(sender, F("sellNotEnoughItems", itemName));
+					plugin.sendMessage(sender, F("sellNotEnoughItems", itemName, rawAmount));
 					return true;
 				}
 

@@ -514,7 +514,7 @@ public class Database {
 		if (buyAmount > 0) {
 
 			if (plugin.getBalance(sender.getName()) < (buyAmount * buyPrice)) {
-				plugin.sendMessage(sender, L("buyNotEnoughFunds"));
+				plugin.sendMessage(sender, F("buyNotEnoughFunds", plugin.Round(buyPrice * buyAmount, Config.priceRounding), plugin.Round(buyPrice,Config.priceRounding)));
 				return 0;
 			}
 
