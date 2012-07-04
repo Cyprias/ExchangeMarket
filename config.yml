@@ -11,3 +11,4 @@ cancelSelfSalesWhenBuying: true
 priceRounding: 3
 autoSellPrice: -0.001
 autoBuyPrice: 0.001
+autoPricePerUnit: true

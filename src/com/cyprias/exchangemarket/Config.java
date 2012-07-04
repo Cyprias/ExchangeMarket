@@ -24,7 +24,7 @@ public class Config {
 	
 	public static String sqlUsername, sqlPassword, sqlURL, sqlPrefix;
 	public static String locale;
-	public static Boolean convertCreatePriceToPerItem, cancelSelfSalesWhenBuying;
+	public static Boolean convertCreatePriceToPerItem, cancelSelfSalesWhenBuying, autoPricePerUnit;
 	public static int priceRounding;
 	public static Double autoBuyPrice, autoSellPrice;
 	
@@ -43,6 +43,7 @@ public class Config {
 		
 		autoBuyPrice = config.getDouble("autoBuyPrice");
 		autoSellPrice = config.getDouble("autoSellPrice");
+		autoPricePerUnit = config.getBoolean("autoPricePerUnit");
 		
 	}
 }

@@ -278,8 +278,14 @@ class Commands implements CommandExecutor {
 						return true;
 					}
 					//plugin.info("avgPrice: " + plugin.Round(stats.avgPrice, Config.priceRounding));
-					price = stats.avgPrice + Config.autoBuyPrice;
+					
 
+					if (Config.autoPricePerUnit == true){
+						price = stats.avgPrice + (Config.autoSellPrice*amount);
+					}else{
+						price = stats.avgPrice + Config.autoBuyPrice;
+					}
+					
 				//	plugin.info("avgPrice: " + plugin.Round(price, Config.priceRounding));
 
 					priceEach = true;
@@ -425,8 +431,12 @@ class Commands implements CommandExecutor {
 				int rawAmount = amount;
 				// plugin.sendMessage(sender, "amount: " + amount);
 
+				int invAmount = InventoryUtil.getAmount(stock, player.getInventory());
+				
 				Boolean priceEach = false;
 
+				
+				
 				double price = 0;
 				// if (args.length > 2) {
 
@@ -458,7 +468,13 @@ class Commands implements CommandExecutor {
 						return true;
 					}
 					//plugin.info("avgPrice: " + plugin.Round(stats.avgPrice, Config.priceRounding));
-					price = stats.avgPrice + Config.autoSellPrice;
+					if (Config.autoPricePerUnit == true){
+						price = stats.avgPrice + (Config.autoSellPrice*Math.min(amount, invAmount));
+					}else{
+						price = stats.avgPrice + Config.autoSellPrice;
+					}
+					
+					
 
 					//plugin.info("avgPrice: " + plugin.Round(price, Config.priceRounding));
 
@@ -481,7 +497,7 @@ class Commands implements CommandExecutor {
 				// plugin.sendMessage(sender, "price: " + price);
 
 				String itemName = plugin.itemdb.getItemName(stock.getTypeId(), stock.getDurability());
-				if (InventoryUtil.getAmount(stock, player.getInventory()) < amount) {
+				if (invAmount < amount) {
 					// plugin.sendMessage(sender,"You do not have " + itemName +
 					// "x" + amount + " in your inv.");
 
