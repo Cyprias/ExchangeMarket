@@ -188,9 +188,9 @@ public class Database {
 					// plugin.sendMessage(sender, "Sold " + itemName + "x" +
 					// amount + " for $" + (amount*price) + " ($" +price+"e)");
 					if (infinite == true) {
-						plugin.notifySellerOfExchange(sender.getName(), itemID, itemDur, amount, price, plugin.pluginName);
+						plugin.notifySellerOfExchange(trader, itemID, itemDur, amount, price, plugin.pluginName);
 					} else {
-						plugin.notifySellerOfExchange(sender.getName(), itemID, itemDur, amount, price, trader);
+						plugin.notifySellerOfExchange(trader, itemID, itemDur, amount, price, sender.getName());
 					}
 
 					if (infinite == false) {

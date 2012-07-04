@@ -486,6 +486,7 @@ class Commands implements CommandExecutor {
 					return true;
 				}
 
+
 				plugin.database.processSellOrder(sender, stock.getTypeId(), stock.getDurability(), amount, price);
 
 				/*
