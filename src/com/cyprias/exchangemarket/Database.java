@@ -942,7 +942,7 @@ public class Database {
 
 				// plugin.sendMessage(sender, id + ": "+itemName+"x"+exchanged);
 				if (exchanged > 0) {
-					for (int i = exchanged; i >= 0; i--) {
+					for (int i = exchanged; i > 0; i--) {
 						if (plugin.database.giveItemToPlayer(player, itemID, itemDur, i) == true) {
 							plugin.sendMessage(sender, F("collectedItem", itemName, i));
 							plugin.database.decreaseInt(Config.sqlPrefix + "Orders", id, "exchanged", i);

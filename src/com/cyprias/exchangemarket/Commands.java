@@ -269,6 +269,10 @@ class Commands implements CommandExecutor {
 					Database.itemStats stats = plugin.database.getItemStats(item.getTypeId(), item.getDurability(), 1);//2
 
 					if (stats.total <= 0) {
+						stats = plugin.database.getItemStats(item.getTypeId(), item.getDurability(), 0);//2
+					}
+					
+					if (stats.total <= 0) {
 						plugin.sendMessage(sender, L("mustSupplyAPrice"));
 
 						return true;
@@ -444,6 +448,10 @@ class Commands implements CommandExecutor {
 					//plugin.info("no price given.");
 					Database.itemStats stats = plugin.database.getItemStats(stock.getTypeId(), stock.getDurability(), 2);//1
 
+					if (stats.total <= 0) {
+						stats = plugin.database.getItemStats(stock.getTypeId(), stock.getDurability(), 0);//1
+					}
+					
 					if (stats.total <= 0) {
 						plugin.sendMessage(sender, L("mustSupplyAPrice"));
 
