@@ -213,7 +213,7 @@ class Commands implements CommandExecutor {
 				
 			
 				
-				//plugin.database.listOrders(sender, type);
+				plugin.database.listOrders(sender, type);
 
 				return true;
 
@@ -266,7 +266,7 @@ class Commands implements CommandExecutor {
 				} else {
 
 				//	plugin.info("no price given.");
-					Database.itemStats stats = plugin.database.getItemStats(item.getTypeId(), item.getDurability(), 2);
+					Database.itemStats stats = plugin.database.getItemStats(item.getTypeId(), item.getDurability(), 1);//2
 
 					if (stats.total <= 0) {
 						plugin.sendMessage(sender, L("mustSupplyAPrice"));
@@ -442,7 +442,7 @@ class Commands implements CommandExecutor {
 				} else {
 
 					//plugin.info("no price given.");
-					Database.itemStats stats = plugin.database.getItemStats(stock.getTypeId(), stock.getDurability(), 1);
+					Database.itemStats stats = plugin.database.getItemStats(stock.getTypeId(), stock.getDurability(), 2);//1
 
 					if (stats.total <= 0) {
 						plugin.sendMessage(sender, L("mustSupplyAPrice"));

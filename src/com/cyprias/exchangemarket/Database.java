@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
@@ -188,9 +189,9 @@ public class Database {
 					// plugin.sendMessage(sender, "Sold " + itemName + "x" +
 					// amount + " for $" + (amount*price) + " ($" +price+"e)");
 					if (infinite == true) {
-						plugin.notifySellerOfExchange(trader, itemID, itemDur, amount, price, plugin.pluginName);
+						plugin.notifySellerOfExchange(sender.getName(), itemID, itemDur, amount, price, plugin.pluginName);
 					} else {
-						plugin.notifySellerOfExchange(trader, itemID, itemDur, amount, price, sender.getName());
+						plugin.notifySellerOfExchange(sender.getName(), itemID, itemDur, amount, price, trader);
 					}
 
 					if (infinite == false) {
@@ -388,9 +389,9 @@ public class Database {
 						}
 
 						if (infinite == true) {
-							plugin.notifySellerOfExchange(sender.getName(), itemID, itemDur, canBuy, price, plugin.pluginName);
+							plugin.notifySellerOfExchange(trader, itemID, itemDur, canBuy, price, plugin.pluginName);
 						} else {
-							plugin.notifySellerOfExchange(sender.getName(), itemID, itemDur, canBuy, price, trader);// buy
+							plugin.notifySellerOfExchange(trader, itemID, itemDur, canBuy, price,sender.getName() );// buy
 																													// when
 																													// sale
 																													// exists
@@ -1012,8 +1013,11 @@ public class Database {
 				// .sendMessage(sender, F("playerOrder",
 				// TypeToString(type,infinite), id, itemName,amount, price) +
 				// toCollect);
-
-				sender.sendMessage(F("playerOrder", TypeToString(type, infinite), id, itemName, amount, plugin.Round(amount * price, Config.priceRounding), plugin.Round(price,Config.priceRounding)) + toCollect);
+				if (type == 1){
+					sender.sendMessage(F("playerOrder", ChatColor.RED+TypeToString(type, infinite), id, itemName, amount, plugin.Round(amount * price, Config.priceRounding), plugin.Round(price,Config.priceRounding)) + toCollect);
+				}else{
+					sender.sendMessage(F("playerOrder", ChatColor.GREEN+TypeToString(type, infinite), id, itemName, amount, plugin.Round(amount * price, Config.priceRounding), plugin.Round(price,Config.priceRounding)) + toCollect);
+				}
 
 			}
 
