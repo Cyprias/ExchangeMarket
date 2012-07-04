@@ -1105,8 +1105,11 @@ public class Database {
 							double money = price * amount;
 
 							plugin.payPlayer(sender.getName(), money);
-							plugin.sendMessage(sender, F("refundedYourMoney", money));
-
+							plugin.sendMessage(sender, F("refundedYourMoney", plugin.Round(money, Config.priceRounding)));
+							
+							
+							
+							
 						}
 
 					}
@@ -1146,14 +1149,14 @@ public class Database {
 	public int listOrders(CommandSender sender, int getType, Connection con) {
 		int updateSuccessful = 0;
 
-		String SQL = "SELECT * FROM " + Config.sqlPrefix + "Orders ORDER BY id ASC;";
+		String SQL = "SELECT * FROM " + Config.sqlPrefix + "Orders WHERE `amount` > 0 ORDER BY id ASC;";
 		
 		if (getType > 0) {
 			//query = "SELECT * FROM " + Config.sqlPrefix
 			//	+ "Orders WHERE `itemID` = ? AND `itemDur` = ? AND `itemEnchants` IS NULL AND `amount` > 0 AND `type` = ?;";
 			
 			
-			SQL = "SELECT * FROM " + Config.sqlPrefix + "Orders WHERE `type` = ? ORDER BY id ASC;";
+			SQL = "SELECT * FROM " + Config.sqlPrefix + "Orders WHERE `amount` > 0 AND `type` = ? ORDER BY id ASC;";
 		}
 		
 		int count = 0;

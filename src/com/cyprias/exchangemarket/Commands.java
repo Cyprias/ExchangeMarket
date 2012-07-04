@@ -469,7 +469,8 @@ class Commands implements CommandExecutor {
 					}
 					//plugin.info("avgPrice: " + plugin.Round(stats.avgPrice, Config.priceRounding));
 					if (Config.autoPricePerUnit == true){
-						price = stats.avgPrice + (Config.autoSellPrice*Math.min(amount, invAmount));
+						//price = stats.avgPrice + (Config.autoSellPrice*Math.min(amount, invAmount));
+						price = stats.avgPrice + (Config.autoSellPrice*amount);
 					}else{
 						price = stats.avgPrice + Config.autoSellPrice;
 					}
