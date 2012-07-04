@@ -2,6 +2,7 @@ package com.cyprias.exchangemarket;
 
 import java.util.HashMap;
 
+import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -78,12 +79,12 @@ class Commands implements CommandExecutor {
 				plugin.sendMessage(sender, F("pluginsCommands", plugin.pluginName));
 
 				if (plugin.hasPermission(sender, "exchangemarket.sell"))
-					plugin.sendMessage(sender, "  §a/" + commandLabel + " sell <itemName> <amount> [price] §7- " + L("cmdSellDesc"));
+					plugin.sendMessage(sender, "  §a/" + commandLabel + " sell <itemName> <amount> [price[e]] §7- " + L("cmdSellDesc"));
 				if (plugin.hasPermission(sender, "exchangemarket.buy"))
-					plugin.sendMessage(sender, "  §a/" + commandLabel + " buy <itemName> <amount> [price] §7- " + L("cmdBuyDesc"));
+					plugin.sendMessage(sender, "  §a/" + commandLabel + " buy <itemName> <amount> [price[e]] §7- " + L("cmdBuyDesc"));
 
 				if (plugin.hasPermission(sender, "exchangemarket.price"))
-					plugin.sendMessage(sender, "  §a/" + commandLabel + " price <itemName> [amount] [sale/buy] §7- " + L("cmdPriceDesc"));
+					plugin.sendMessage(sender, "  §a/" + commandLabel + " price [itemName] [amount] [sale/buy] §7- " + L("cmdPriceDesc"));
 
 				if (plugin.hasPermission(sender, "exchangemarket.infbuy"))
 					plugin.sendMessage(sender, "  §a/" + commandLabel + " infbuy <itemName> <price> §7- " + L("cmdInfBuyDesc"));
@@ -110,18 +111,27 @@ class Commands implements CommandExecutor {
 				if (!hasCommandPermission(sender, "exchangemarket.price")) {
 					return true;
 				}
-				if (args.length < 2) {
-					plugin.sendMessage(sender, "§a/" + commandLabel + " price <itemName> [amount] [Buy/Sale] §7- " + L("cmdPriceDesc"));
-					return true;
+				//if (args.length < 2) {
+				//	plugin.sendMessage(sender, "§a/" + commandLabel + " price <itemName> [amount] [Buy/Sale] §7- " + L("cmdPriceDesc"));
+				//	return true;
+				//}
+				
+				ItemStack item = null;
+				int amount = 1;
+				if (args.length > 1) {
+					item = ItemDb.getItemStack(args[1]);
+				}else{
+					item = player.getItemInHand();
+					amount = item.getAmount();
 				}
-
-				ItemStack stock = ItemDb.getItemStack(args[1]);
-				if (stock == null) {
+				
+				if (item == null) {
 					plugin.sendMessage(sender, F("invalidItem", args[1]));
 					return true;
 				}
 
-				int amount = 1;
+
+				
 				if (args.length > 2) {
 
 					if (isInt(args[2])) {
@@ -132,7 +142,7 @@ class Commands implements CommandExecutor {
 						return true;
 					}
 				}
-				stock.setAmount(amount);
+				item.setAmount(amount);
 				// plugin.sendMessage(sender, "amount: " + amount);
 
 				int type = 0;
@@ -148,8 +158,12 @@ class Commands implements CommandExecutor {
 					}
 				}
 
-				Database.itemStats stats = plugin.database.getItemStats(stock.getTypeId(), stock.getDurability(), type);
-
+				Database.itemStats stats = plugin.database.getItemStats(item.getTypeId(), item.getDurability(), type);
+				String itemName = plugin.itemdb.getItemName(item.getTypeId(), item.getDurability());
+				
+				
+				
+				plugin.sendMessage(sender, F("itemShort", itemName, amount));
 				plugin.sendMessage(sender, getItemStatsMsg(stats, amount));
 
 				return true;
@@ -208,7 +222,7 @@ class Commands implements CommandExecutor {
 					return true;
 				}
 				if (args.length < 3) {
-					plugin.sendMessage(sender, "§a/" + commandLabel + " buy <itemName> <amount> [price] §7- " + L("cmdBuyDesc"));
+					plugin.sendMessage(sender, "§a/" + commandLabel + " buy <itemName> <amount> [price[e]] §7- " + L("cmdBuyDesc"));
 					return true;
 				}
 
