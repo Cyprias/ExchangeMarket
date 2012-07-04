@@ -1,5 +1,7 @@
 package com.cyprias.exchangemarket;
 
+import java.io.IOException;
+
 import net.milkbowl.vault.economy.Economy;
 
 import org.bukkit.command.CommandSender;
@@ -40,6 +42,11 @@ public class ExchangeMarket extends JavaPlugin {
 		getCommand("em").setExecutor(this.commands);
 		
 		pluginName = getDescription().getName();
+		
+		try {
+		    Metrics metrics = new Metrics(this);
+		    metrics.start();
+		} catch (IOException e) {}
 	}
 	public boolean hasPermission(CommandSender sender, String node) {
 		if (!(sender instanceof Player)) {
