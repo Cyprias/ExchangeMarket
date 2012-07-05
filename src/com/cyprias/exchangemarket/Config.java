@@ -22,18 +22,35 @@ public class Config {
 		loadConfigOpts();
 	}
 	
-	public static String sqlUsername, sqlPassword, sqlURL, sqlPrefix;
+	public static String sqlUsername, sqlPassword, sqlURL, sqlPrefix, sqlDatabase, sqlHost, sqlPort;
+	//public static int sqlPort;
 	public static String locale;
-	public static Boolean convertCreatePriceToPerItem, cancelSelfSalesWhenBuying, autoPricePerUnit;
+	public static Boolean convertCreatePriceToPerItem, cancelSelfSalesWhenBuying, autoPricePerUnit, clearRequestAfterConfirm, confirmAllOrders, autoPriceConfirm;
 	public static int priceRounding;
 	public static Double autoBuyPrice, autoSellPrice;
+
 	
 	private void loadConfigOpts(){
 		sqlUsername = config.getString("mysql.username");
 		sqlPassword = config.getString("mysql.password");
-		sqlURL = "jdbc:mysql://" + config.getString("mysql.hostname") + ":" + config.getInt("mysql.port") + "/" + config.getString("mysql.database");
 		sqlPrefix = config.getString("mysql.prefix"); 
-			
+
+		sqlDatabase = config.getString("mysql.database");
+		
+		sqlHost = config.getString("mysql.hostname");
+		sqlPort = config.getString("mysql.port");
+		//sqlFile = config.getString("mysql.dbfile");
+		
+		//if (sqlSystem.equals("sqlite")){
+		//	sqlURL = "jdbc:sqlite:"+sqlFile;
+		//}else if (sqlSystem.equals("mysql")){
+			sqlURL = "jdbc:mysql://" + sqlHost + ":" + sqlPort + "/" + sqlDatabase;
+		//}
+		
+		clearRequestAfterConfirm = config.getBoolean("clearRequestAfterConfirm");
+		autoPriceConfirm = config.getBoolean("autoPriceConfirm");
+		confirmAllOrders = config.getBoolean("confirmAllOrders");
+		
 		locale = config.getString("locale");
 		
 		convertCreatePriceToPerItem = config.getBoolean("convertCreatePriceToPerItem");

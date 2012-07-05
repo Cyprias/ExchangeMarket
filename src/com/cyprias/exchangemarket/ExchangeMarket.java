@@ -1,6 +1,7 @@
 package com.cyprias.exchangemarket;
 
 import java.io.IOException;
+import java.util.logging.Logger;
 
 import net.milkbowl.vault.economy.Economy;
 
@@ -18,11 +19,14 @@ public class ExchangeMarket extends JavaPlugin {
 	public ItemDb itemdb;
 	public Events events;
 	
+	
+	
 	public YML yml;
 	public Localization localization;
 	
 	public String pluginName;
 	public static Economy econ = null;
+	public Logger log =	Logger.getLogger("Minecraft"); // Minecraft log and console
 	
 	public void onEnable() {
 		this.config = new Config(this);

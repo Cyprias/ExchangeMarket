@@ -1,10 +1,12 @@
 package com.cyprias.exchangemarket;
 
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -34,11 +36,18 @@ public class Database {
 			plugin.info("Failed to connect to database, disabling plugin...");
 			plugin.getPluginLoader().disablePlugin(plugin);
 		}
+		// MySQL = new MySQL(this);
+
 	}
 
 	public boolean testDBConnection() {
 		try {
-			Connection con = DriverManager.getConnection(Config.sqlURL, Config.sqlUsername, Config.sqlPassword);
+			Connection con;
+			if (Config.sqlURL.contains("mysql")) {
+				con = DriverManager.getConnection(Config.sqlURL, Config.sqlUsername, Config.sqlPassword);
+			} else {
+				con = DriverManager.getConnection(Config.sqlURL);
+			}
 
 			con.close();
 			return true;
@@ -47,9 +56,16 @@ public class Database {
 		return false;
 	}
 
-	public static Connection getSQLConnection() {
+	public Connection getSQLConnection() {
 		try {
-			return DriverManager.getConnection(Config.sqlURL, Config.sqlUsername, Config.sqlPassword);
+			Connection con;
+			if (Config.sqlURL.contains("mysql")) {
+				con = DriverManager.getConnection(Config.sqlURL, Config.sqlUsername, Config.sqlPassword);
+			} else {
+				con = DriverManager.getConnection(Config.sqlURL);
+			}
+
+			return con;
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -136,7 +152,7 @@ public class Database {
 		return giveItemToPlayer(player, itemID, itemDur, amount, null);
 	}
 
-	public int checkBuyOrders(CommandSender sender, int itemID, short itemDur, int sellAmount, double sellPrice, Connection con) {
+	public int checkBuyOrders(CommandSender sender, int itemID, short itemDur, int sellAmount, double sellPrice, Boolean dryrun, Connection con) {
 		String query = "SELECT * FROM " + Config.sqlPrefix
 			+ "Orders WHERE `type` = 2 AND `itemID` = ? AND `itemDur` = ? AND `price` >= ? AND `amount` > 0  AND `player` NOT LIKE ? ORDER BY `price` DESC";
 		int updateSuccessful = 0;
@@ -149,7 +165,11 @@ public class Database {
 			statement.setInt(1, itemID);
 			statement.setInt(2, itemDur);
 
-			statement.setDouble(3, sellPrice);
+			if (sellPrice == -1) {
+				statement.setDouble(3, 0);
+			} else {
+				statement.setDouble(3, sellPrice);
+			}
 
 			statement.setString(4, sender.getName());
 
@@ -170,8 +190,7 @@ public class Database {
 				price = result.getDouble(8);
 				amount = result.getInt(9);
 
-				// plugin.info("processBuyOrder id: " + id + ", price: " + price
-				// + ", amount: " + amount);
+				 plugin.info("processBuyOrder id: " + id + ", price: " + price + ", amount: " + amount);
 
 				if (infinite == true) {
 					amount = sellAmount;
@@ -181,10 +200,11 @@ public class Database {
 
 				// plugin.info("amount: " + amount);
 
-				if (removeItemFromPlayer(player, itemID, itemDur, amount) == true) {
+				if (dryrun == true || removeItemFromPlayer(player, itemID, itemDur, amount) == true) {
 					sellAmount -= amount;
 
-					plugin.payPlayer(sender.getName(), amount * price);
+					if (dryrun == false)
+						plugin.payPlayer(sender.getName(), amount * price);
 
 					// plugin.sendMessage(sender, "Sold " + itemName + "x" +
 					// amount + " for $" + (amount*price) + " ($" +price+"e)");
@@ -194,7 +214,7 @@ public class Database {
 						plugin.notifySellerOfExchange(sender.getName(), itemID, itemDur, amount, price, trader);
 					}
 
-					if (infinite == false) {
+					if (dryrun == false && infinite == false) {
 						decreaseInt(Config.sqlPrefix + "Orders", id, "amount", amount, con);
 						increaseInt(Config.sqlPrefix + "Orders", id, "exchanged", amount, con);
 						// plugin.notifyBuyerOfExchange(trader, itemID, itemDur,
@@ -225,18 +245,44 @@ public class Database {
 		return sellAmount;
 	}
 
-	public void processSellOrder(CommandSender sender, int itemID, short itemDur, int sellAmount, double sellPrice) {
+	// public void processSellOrder(CommandSender sender, int itemID, short
+	// itemDur, int sellAmount, double sellPrice) {
+	// processSellOrder(sender, itemID, itemDur, sellAmount, sellPrice, false);
+	// }
+	public int processSellOrder(CommandSender sender, int itemID, short itemDur, int sellAmount, double sellPrice, Boolean dryrun) {
 		Connection con = getSQLConnection();
-
+		int success =0;
+		
 		// plugin.info("sellAmountA: " + sellAmount);
-		sellAmount = checkBuyOrders(sender, itemID, itemDur, sellAmount, sellPrice, con);
+		int beforeAmount = sellAmount;
+		sellAmount = checkBuyOrders(sender, itemID, itemDur, sellAmount, sellPrice, dryrun, con);
 
+		if (beforeAmount != sellAmount)
+			success  =1;
+		
 		// plugin.info("sellAmountB: " + sellAmount);
 
 		String itemName = plugin.itemdb.getItemName(itemID, itemDur);
 		Player player = (Player) sender;
 
 		if (sellAmount > 0) {
+
+			if (sellPrice == -1) {
+
+				Database.itemStats stats = plugin.database.getItemStats(itemID, itemDur, 0);// 2
+				if (stats.total <= 0) {
+					plugin.sendMessage(sender, L("mustSupplyAPrice"));
+					return 0;
+				}
+
+				if (Config.autoPricePerUnit == true) {
+					sellPrice = stats.avgPrice + (Config.autoSellPrice * sellAmount);
+					// price = stats.avgPrice + (Config.autoSellPrice*amount);
+				} else {
+					sellPrice = stats.avgPrice + Config.autoSellPrice;
+				}
+
+			}
 
 			ItemStack itemStack = new ItemStack(itemID, 1);
 			itemStack.setDurability(itemDur);
@@ -245,20 +291,25 @@ public class Database {
 			// plugin.info("sellAmountC: " + sellAmount);
 			itemStack.setAmount(sellAmount);
 
-			int success = insertOrder(1, false, sender.getName(), itemID, itemDur, null, sellPrice, sellAmount, con);
+			success = insertOrder(1, false, sender.getName(), itemID, itemDur, null, sellPrice, sellAmount, dryrun, con);
 			if (success > 0) {
-				plugin.sendMessage(sender, F("createdSellOrder", itemName, sellAmount, plugin.Round(sellAmount * sellPrice, Config.priceRounding), plugin.Round(sellPrice,Config.priceRounding)));
+				plugin.sendMessage(
+					sender,
+					F("createdSellOrder", itemName, sellAmount, plugin.Round(sellAmount * sellPrice, Config.priceRounding),
+						plugin.Round(sellPrice, Config.priceRounding)));
 
 				// plugin.debtPlayer(sender.getName(), sellPrice * sellPrice);
-
-				InventoryUtil.remove(itemStack, player.getInventory());
+				if (dryrun == false)
+					InventoryUtil.remove(itemStack, player.getInventory());
 
 			}
 
 		}
 
-		cleanSellOrders(con);
-
+		if (dryrun == false)
+			cleanSellOrders(con);
+		
+		return success;
 	}
 
 	public int cleanBuyOrders() {
@@ -317,7 +368,7 @@ public class Database {
 		return value;
 	}
 
-	public int checkSellOrders(CommandSender sender, int itemID, short itemDur, int buyAmount, double buyPrice, Connection con) {
+	public int checkSellOrders(CommandSender sender, int itemID, short itemDur, int buyAmount, double buyPrice, Boolean dryrun, Connection con) {
 
 		String query = "SELECT * FROM " + Config.sqlPrefix
 			+ "Orders WHERE `type` = 1 AND `itemID` = ? AND `itemDur` = ? AND `price` <= ? AND `amount` > 0 AND `player` NOT LIKE ? ORDER BY `price` ASC";
@@ -331,7 +382,11 @@ public class Database {
 			statement.setInt(1, itemID);
 			statement.setInt(2, itemDur);
 
-			statement.setDouble(3, buyPrice);
+			if (buyPrice == -1) {
+				statement.setDouble(3, 9999);
+			} else {
+				statement.setDouble(3, buyPrice);
+			}
 
 			statement.setString(4, sender.getName());
 
@@ -353,7 +408,8 @@ public class Database {
 				price = result.getDouble(8);
 				amount = result.getInt(9);
 
-				//plugin.info("processBuyOrder id: " + id + ", price: " + price + ", amount: " + amount);
+				// plugin.info("processBuyOrder id: " + id + ", price: " + price
+				// + ", amount: " + amount);
 
 				senderBalance = plugin.getBalance(sender.getName());
 				// plugin.info("senderBalance:" + senderBalance);
@@ -372,33 +428,38 @@ public class Database {
 					itemStack.setDurability(itemDur);
 					itemStack.setAmount(canBuy);
 
-					if (InventoryUtil.fits(itemStack, player.getInventory())) {
+					if (dryrun == true || InventoryUtil.fits(itemStack, player.getInventory())) {
 
-						plugin.debtPlayer(sender.getName(), canBuy * price);
-						if (infinite == false)
-							plugin.payPlayer(trader, canBuy * price);
+						if (dryrun == false) {
+							plugin.debtPlayer(sender.getName(), canBuy * price);
+							if (infinite == false)
+								plugin.payPlayer(trader, canBuy * price);
 
-						InventoryUtil.add(itemStack, player.getInventory());
+							InventoryUtil.add(itemStack, player.getInventory());
 
-						// setInt(Config.sqlPrefix+"Orders", id, "amount",
-						// amount-canBuy);
+							// setInt(Config.sqlPrefix+"Orders", id, "amount",
+							// amount-canBuy);
 
-						if (infinite == false) {
-							decreaseInt(Config.sqlPrefix + "Orders", id, "amount", canBuy);
-							increaseInt(Config.sqlPrefix + "Orders", id, "exchanged", canBuy);
+							if (infinite == false) {
+								decreaseInt(Config.sqlPrefix + "Orders", id, "amount", canBuy);
+								increaseInt(Config.sqlPrefix + "Orders", id, "exchanged", canBuy);
+							}
+
+							if (infinite == true) {
+								plugin.notifySellerOfExchange(trader, itemID, itemDur, canBuy, price, plugin.pluginName);
+							} else {
+								plugin.notifySellerOfExchange(trader, itemID, itemDur, canBuy, price, sender.getName());// buy
+																														// when
+																														// sale
+																														// exists
+							}
 						}
 
-						if (infinite == true) {
-							plugin.notifySellerOfExchange(trader, itemID, itemDur, canBuy, price, plugin.pluginName);
-						} else {
-							plugin.notifySellerOfExchange(trader, itemID, itemDur, canBuy, price,sender.getName() );// buy
-																													// when
-																													// sale
-																													// exists
-						}
-
 						if (infinite == false)
-							plugin.sendMessage(sender, F("buyingItem", itemName, canBuy, plugin.Round(price * canBuy, Config.priceRounding), plugin.Round(price,Config.priceRounding), trader));
+							plugin.sendMessage(
+								sender,
+								F("buyingItem", itemName, canBuy, plugin.Round(price * canBuy, Config.priceRounding),
+									plugin.Round(price, Config.priceRounding), trader));
 
 						buyAmount -= canBuy;
 					}
@@ -422,10 +483,10 @@ public class Database {
 		return Localization.L(string);
 	}
 
-	public int checkPlayerSellOrders(CommandSender sender, int itemID, short itemDur, int buyAmount, double buyPrice, Connection con) {
+	public int checkPlayerSellOrders(CommandSender sender, int itemID, short itemDur, int buyAmount, double buyPrice, Boolean dyrun, Connection con) {
 
 		String query = "SELECT * FROM " + Config.sqlPrefix
-			+ "Orders WHERE `type` = 1 AND `infinite` = 0 AND `itemID` = ? AND `itemDur` = ? AND `amount` > 0 AND `player` LIKE ? ORDER BY `price` ASC";//DESC
+			+ "Orders WHERE `type` = 1 AND `infinite` = 0 AND `itemID` = ? AND `itemDur` = ? AND `amount` > 0 AND `player` LIKE ? ORDER BY `price` ASC";// DESC
 
 		int updateSuccessful = 0;
 		String itemName = plugin.itemdb.getItemName(itemID, itemDur);
@@ -458,7 +519,8 @@ public class Database {
 				price = result.getDouble(8);
 				amount = result.getInt(9);
 
-				//plugin.info("processBuyOrder id: " + id + ", price: " + price + ", amount: " + amount);
+				// plugin.info("processBuyOrder id: " + id + ", price: " + price
+				// + ", amount: " + amount);
 
 				senderBalance = plugin.getBalance(sender.getName());
 				// plugin.info("senderBalance:" + senderBalance);
@@ -477,14 +539,19 @@ public class Database {
 					itemStack.setAmount(canBuy);
 
 					if (InventoryUtil.fits(itemStack, player.getInventory())) {
-						InventoryUtil.add(itemStack, player.getInventory());
+						if (dyrun == false) {
+							InventoryUtil.add(itemStack, player.getInventory());
 
-						if (infinite == false) {
-							decreaseInt(Config.sqlPrefix + "Orders", id, "amount", canBuy);
+							if (infinite == false) {
+								decreaseInt(Config.sqlPrefix + "Orders", id, "amount", canBuy);
+							}
 						}
 
 						if (infinite == false)
-							plugin.sendMessage(sender, F("buyFromSelf", itemName, canBuy, plugin.Round(price * canBuy, Config.priceRounding), plugin.Round(price,Config.priceRounding)));
+							plugin.sendMessage(
+								sender,
+								F("buyFromSelf", itemName, canBuy, plugin.Round(price * canBuy, Config.priceRounding),
+									plugin.Round(price, Config.priceRounding)));
 
 						buyAmount -= canBuy;
 					}
@@ -500,47 +567,79 @@ public class Database {
 		return buyAmount;
 	}
 
-	public int processBuyOrder(CommandSender sender, int itemID, short itemDur, int buyAmount, double buyPrice, Connection con) {
+	public int processBuyOrder(CommandSender sender, int itemID, short itemDur, int buyAmount, double buyPrice, Boolean dyrun, Connection con) {
 		int updateSuccessful = 0;
 
 		// plugin.info("buyAmountA: " + buyAmount);
 		if (Config.cancelSelfSalesWhenBuying == true)
-			buyAmount = checkPlayerSellOrders(sender, itemID, itemDur, buyAmount, buyPrice, con);
+			buyAmount = checkPlayerSellOrders(sender, itemID, itemDur, buyAmount, buyPrice, dyrun, con);
 
-		buyAmount = checkSellOrders(sender, itemID, itemDur, buyAmount, buyPrice, con);
+		int beforeAmount = buyAmount;
+		buyAmount = checkSellOrders(sender, itemID, itemDur, buyAmount, buyPrice, dyrun, con);
 		// plugin.info("buyAmountB: " + buyAmount);
 
-		String itemName = plugin.itemdb.getItemName(itemID, itemDur);
+		if (buyAmount != beforeAmount)
+			updateSuccessful = 1;
+		
+		// /// ABC
+
+		
 
 		if (buyAmount > 0) {
+			String itemName = plugin.itemdb.getItemName(itemID, itemDur);
+			
+			if (buyPrice == -1) {
 
+				Database.itemStats stats = plugin.database.getItemStats(itemID, itemDur, 0);// 2
+				if (stats.total <= 0) {
+					plugin.sendMessage(sender, L("mustSupplyAPrice"));
+					return 0;
+				}
+
+				if (Config.autoPricePerUnit == true) {
+					buyPrice = stats.avgPrice + (Config.autoBuyPrice * buyPrice);
+					// price = stats.avgPrice + (Config.autoSellPrice*amount);
+				} else {
+					buyPrice = stats.avgPrice + Config.autoBuyPrice;
+				}
+
+			}
+			
 			if (plugin.getBalance(sender.getName()) < (buyAmount * buyPrice)) {
-				plugin.sendMessage(sender, F("buyNotEnoughFunds", plugin.Round(buyPrice * buyAmount, Config.priceRounding), plugin.Round(buyPrice,Config.priceRounding)));
+				plugin.sendMessage(sender,
+					F("buyNotEnoughFunds", plugin.Round(buyPrice * buyAmount, Config.priceRounding), plugin.Round(buyPrice, Config.priceRounding)));
 				return 0;
 			}
 
-			updateSuccessful = insertOrder(2, false, sender.getName(), itemID, itemDur, null, buyPrice, buyAmount, con);
+			updateSuccessful = insertOrder(2, false, sender.getName(), itemID, itemDur, null, buyPrice, buyAmount, dyrun, con);
 			if (updateSuccessful > 0) {
-				plugin.sendMessage(sender, F("createdBuyOrder", itemName, buyAmount, plugin.Round(buyPrice * buyAmount, Config.priceRounding), plugin.Round(buyPrice,Config.priceRounding)));
+				plugin.sendMessage(
+					sender,
+					F("createdBuyOrder", itemName, buyAmount, plugin.Round(buyPrice * buyAmount, Config.priceRounding),
+						plugin.Round(buyPrice, Config.priceRounding)));
 
-				plugin.debtPlayer(sender.getName(), buyAmount * buyPrice);
+				if (dyrun == false)
+					plugin.debtPlayer(sender.getName(), buyAmount * buyPrice);
 
 			}
 
 		}
 
-		cleanSellOrders(con);
+		if (dyrun == false)
+			cleanSellOrders(con);
+
 		return updateSuccessful;
 	}
 
-	public int processBuyOrder(CommandSender sender, int itemID, short itemDur, int buyAmount, double buyPrice) {
+	public int processBuyOrder(CommandSender sender, int itemID, short itemDur, int buyAmount, double buyPrice, Boolean dyrun) {
 		Connection con = getSQLConnection();
-		int value = processBuyOrder(sender, itemID, itemDur, buyAmount, buyPrice, con);
+		int value = processBuyOrder(sender, itemID, itemDur, buyAmount, buyPrice, dyrun, con);
 		closeSQLConnection(con);
 		return value;
 	}
 
-	public int insertOrder(int type, Boolean infinite, String player, int itemID, int itemDur, String itemEnchants, double price, int amount, Connection con) {
+	public int insertOrder(int type, Boolean infinite, String player, int itemID, int itemDur, String itemEnchants, double price, int amount, Boolean dyrun,
+		Connection con) {
 		int updateSuccessful = 0;
 		String query = "SELECT *  FROM " + Config.sqlPrefix
 			+ "Orders WHERE `type` = ? AND `infinite` = ? AND `player` LIKE ? AND `itemID` = ? AND `itemDur` = ? AND `itemEnchants` IS NULL  AND `price` = ?;";
@@ -566,7 +665,8 @@ public class Database {
 				if (id > 0) {
 					// plugin.info("Order already in table, changing amount...");
 
-					increaseInt(Config.sqlPrefix + "Orders", id, "amount", amount, con);
+					if (dyrun == false)
+						increaseInt(Config.sqlPrefix + "Orders", id, "amount", amount, con);
 
 				}
 				statement.close();
@@ -579,6 +679,9 @@ public class Database {
 		if (id > 0) {
 			return 2;
 		}
+
+		if (dyrun == true)
+			return 1;
 
 		query = "INSERT INTO "
 			+ Config.sqlPrefix
@@ -602,9 +705,9 @@ public class Database {
 		return updateSuccessful;
 	}
 
-	public int insertOrder(int type, Boolean infinite, String player, int itemID, int itemDur, String itemEnchants, double price, int amount) {
+	public int insertOrder(int type, Boolean infinite, String player, int itemID, int itemDur, String itemEnchants, double price, int amount, Boolean dyrun) {
 		Connection con = getSQLConnection();
-		int value = insertOrder(type, infinite, player, itemID, itemDur, itemEnchants, price, amount, con);
+		int value = insertOrder(type, infinite, player, itemID, itemDur, itemEnchants, price, amount, dyrun, con);
 		closeSQLConnection(con);
 		return value;
 	}
@@ -1013,10 +1116,14 @@ public class Database {
 				// .sendMessage(sender, F("playerOrder",
 				// TypeToString(type,infinite), id, itemName,amount, price) +
 				// toCollect);
-				if (type == 1){
-					sender.sendMessage(F("playerOrder", ChatColor.RED+TypeToString(type, infinite), id, itemName, amount, plugin.Round(amount * price, Config.priceRounding), plugin.Round(price,Config.priceRounding)) + toCollect);
-				}else{
-					sender.sendMessage(F("playerOrder", ChatColor.GREEN+TypeToString(type, infinite), id, itemName, amount, plugin.Round(amount * price, Config.priceRounding), plugin.Round(price,Config.priceRounding)) + toCollect);
+				if (type == 1) {
+					sender.sendMessage(F("playerOrder", ChatColor.RED + TypeToString(type, infinite), id, itemName, amount,
+						plugin.Round(amount * price, Config.priceRounding), plugin.Round(price, Config.priceRounding))
+						+ toCollect);
+				} else {
+					sender.sendMessage(F("playerOrder", ChatColor.GREEN + TypeToString(type, infinite), id, itemName, amount,
+						plugin.Round(amount * price, Config.priceRounding), plugin.Round(price, Config.priceRounding))
+						+ toCollect);
 				}
 
 			}
@@ -1106,10 +1213,7 @@ public class Database {
 
 							plugin.payPlayer(sender.getName(), money);
 							plugin.sendMessage(sender, F("refundedYourMoney", plugin.Round(money, Config.priceRounding)));
-							
-							
-							
-							
+
 						}
 
 					}
@@ -1150,23 +1254,23 @@ public class Database {
 		int updateSuccessful = 0;
 
 		String SQL = "SELECT * FROM " + Config.sqlPrefix + "Orders WHERE `amount` > 0 ORDER BY id ASC;";
-		
+
 		if (getType > 0) {
-			//query = "SELECT * FROM " + Config.sqlPrefix
-			//	+ "Orders WHERE `itemID` = ? AND `itemDur` = ? AND `itemEnchants` IS NULL AND `amount` > 0 AND `type` = ?;";
-			
-			
+			// query = "SELECT * FROM " + Config.sqlPrefix
+			// +
+			// "Orders WHERE `itemID` = ? AND `itemDur` = ? AND `itemEnchants` IS NULL AND `amount` > 0 AND `type` = ?;";
+
 			SQL = "SELECT * FROM " + Config.sqlPrefix + "Orders WHERE `amount` > 0 AND `type` = ? ORDER BY id ASC;";
 		}
-		
+
 		int count = 0;
 		try {
 			PreparedStatement statement = con.prepareStatement(SQL);
 
-			if (getType > 0){
+			if (getType > 0) {
 				statement.setInt(1, getType);
 			}
-			
+
 			ResultSet result = statement.executeQuery();
 
 			int type, itemID, itemDur, amount, id;
@@ -1185,10 +1289,12 @@ public class Database {
 				amount = result.getInt(9);
 				itemName = plugin.itemdb.getItemName(itemID, itemDur);
 
-				//plugin.info("id: " + id + ", type: " + type + ", infinite: " + infinite + ", itemName: " + itemName + ", amount: " + amount + ", price: " + price);
-				
-				
-				sender.sendMessage(F("playerOrder", TypeToString(type, infinite), id, itemName, amount, plugin.Round(amount * price, Config.priceRounding), plugin.Round(price,Config.priceRounding)));
+				// plugin.info("id: " + id + ", type: " + type + ", infinite: "
+				// + infinite + ", itemName: " + itemName + ", amount: " +
+				// amount + ", price: " + price);
+
+				sender.sendMessage(F("playerOrder", TypeToString(type, infinite), id, itemName, amount, plugin.Round(amount * price, Config.priceRounding),
+					plugin.Round(price, Config.priceRounding)));
 
 				// plugin.sendMessage(sender, );
 

@@ -22,6 +22,7 @@ class Commands implements CommandExecutor {
 
 	}
 
+	
 	private String getItemStatsMsg(Database.itemStats stats, int stackCount) {
 		int roundTo = Config.priceRounding;
 		if (stats.total == 0)
@@ -67,10 +68,22 @@ class Commands implements CommandExecutor {
 		return bldr.toString();
 	}
 
+	
+	public static HashMap<String, String[]> lastRequest = new HashMap<String, String[]>();
+	
 	public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
+		return onCommand(sender, cmd, commandLabel, args, null);
+	}
+	
+	public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args, Boolean confirmed) {
 		// TODO Auto-generated method stub
 
 		if (commandLabel.equalsIgnoreCase("em")) {
+			Boolean dryrun = Config.confirmAllOrders;
+
+			if (confirmed != null && confirmed == true)
+				dryrun = false;
+			
 			final String message = getFinalArg(args, 0);
 			plugin.info(sender.getName() + ": /" + cmd.getName() + " " + message);
 
@@ -226,6 +239,9 @@ class Commands implements CommandExecutor {
 					return true;
 				}
 
+				
+				
+				
 				ItemStack item = ItemDb.getItemStack(args[1]);
 
 				if (item == null) {
@@ -245,65 +261,79 @@ class Commands implements CommandExecutor {
 				}
 				item.setAmount(amount);
 				// plugin.sendMessage(sender, "amount: " + amount);
-				Boolean priceEach = false;
-
+				
+				
+				
+				
+				
 				double price = 0;
 				// if (args.length > 2) {
 
 				if (args.length > 3) {
-
+					Boolean priceEach = false;
+					
 					if (args[3].substring(args[3].length() - 1, args[3].length()).equalsIgnoreCase("e")) {
 						priceEach = true;
 						args[3] = args[3].substring(0, args[3].length() - 1);
 					}
 
 					if (isDouble(args[3])) {
-						price = Double.parseDouble(args[3]);
+						price = Math.abs(Double.parseDouble(args[3]));
 					} else {
 						plugin.sendMessage(sender, F("invalidPrice", args[3]));
 						return true;
 					}
+					if (price == 0) {
+						plugin.sendMessage(sender, F("invalidPrice", 0));
+						return true;
+					}
+					if (priceEach == false && Config.convertCreatePriceToPerItem == true)
+						price = price / amount;
+
 				} else {
 
-				//	plugin.info("no price given.");
-					Database.itemStats stats = plugin.database.getItemStats(item.getTypeId(), item.getDurability(), 1);//2
+					//plugin.info("no price given.");
+					if (confirmed == null)
+						dryrun = Config.autoPriceConfirm;
+					
+					price = -1;
+					
+					/*
+					Database.itemStats stats = plugin.database.getItemStats(item.getTypeId(), item.getDurability(), 0);//1
 
-					if (stats.total <= 0) {
-						stats = plugin.database.getItemStats(item.getTypeId(), item.getDurability(), 0);//2
-					}
+					//if (stats.total <= 0) {
+					//	stats = plugin.database.getItemStats(item.getTypeId(), item.getDurability(), 0);//2
+					//}
 					
 					if (stats.total <= 0) {
 						plugin.sendMessage(sender, L("mustSupplyAPrice"));
 
 						return true;
 					}
-					//plugin.info("avgPrice: " + plugin.Round(stats.avgPrice, Config.priceRounding));
-					
 
 					if (Config.autoPricePerUnit == true){
 						price = stats.avgPrice + (Config.autoSellPrice*amount);
 					}else{
 						price = stats.avgPrice + Config.autoBuyPrice;
 					}
-					
-				//	plugin.info("avgPrice: " + plugin.Round(price, Config.priceRounding));
-
-					priceEach = true;
-					//
+					*/
 
 				}
 				// }
-				price = Math.abs(price);
-				if (price == 0) {
-					plugin.sendMessage(sender, F("invalidPrice", 0));
-					return true;
-				}
+
+				
 				// plugin.sendMessage(sender, "price: " + price);
 
-				if (priceEach == false && Config.convertCreatePriceToPerItem == true)
-					price = price / amount;
 
-				plugin.database.processBuyOrder(sender, item.getTypeId(), item.getDurability(), amount, price);
+
+				int success = plugin.database.processBuyOrder(sender, item.getTypeId(), item.getDurability(), amount, price, dryrun);
+				
+				if (success > 0 && dryrun == true){
+					lastRequest.put(sender.getName(), args);
+					plugin.sendMessage(sender, L("confirmRequest"));
+					
+				}
+				
 				return true;
 
 			} else if (args[0].equalsIgnoreCase("infbuy")) {
@@ -338,7 +368,7 @@ class Commands implements CommandExecutor {
 
 				String itemName = plugin.itemdb.getItemName(stock.getTypeId(), stock.getDurability());
 
-				int success = plugin.database.insertOrder(2, true, sender.getName(), stock.getTypeId(), stock.getDurability(), null, price, 1);
+				int success = plugin.database.insertOrder(2, true, sender.getName(), stock.getTypeId(), stock.getDurability(), null, price, 1, dryrun);
 
 				if (success > 0) {
 					plugin.sendMessage(sender, F("infiniteBuyCreated", itemName, price));
@@ -376,7 +406,7 @@ class Commands implements CommandExecutor {
 
 				String itemName = plugin.itemdb.getItemName(stock.getTypeId(), stock.getDurability());
 
-				int success = plugin.database.insertOrder(1, true, sender.getName(), stock.getTypeId(), stock.getDurability(), null, price, 1);
+				int success = plugin.database.insertOrder(1, true, sender.getName(), stock.getTypeId(), stock.getDurability(), null, price, 1, dryrun);
 
 				if (success > 0) {
 					plugin.sendMessage(sender, F("infiniteSellCreated", itemName, price));
@@ -407,7 +437,9 @@ class Commands implements CommandExecutor {
 					plugin.sendMessage(sender, "§a/" + commandLabel + " sell <itemName> <amount> [price] §7- " + L("cmdSellDesc"));
 					return true;
 				}
-
+				
+				
+				
 				ItemStack stock = ItemDb.getItemStack(args[1]);
 
 				if (stock == null) {
@@ -433,34 +465,57 @@ class Commands implements CommandExecutor {
 
 				int invAmount = InventoryUtil.getAmount(stock, player.getInventory());
 				
-				Boolean priceEach = false;
+				String itemName = plugin.itemdb.getItemName(stock.getTypeId(), stock.getDurability());
+				if (invAmount < amount) {
+					amount = InventoryUtil.getAmount(stock, player.getInventory());
+				}
 
+				if (amount == 0) {
+					plugin.sendMessage(sender, F("sellNotEnoughItems", itemName, rawAmount));
+					return true;
+				}
+				
+				
 				
 				
 				double price = 0;
 				// if (args.length > 2) {
 
 				if (args.length > 3) {
-
+					Boolean priceEach = false;
+					
 					if (args[3].substring(args[3].length() - 1, args[3].length()).equalsIgnoreCase("e")) {
 						priceEach = true;
 						args[3] = args[3].substring(0, args[3].length() - 1);
 					}
 
 					if (isDouble(args[3])) {
-						price = Double.parseDouble(args[3]);
+						price = Math.abs(Double.parseDouble(args[3]));
 					} else {
 						plugin.sendMessage(sender, F("invalidPrice", args[3]));
 						return true;
 					}
+					if (price == 0) {
+						plugin.sendMessage(sender, F("invalidPrice", 0));
+						return true;
+					}
+					if (priceEach == false && Config.convertCreatePriceToPerItem == true)
+						price = price / amount;
+					
 				} else {
 
 					//plugin.info("no price given.");
-					Database.itemStats stats = plugin.database.getItemStats(stock.getTypeId(), stock.getDurability(), 2);//1
+					if (confirmed == null)
+						dryrun = Config.autoPriceConfirm;
+					
+					price = -1;
+					
+					/*
+					Database.itemStats stats = plugin.database.getItemStats(stock.getTypeId(), stock.getDurability(), 0);//2
 
-					if (stats.total <= 0) {
-						stats = plugin.database.getItemStats(stock.getTypeId(), stock.getDurability(), 0);//1
-					}
+					//if (stats.total <= 0) {
+					//	stats = plugin.database.getItemStats(stock.getTypeId(), stock.getDurability(), 0);//1
+					//}
 					
 					if (stats.total <= 0) {
 						plugin.sendMessage(sender, L("mustSupplyAPrice"));
@@ -469,67 +524,42 @@ class Commands implements CommandExecutor {
 					}
 					//plugin.info("avgPrice: " + plugin.Round(stats.avgPrice, Config.priceRounding));
 					if (Config.autoPricePerUnit == true){
-						//price = stats.avgPrice + (Config.autoSellPrice*Math.min(amount, invAmount));
-						price = stats.avgPrice + (Config.autoSellPrice*amount);
+						price = stats.avgPrice + (Config.autoSellPrice*Math.min(amount, invAmount));
+						//price = stats.avgPrice + (Config.autoSellPrice*amount);
 					}else{
 						price = stats.avgPrice + Config.autoSellPrice;
 					}
 					
-					
+					*/
 
 					//plugin.info("avgPrice: " + plugin.Round(price, Config.priceRounding));
 
-					priceEach = true;
 					//
 
 				}
-				// }
-				price = Math.abs(price);
 
-				if (price == 0) {
-					plugin.sendMessage(sender, F("invalidPrice", 0));
-					return true;
-				}
-				// plugin.sendMessage(sender, "price: " + price);
 
-				if (priceEach == false && Config.convertCreatePriceToPerItem == true)
-					price = price / amount;
-
-				// plugin.sendMessage(sender, "price: " + price);
-
-				String itemName = plugin.itemdb.getItemName(stock.getTypeId(), stock.getDurability());
-				if (invAmount < amount) {
-					// plugin.sendMessage(sender,"You do not have " + itemName +
-					// "x" + amount + " in your inv.");
-
-					amount = InventoryUtil.getAmount(stock, player.getInventory());
+				int success = plugin.database.processSellOrder(sender, stock.getTypeId(), stock.getDurability(), amount, price, dryrun);
+				
+				if (success > 0 && dryrun == true){
+					lastRequest.put(sender.getName(), args);
+					plugin.sendMessage(sender, L("confirmRequest"));
 				}
 
-				if (amount == 0) {
-
-					plugin.sendMessage(sender, F("sellNotEnoughItems", itemName, rawAmount));
+				return true;
+			} else if (args[0].equalsIgnoreCase("confirm")) {
+				
+				if (!lastRequest.containsKey(sender.getName())){
+					plugin.sendMessage(sender, L("noRequestYet"));
 					return true;
 				}
 
-
-				plugin.database.processSellOrder(sender, stock.getTypeId(), stock.getDurability(), amount, price);
-
-				/*
-				 * String playerName = sender.getName(); int success =
-				 * plugin.database.insertOrder( 1, false, playerName,
-				 * stock.getTypeId(), stock.getDurability(), null, price, amount
-				 * );
-				 * 
-				 * if (success > 0) { InventoryUtil.remove(stock,
-				 * player.getInventory());
-				 * 
-				 * double each = plugin.Round(price/amount,2);
-				 * plugin.sendMessage(sender, "Selling " + itemName + "x" +
-				 * amount + " for $" + price + " each.");
-				 * 
-				 * }
-				 */
-
+				
+				onCommand(sender, cmd, commandLabel, lastRequest.get(sender.getName()), true);
+				
+				if (Config.clearRequestAfterConfirm == true)
+					lastRequest.remove(sender.getName());
+				
 				return true;
 			} else if (args[0].equalsIgnoreCase("sellhand")) {
 				if (!hasCommandPermission(sender, "exchangemarket.sellhand")) {
@@ -561,14 +591,19 @@ class Commands implements CommandExecutor {
 
 				int stock = item.getAmount();
 
-				int success = plugin.database.insertOrder(type, false, playerName, itemID, itemDur, itemEnchants, price, stock);
+				int success = plugin.database.insertOrder(type, false, playerName, itemID, itemDur, itemEnchants, price, stock, dryrun);
 
 				plugin.sendMessage(sender, "success: " + success);
 
-				if (success > 0) {
+				if (success > 0 && dryrun == false) {
 					InventoryUtil.remove(item, player.getInventory());
 				}
 
+				if (dryrun == true){
+					lastRequest.put(sender.getName(), args);
+					plugin.sendMessage(sender, "Type /em confirm to commit this order.");
+				}
+				
 				return true;
 				// insertOrder
 			}

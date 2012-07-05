@@ -12,3 +12,6 @@ priceRounding: 3
 autoSellPrice: -0.001
 autoBuyPrice: 0.001
 autoPricePerUnit: true
+clearRequestAfterConfirm: false
+autoPriceConfirm: true
+confirmAllOrders: false
