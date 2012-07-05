@@ -268,34 +268,14 @@ public class Database {
 		if (sellAmount > 0) {
 
 			if (sellPrice == -1) {
-
-				plugin.sendMessage(sender, L("mustSupplyAPrice"));
-				return success;
 				
+				sellPrice = getTradersLastPrice(sender.getName(), itemID, itemDur);
 				
-				/*
-				
-				Database.itemStats stats = plugin.database.getItemStats(itemID, itemDur, 0);// 2
-				if (stats.total <= 0) {
+				if (sellPrice <= 0){
 					plugin.sendMessage(sender, L("mustSupplyAPrice"));
-					return 0;
+					return success;
 				}
 
-				plugin.info("priceA: " + sellPrice);
-				plugin.info("priceB: " + stats.avgPrice);
-				plugin.info("priceC: " + Config.autoSellPrice);
-				plugin.info("priceD: " + sellAmount);
-				plugin.info("priceF: " + (Config.autoSellPrice * sellAmount));
-				
-				if (Config.autoPricePerUnit == true) {
-					sellPrice = stats.avgPrice + (Config.autoSellPrice * sellAmount);
-					// price = stats.avgPrice + (Config.autoSellPrice*amount);
-				} else {
-					sellPrice = stats.avgPrice + Config.autoSellPrice;
-				}
-				
-				plugin.info("priceG: " + sellPrice);
-				*/
 			}
 
 			ItemStack itemStack = new ItemStack(itemID, 1);
@@ -582,7 +562,7 @@ public class Database {
 	}
 
 	public int processBuyOrder(CommandSender sender, int itemID, short itemDur, int buyAmount, double buyPrice, Boolean dyrun, Connection con) {
-		int updateSuccessful = 0;
+		int success = 0;
 		int beforeAmount = buyAmount;
 		
 		// plugin.info("buyAmountA: " + buyAmount);
@@ -594,7 +574,7 @@ public class Database {
 		// plugin.info("buyAmountB: " + buyAmount);
 
 		if (buyAmount != beforeAmount)
-			updateSuccessful = 1;
+			success = 1;
 		
 		// /// ABC
 
@@ -604,20 +584,12 @@ public class Database {
 			
 			
 			if (buyPrice == -1) {
-				plugin.sendMessage(sender, L("mustSupplyAPrice"));
-				return updateSuccessful;
+				buyPrice = getTradersLastPrice(sender.getName(), itemID, itemDur);
 				
-				/*
-				Database.itemStats stats = plugin.database.getItemStats(itemID, itemDur, 0);// 2
-				if (stats.total <= 0) {
+				if (buyPrice <= 0){
 					plugin.sendMessage(sender, L("mustSupplyAPrice"));
-					return 0;
+					return success;
 				}
-				if (Config.autoPricePerUnit == true) {
-					buyPrice = stats.avgPrice + (Config.autoBuyPrice * buyAmount);
-				} else {
-					buyPrice = stats.avgPrice + Config.autoBuyPrice;
-				}*/
 			}
 			
 			String itemName = plugin.itemdb.getItemName(itemID, itemDur);
@@ -628,8 +600,8 @@ public class Database {
 				return 0;
 			}
 
-			updateSuccessful = insertOrder(2, false, sender.getName(), itemID, itemDur, null, buyPrice, buyAmount, dyrun, con);
-			if (dyrun == true || updateSuccessful > 0) {
+			success = insertOrder(2, false, sender.getName(), itemID, itemDur, null, buyPrice, buyAmount, dyrun, con);
+			if (dyrun == true || success > 0) {
 				plugin.sendMessage(
 					sender,
 					F("createdBuyOrder", itemName, buyAmount, plugin.Round(buyPrice * buyAmount, Config.priceRounding),
@@ -645,7 +617,7 @@ public class Database {
 		if (dyrun == false)
 			cleanSellOrders(con);
 
-		return updateSuccessful;
+		return success;
 	}
 
 	public int processBuyOrder(CommandSender sender, int itemID, short itemDur, int buyAmount, double buyPrice, Boolean dyrun) {
@@ -1267,6 +1239,43 @@ public class Database {
 		return value;
 	}
 
+	public double getTradersLastPrice(String trader, int itemID, short itemDur, Connection con){
+		double price = 0;
+		String SQL = "SELECT * FROM "+Config.sqlPrefix + "Orders WHERE `player` LIKE ? AND `itemID` = ? AND `itemDur` = ? ORDER BY `id` DESC";
+		
+		try {
+			PreparedStatement statement = con.prepareStatement(SQL);
+
+			statement.setString(1, trader);
+			statement.setInt(2, itemID);
+			statement.setShort(3, itemDur);
+			
+
+			ResultSet result = statement.executeQuery();
+
+			
+			while (result.next()) {
+				price = result.getDouble(8);
+				break;
+			}
+
+			result.close();
+			statement.close();
+
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return price;
+	}
+	public Double getTradersLastPrice(String trader, int itemID, short itemDur) {
+		Connection con = getSQLConnection();
+		Double value = getTradersLastPrice(trader, itemID, itemDur, con);
+		closeSQLConnection(con);
+		return value;
+	}
+	
 	public int listOrders(CommandSender sender, int getType, Connection con) {
 		int updateSuccessful = 0;
 
