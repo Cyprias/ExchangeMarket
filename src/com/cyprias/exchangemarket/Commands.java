@@ -92,7 +92,7 @@ class Commands implements CommandExecutor {
 				plugin.sendMessage(sender, F("pluginsCommands", plugin.pluginName));
 
 				if (plugin.hasPermission(sender, "exchangemarket.sell"))
-					plugin.sendMessage(sender, "  §a/" + commandLabel + " sell <itemName> <amount> [price[e]] §7- " + L("cmdSellDesc"));
+					plugin.sendMessage(sender, "  §a/" + commandLabel + " sell <itemName> [amount] [price[e]] §7- " + L("cmdSellDesc"));
 				if (plugin.hasPermission(sender, "exchangemarket.buy"))
 					plugin.sendMessage(sender, "  §a/" + commandLabel + " buy <itemName> <amount> [price[e]] §7- " + L("cmdBuyDesc"));
 
@@ -155,6 +155,9 @@ class Commands implements CommandExecutor {
 						return true;
 					}
 				}
+				
+				
+				
 				item.setAmount(amount);
 				// plugin.sendMessage(sender, "amount: " + amount);
 
@@ -442,8 +445,8 @@ class Commands implements CommandExecutor {
 					return true;
 				}
 
-				if (args.length < 3) {
-					plugin.sendMessage(sender, "§a/" + commandLabel + " sell <itemName> <amount> [price] §7- " + L("cmdSellDesc"));
+				if (args.length < 2) {
+					plugin.sendMessage(sender, "§a/" + commandLabel + " sell <itemName> [amount] [price] §7- " + L("cmdSellDesc"));
 					return true;
 				}
 				
@@ -456,9 +459,11 @@ class Commands implements CommandExecutor {
 					return true;
 				}
 
+				//int invAmount = InventoryUtil.getAmount(stock, player.getInventory());
 				// plugin.sendMessage(sender, "stock: " + stock);
 
-				int amount = 1;
+				int invAmount = InventoryUtil.getAmount(stock, player.getInventory());
+				int amount = invAmount;
 				if (args.length > 1) {
 
 					if (isInt(args[2])) {
@@ -472,7 +477,7 @@ class Commands implements CommandExecutor {
 				int rawAmount = amount;
 				// plugin.sendMessage(sender, "amount: " + amount);
 
-				int invAmount = InventoryUtil.getAmount(stock, player.getInventory());
+				
 				
 				String itemName = plugin.itemdb.getItemName(stock.getTypeId(), stock.getDurability());
 				if (invAmount < amount) {
