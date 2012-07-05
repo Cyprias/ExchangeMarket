@@ -246,7 +246,7 @@ class Commands implements CommandExecutor {
 				if (!hasCommandPermission(sender, "exchangemarket.buy")) {
 					return true;
 				}
-				if (args.length < 3) {
+				if (args.length < 2) {
 					plugin.sendMessage(sender, "§a/" + commandLabel + " buy <itemName> <amount> [price[e]] §7- " + L("cmdBuyDesc"));
 					return true;
 				}
@@ -262,7 +262,7 @@ class Commands implements CommandExecutor {
 				}
 
 				int amount = 1;
-				if (args.length > 1) {
+				if (args.length > 2) {
 
 					if (isInt(args[2])) {
 						amount = Integer.parseInt(args[2]);
@@ -465,7 +465,7 @@ class Commands implements CommandExecutor {
 
 				int invAmount = InventoryUtil.getAmount(stock, player.getInventory());
 				int amount = invAmount;
-				if (args.length > 1) {
+				if (args.length > 2) {
 
 					if (isInt(args[2])) {
 						amount = Integer.parseInt(args[2]);
