@@ -8,8 +8,6 @@ commands:
     usage: /<command>
 
 permissions:
-  exchangemarket.*:
-    default: false
   exchangemarket.sell:
     default: false
   exchangemarket.buy:
@@ -31,4 +29,6 @@ permissions:
   exchangemarket.cancel:
     default: false
   exchangemarket.reload:
+    default: false
+  exchangemarket.version:
     default: false

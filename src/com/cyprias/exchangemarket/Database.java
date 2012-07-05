@@ -1135,11 +1135,11 @@ public class Database {
 				// toCollect);
 				if (type == 1) {
 					sender.sendMessage(F("playerOrder", ChatColor.RED + TypeToString(type, infinite), id, itemName, amount,
-						plugin.Round(amount * price, Config.priceRounding), plugin.Round(price, Config.priceRounding))
+						plugin.Round(amount * price, Config.priceRounding), plugin.Round(price, Config.priceRounding), trader)
 						+ toCollect);
 				} else {
 					sender.sendMessage(F("playerOrder", ChatColor.GREEN + TypeToString(type, infinite), id, itemName, amount,
-						plugin.Round(amount * price, Config.priceRounding), plugin.Round(price, Config.priceRounding))
+						plugin.Round(amount * price, Config.priceRounding), plugin.Round(price, Config.priceRounding), trader)
 						+ toCollect);
 				}
 
@@ -1293,13 +1293,14 @@ public class Database {
 			int type, itemID, itemDur, amount, id;
 			Boolean infinite;
 			double price;
-			String itemName;
+			String itemName, trader;
 			while (result.next()) {
 				count += 1;
 				// patron = result.getString(1);
 				id = result.getInt(1);
 				type = result.getInt(2);
 				infinite = result.getBoolean(3);
+				trader = result.getString(4);
 				itemID = result.getInt(5);
 				itemDur = result.getInt(6);
 				price = result.getDouble(8);
@@ -1311,7 +1312,7 @@ public class Database {
 				// amount + ", price: " + price);
 
 				sender.sendMessage(F("playerOrder", TypeToString(type, infinite), id, itemName, amount, plugin.Round(amount * price, Config.priceRounding),
-					plugin.Round(price, Config.priceRounding)));
+					plugin.Round(price, Config.priceRounding), trader));
 
 				// plugin.sendMessage(sender, );
 
