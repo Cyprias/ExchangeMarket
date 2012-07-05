@@ -271,6 +271,7 @@ class Commands implements CommandExecutor {
 						return true;
 					}
 				}
+				int rawAmount = amount;
 				item.setAmount(amount);
 				// plugin.sendMessage(sender, "amount: " + amount);
 				
@@ -300,7 +301,7 @@ class Commands implements CommandExecutor {
 						return true;
 					}
 					if (priceEach == false && Config.convertCreatePriceToPerItem == true)
-						price = price / amount;
+						price = price / rawAmount;
 
 				} else {
 
@@ -480,10 +481,12 @@ class Commands implements CommandExecutor {
 				
 				
 				String itemName = plugin.itemdb.getItemName(stock.getTypeId(), stock.getDurability());
-				if (invAmount < amount) {
-					amount = InventoryUtil.getAmount(stock, player.getInventory());
-				}
+				//if (invAmount < amount) {
+				//	amount = InventoryUtil.getAmount(stock, player.getInventory());
+				//}
 
+				amount = Math.min(invAmount, amount);
+				
 				if (amount == 0) {
 					plugin.sendMessage(sender, F("sellNotEnoughItems", itemName, rawAmount));
 					return true;
@@ -514,7 +517,7 @@ class Commands implements CommandExecutor {
 						return true;
 					}
 					if (priceEach == false && Config.convertCreatePriceToPerItem == true)
-						price = price / amount;
+						price = price / rawAmount;
 					
 				} else {
 
