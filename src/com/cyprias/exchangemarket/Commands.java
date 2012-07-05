@@ -180,6 +180,15 @@ class Commands implements CommandExecutor {
 				plugin.sendMessage(sender, getItemStatsMsg(stats, amount));
 
 				return true;
+				
+			} else if (args[0].equalsIgnoreCase("version") && args.length == 1) {
+				if (!hasCommandPermission(sender, "exchangemarket.version")) {
+					return true;
+				}
+
+				plugin.queueVersionCheck((Player) sender);
+				return true;
+				
 			} else if (args[0].equalsIgnoreCase("cancel")) {
 				if (!hasCommandPermission(sender, "exchangemarket.cancel")) {
 					return true;

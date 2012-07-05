@@ -25,7 +25,7 @@ public class Config {
 	public static String sqlUsername, sqlPassword, sqlURL, sqlPrefix, sqlDatabase, sqlHost, sqlPort;
 	//public static int sqlPort;
 	public static String locale;
-	public static Boolean convertCreatePriceToPerItem, cancelSelfSalesWhenBuying, autoPricePerUnit, clearRequestAfterConfirm, confirmAllOrders, autoPriceConfirm;
+	public static Boolean notifyOpsOfNewVersion, convertCreatePriceToPerItem, cancelSelfSalesWhenBuying, autoPricePerUnit, clearRequestAfterConfirm, confirmAllOrders, autoPriceConfirm;
 	public static int priceRounding;
 	public static Double autoBuyPrice, autoSellPrice;
 
@@ -46,7 +46,9 @@ public class Config {
 		//}else if (sqlSystem.equals("mysql")){
 			sqlURL = "jdbc:mysql://" + sqlHost + ":" + sqlPort + "/" + sqlDatabase;
 		//}
-		
+			
+		notifyOpsOfNewVersion = config.getBoolean("notifyOpsOfNewVersion");
+			
 		clearRequestAfterConfirm = config.getBoolean("clearRequestAfterConfirm");
 		autoPriceConfirm = config.getBoolean("autoPriceConfirm");
 		confirmAllOrders = config.getBoolean("confirmAllOrders");
