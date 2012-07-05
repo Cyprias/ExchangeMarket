@@ -269,19 +269,33 @@ public class Database {
 
 			if (sellPrice == -1) {
 
+				plugin.sendMessage(sender, L("mustSupplyAPrice"));
+				return success;
+				
+				
+				/*
+				
 				Database.itemStats stats = plugin.database.getItemStats(itemID, itemDur, 0);// 2
 				if (stats.total <= 0) {
 					plugin.sendMessage(sender, L("mustSupplyAPrice"));
 					return 0;
 				}
 
+				plugin.info("priceA: " + sellPrice);
+				plugin.info("priceB: " + stats.avgPrice);
+				plugin.info("priceC: " + Config.autoSellPrice);
+				plugin.info("priceD: " + sellAmount);
+				plugin.info("priceF: " + (Config.autoSellPrice * sellAmount));
+				
 				if (Config.autoPricePerUnit == true) {
 					sellPrice = stats.avgPrice + (Config.autoSellPrice * sellAmount);
 					// price = stats.avgPrice + (Config.autoSellPrice*amount);
 				} else {
 					sellPrice = stats.avgPrice + Config.autoSellPrice;
 				}
-
+				
+				plugin.info("priceG: " + sellPrice);
+				*/
 			}
 
 			ItemStack itemStack = new ItemStack(itemID, 1);
@@ -569,12 +583,13 @@ public class Database {
 
 	public int processBuyOrder(CommandSender sender, int itemID, short itemDur, int buyAmount, double buyPrice, Boolean dyrun, Connection con) {
 		int updateSuccessful = 0;
-
+		int beforeAmount = buyAmount;
+		
 		// plugin.info("buyAmountA: " + buyAmount);
 		if (Config.cancelSelfSalesWhenBuying == true)
 			buyAmount = checkPlayerSellOrders(sender, itemID, itemDur, buyAmount, buyPrice, dyrun, con);
 
-		int beforeAmount = buyAmount;
+		
 		buyAmount = checkSellOrders(sender, itemID, itemDur, buyAmount, buyPrice, dyrun, con);
 		// plugin.info("buyAmountB: " + buyAmount);
 
@@ -586,24 +601,26 @@ public class Database {
 		
 
 		if (buyAmount > 0) {
-			String itemName = plugin.itemdb.getItemName(itemID, itemDur);
+			
 			
 			if (buyPrice == -1) {
-
+				plugin.sendMessage(sender, L("mustSupplyAPrice"));
+				return updateSuccessful;
+				
+				/*
 				Database.itemStats stats = plugin.database.getItemStats(itemID, itemDur, 0);// 2
 				if (stats.total <= 0) {
 					plugin.sendMessage(sender, L("mustSupplyAPrice"));
 					return 0;
 				}
-
 				if (Config.autoPricePerUnit == true) {
-					buyPrice = stats.avgPrice + (Config.autoBuyPrice * buyPrice);
-					// price = stats.avgPrice + (Config.autoSellPrice*amount);
+					buyPrice = stats.avgPrice + (Config.autoBuyPrice * buyAmount);
 				} else {
 					buyPrice = stats.avgPrice + Config.autoBuyPrice;
-				}
-
+				}*/
 			}
+			
+			String itemName = plugin.itemdb.getItemName(itemID, itemDur);
 			
 			if (plugin.getBalance(sender.getName()) < (buyAmount * buyPrice)) {
 				plugin.sendMessage(sender,
@@ -612,7 +629,7 @@ public class Database {
 			}
 
 			updateSuccessful = insertOrder(2, false, sender.getName(), itemID, itemDur, null, buyPrice, buyAmount, dyrun, con);
-			if (updateSuccessful > 0) {
+			if (dyrun == true || updateSuccessful > 0) {
 				plugin.sendMessage(
 					sender,
 					F("createdBuyOrder", itemName, buyAmount, plugin.Round(buyPrice * buyAmount, Config.priceRounding),
