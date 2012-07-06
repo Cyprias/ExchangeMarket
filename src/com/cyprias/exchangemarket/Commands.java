@@ -111,7 +111,7 @@ class Commands implements CommandExecutor {
 				if (plugin.hasPermission(sender, "exchangemarket.collect"))
 					plugin.sendMessage(sender, "  §a/" + commandLabel + " collect §7- " + L("cmdCollectDesc"));
 				if (plugin.hasPermission(sender, "exchangemarket.cancel"))
-					plugin.sendMessage(sender, "  §a/" + commandLabel + " cancel <ID> §7- " + L("cmdCancelDesc"));
+					plugin.sendMessage(sender, "  §a/" + commandLabel + " cancel <ID/Buy/Sell> [itemName] [amount] §7- " + L("cmdCancelDesc"));
 
 				if (plugin.hasPermission(sender, "exchangemarket.reload"))
 					plugin.sendMessage(sender, "  §a/" + commandLabel + " reload §7- " + L("cmdReloadDesc"));
@@ -198,16 +198,73 @@ class Commands implements CommandExecutor {
 				}
 
 				if (args.length < 2) {
-					plugin.sendMessage(sender, L("includeOrderNumber"));
+				//	plugin.sendMessage(sender, L("includeOrderNumber"));
+					plugin.sendMessage(sender, "§a/" + commandLabel + " cancel <ID/Buy/Sell> [itemName] [amount] §7- " + L("cmdCancelDesc"));
+
 					return true;
 				}
 
-				if (!isInt(args[1])) {
-					plugin.sendMessage(sender, F("invalidOrderNumber", args[1]));
-					return true;
+				if (isInt(args[1])) {
+					plugin.database.cancelOrder(sender, Integer.parseInt(args[1]));
+				}else{
+					if (confirmed == null)
+						dryrun = true;
+					
+					//plugin.sendMessage(sender, F("invalidOrderNumber", args[1]));
+					//return true;
+					int type = 0;
+					if (args.length > 1) {
+						if (args[1].equalsIgnoreCase("sell")) {
+							type = 1;
+						} else if (args[1].equalsIgnoreCase("buy")) {
+							type = 2;
+
+						} else {
+							plugin.sendMessage(sender, F("invalidType", args[1]));
+							return true;
+						}
+					}
+					
+					ItemStack item = null;
+					int amount = 1;
+					if (args.length > 2) {
+						item = ItemDb.getItemStack(args[2]);
+					}
+					
+					if (item == null) {
+						plugin.sendMessage(sender, F("invalidItem", args[2]));
+						return true;
+					}
+					
+					if (args.length > 3) {
+
+						if (isInt(args[3])) {
+							amount = Integer.parseInt(args[3]);
+						} else {
+							plugin.sendMessage(sender, F("invalidAmount", args[3]));
+
+							return true;
+						}
+					}
+					String itemName = plugin.itemdb.getItemName(item.getTypeId(), item.getDurability());
+					
+					//plugin.info("type: " +type);
+					//plugin.info("itemName: " +itemName);
+					//plugin.info("amount: " +amount);
+					
+					int success = plugin.database.cancelOrders(sender, type, item.getTypeId(), item.getDurability(), amount, dryrun);
+					//plugin.info("success: " +success);
+					
+					if (success > 0 && dryrun == true){
+						lastRequest.put(sender.getName(), args);
+						plugin.sendMessage(sender, L("confirmRequest"));
+						
+					}
+					
+					
 				}
 
-				plugin.database.cancelOrder(sender, Integer.parseInt(args[1]));
+				
 
 				return true;
 			} else if (args[0].equalsIgnoreCase("orders")) {
