@@ -24,11 +24,11 @@ public class Config {
 	
 	public static String sqlUsername, sqlPassword, sqlURL, sqlPrefix, sqlDatabase, sqlHost, sqlPort;
 	//public static int sqlPort;
-	public static String locale;
+	public static String locale, listSortOrder;
 	public static Boolean notifyOpsOfNewVersion, convertCreatePriceToPerItem, cancelSelfSalesWhenBuying, autoPricePerUnit, clearRequestAfterConfirm, confirmAllOrders, autoPriceConfirm;
 	public static int priceRounding;
 	public static Double autoBuyPrice, autoSellPrice;
-
+	
 	
 	private void loadConfigOpts(){
 		sqlUsername = config.getString("mysql.username");
@@ -63,6 +63,8 @@ public class Config {
 		autoBuyPrice = config.getDouble("autoBuyPrice");
 		autoSellPrice = config.getDouble("autoSellPrice");
 		autoPricePerUnit = config.getBoolean("autoPricePerUnit");
+		
+		listSortOrder = config.getString("listSortOrder");
 		
 	}
 }

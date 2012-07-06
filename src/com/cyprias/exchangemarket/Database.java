@@ -190,7 +190,7 @@ public class Database {
 				price = result.getDouble(8);
 				amount = result.getInt(9);
 
-				 plugin.info("processBuyOrder id: " + id + ", price: " + price + ", amount: " + amount);
+				// plugin.info("processBuyOrder id: " + id + ", price: " + price + ", amount: " + amount);
 
 				if (infinite == true) {
 					amount = sellAmount;
@@ -205,7 +205,9 @@ public class Database {
 
 					if (dryrun == false)
 						plugin.payPlayer(sender.getName(), amount * price);
-
+					
+					plugin.sendMessage(sender, F("withdrewItem", itemName, amount));
+					
 					// plugin.sendMessage(sender, "Sold " + itemName + "x" +
 					// amount + " for $" + (amount*price) + " ($" +price+"e)");
 					if (infinite == true) {
@@ -295,7 +297,8 @@ public class Database {
 				// plugin.debtPlayer(sender.getName(), sellPrice * sellPrice);
 				if (dryrun == false)
 					InventoryUtil.remove(itemStack, player.getInventory());
-
+				
+				plugin.sendMessage(sender, F("withdrewItem", itemName, sellAmount));
 			}
 
 		}
@@ -1279,14 +1282,14 @@ public class Database {
 	public int listOrders(CommandSender sender, int getType, Connection con) {
 		int updateSuccessful = 0;
 
-		String SQL = "SELECT * FROM " + Config.sqlPrefix + "Orders WHERE `amount` > 0 ORDER BY id ASC;";
+		String SQL = "SELECT * FROM " + Config.sqlPrefix + "Orders WHERE `amount` > 0 ORDER BY " + Config.listSortOrder+";";
 
 		if (getType > 0) {
 			// query = "SELECT * FROM " + Config.sqlPrefix
 			// +
 			// "Orders WHERE `itemID` = ? AND `itemDur` = ? AND `itemEnchants` IS NULL AND `amount` > 0 AND `type` = ?;";
 
-			SQL = "SELECT * FROM " + Config.sqlPrefix + "Orders WHERE `amount` > 0 AND `type` = ? ORDER BY id ASC;";
+			SQL = "SELECT * FROM " + Config.sqlPrefix + "Orders WHERE `amount` > 0 AND `type` = ? ORDER BY " + Config.listSortOrder+";";
 		}
 
 		int count = 0;

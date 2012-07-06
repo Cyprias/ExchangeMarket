@@ -16,3 +16,4 @@ clearRequestAfterConfirm: false
 autoPriceConfirm: true
 confirmAllOrders: false
 notifyOpsOfNewVersion: true
+listSortOrder: "price ASC"
