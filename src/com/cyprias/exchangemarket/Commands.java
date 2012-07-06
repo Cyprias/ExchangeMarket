@@ -427,7 +427,10 @@ class Commands implements CommandExecutor {
 
 				return true;
 			} else if (args[0].equalsIgnoreCase("collect")) {
-
+				if (!hasCommandPermission(sender, "exchangemarket.collect")) {
+					return true;
+				}
+				
 				plugin.database.collectPenderingBuys(sender);
 
 				return true;
