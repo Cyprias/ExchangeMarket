@@ -94,7 +94,7 @@ class Commands implements CommandExecutor {
 				if (plugin.hasPermission(sender, "exchangemarket.sell"))
 					plugin.sendMessage(sender, "  §a/" + commandLabel + " sell <itemName> [amount] [price[e]] §7- " + L("cmdSellDesc"));
 				if (plugin.hasPermission(sender, "exchangemarket.buy"))
-					plugin.sendMessage(sender, "  §a/" + commandLabel + " buy <itemName> <amount> [price[e]] §7- " + L("cmdBuyDesc"));
+					plugin.sendMessage(sender, "  §a/" + commandLabel + " buy <itemName> [amount] [price[e]] §7- " + L("cmdBuyDesc"));
 
 				if (plugin.hasPermission(sender, "exchangemarket.price"))
 					plugin.sendMessage(sender, "  §a/" + commandLabel + " price [itemName] [amount] [sale/buy] §7- " + L("cmdPriceDesc"));
