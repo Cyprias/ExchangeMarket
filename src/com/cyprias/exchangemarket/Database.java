@@ -429,6 +429,8 @@ public class Database {
 
 						if (dryrun == false) {
 							plugin.debtPlayer(sender.getName(), canBuy * price);
+							
+							
 							if (infinite == false)
 								plugin.payPlayer(trader, canBuy * price);
 
@@ -451,7 +453,8 @@ public class Database {
 																														// exists
 							}
 						}
-
+						plugin.sendMessage(sender, F("withdrewMoney", plugin.Round(canBuy * price, Config.priceRounding)));
+						
 						if (infinite == false)
 							plugin.sendMessage(
 								sender,
@@ -605,6 +608,8 @@ public class Database {
 
 			success = insertOrder(2, false, sender.getName(), itemID, itemDur, null, buyPrice, buyAmount, dyrun, con);
 			if (dyrun == true || success > 0) {
+				plugin.sendMessage(sender, F("withdrewMoney", plugin.Round(buyPrice * buyAmount, Config.priceRounding)));
+				
 				plugin.sendMessage(
 					sender,
 					F("createdBuyOrder", itemName, buyAmount, plugin.Round(buyPrice * buyAmount, Config.priceRounding),
