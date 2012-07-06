@@ -1189,7 +1189,7 @@ public class Database {
 
 		Connection con = getSQLConnection();
 
-		String SQL = "SELECT * FROM " + Config.sqlPrefix + "Orders WHERE `player` LIKE ? ORDER BY id ASC;";// `amount`
+		String SQL = "SELECT * FROM " + Config.sqlPrefix + "Orders WHERE `player` LIKE ? ORDER BY itemID ASC;";// `amount`
 																											// >
 																											// 0
 		int count = 0;
