@@ -113,6 +113,10 @@ class Commands implements CommandExecutor {
 				if (plugin.hasPermission(sender, "exchangemarket.cancel"))
 					plugin.sendMessage(sender, "  §a/" + commandLabel + " cancel <ID/Buy/Sell> [itemName] [amount] §7- " + L("cmdCancelDesc"));
 
+				if (plugin.hasPermission(sender, "exchangemarket.remove"))
+					plugin.sendMessage(sender, "§a/" + commandLabel + " remove <ID> §7- " + L("cmdRemoveDesc"));
+				
+				
 				if (plugin.hasPermission(sender, "exchangemarket.reload"))
 					plugin.sendMessage(sender, "  §a/" + commandLabel + " reload §7- " + L("cmdReloadDesc"));
 
@@ -191,6 +195,29 @@ class Commands implements CommandExecutor {
 
 				plugin.queueVersionCheck((Player) sender);
 				return true;
+			} else if (args[0].equalsIgnoreCase("remove")) {
+				if (!hasCommandPermission(sender, "exchangemarket.remove")) {
+					return true;
+				}
+				
+				if (args.length < 1) {
+					plugin.sendMessage(sender, "§a/" + commandLabel + " remove <ID> §7- " + L("cmdCancelDesc"));
+					return true;
+				}
+				
+				if (isInt(args[1])) {
+					int success = plugin.database.removeOrder(sender, Integer.parseInt(args[1]));
+					if (success>0){
+						plugin.sendMessage(sender, L("removeSuccessful"));
+					}else{
+						plugin.sendMessage(sender, L("removeFailed"));
+					}
+					
+					
+				}else{
+					plugin.sendMessage(sender, F("invalidOrderNumber", args[1]));
+				}
+				return true;
 				
 			} else if (args[0].equalsIgnoreCase("cancel")) {
 				if (!hasCommandPermission(sender, "exchangemarket.cancel")) {
@@ -198,9 +225,7 @@ class Commands implements CommandExecutor {
 				}
 
 				if (args.length < 2) {
-				//	plugin.sendMessage(sender, L("includeOrderNumber"));
 					plugin.sendMessage(sender, "§a/" + commandLabel + " cancel <ID/Buy/Sell> [itemName] [amount] §7- " + L("cmdCancelDesc"));
-
 					return true;
 				}
 

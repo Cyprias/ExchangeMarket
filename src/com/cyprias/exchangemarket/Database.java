@@ -1244,7 +1244,31 @@ public class Database {
 
 		return updateSuccessful;
 	}
+	public int removeOrder(CommandSender sender, int orderID) {
+		Connection con = getSQLConnection();
+		int success = 0;
+		
+		String query = "DELETE FROM " + Config.sqlPrefix + "Orders WHERE `id` = ?";
+		
+		try {
+			PreparedStatement statement = con.prepareStatement(query);
 
+			statement.setInt(1, orderID);
+
+			success = statement.executeUpdate();
+
+			statement.close();
+			con.close();
+
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		closeSQLConnection(con);
+		return success;
+	}
+	
 	public int cancelOrder(CommandSender sender, int orderID, Connection con) {
 		int updateSuccessful = 0;
 
