@@ -438,7 +438,9 @@ class Commands implements CommandExecutor {
 
 				String itemName = plugin.itemdb.getItemName(stock.getTypeId(), stock.getDurability());
 
-				int success = plugin.database.insertOrder(2, true, sender.getName(), stock.getTypeId(), stock.getDurability(), null, price, 1, dryrun);
+				
+				
+				int success = plugin.database.insertOrder(2, true, plugin.pluginName, stock.getTypeId(), stock.getDurability(), null, price, 1, dryrun);
 
 				if (success > 0) {
 					plugin.sendMessage(sender, F("infiniteBuyCreated", itemName, price));
@@ -476,7 +478,7 @@ class Commands implements CommandExecutor {
 
 				String itemName = plugin.itemdb.getItemName(stock.getTypeId(), stock.getDurability());
 
-				int success = plugin.database.insertOrder(1, true, sender.getName(), stock.getTypeId(), stock.getDurability(), null, price, 1, dryrun);
+				int success = plugin.database.insertOrder(1, true, plugin.pluginName, stock.getTypeId(), stock.getDurability(), null, price, 1, dryrun);
 
 				if (success > 0) {
 					plugin.sendMessage(sender, F("infiniteSellCreated", itemName, price));

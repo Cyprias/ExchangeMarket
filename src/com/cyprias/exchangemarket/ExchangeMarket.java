@@ -142,28 +142,44 @@ public class ExchangeMarket extends JavaPlugin {
 		return null;
 	}
 	
-	public void notifyBuyerOfExchange(String buyerName, int itemID, int itemDur, int amount, double price, String trader){
+	public void notifyBuyerOfExchange(String buyerName, int itemID, int itemDur, int amount, double price, String trader, Boolean dryrun){
 		Player player = findPlayerByName(buyerName);
-		String itemName = itemdb.getItemName(itemID, itemDur);
+		
 		if (player != null){
+			String itemName = itemdb.getItemName(itemID, itemDur);
+			String preview = "";
+			if (dryrun == true)
+				preview = L("preview");
+			
 			//sendMessage(player, "Your " + itemName+"x"+amount+" just sold for $" +(price*amount) + " ($"+price+"e)");
 			sendMessage(player, F("youBought", itemName, amount, Round(price*amount,Config.priceRounding), Round(price,Config.priceRounding), trader));
 			
 		}
 	}
 	
-	public void notifySellerOfExchange(String buyerName, int itemID, int itemDur, int amount, double price, String trader){
+	public void notifySellerOfExchange(String buyerName, int itemID, int itemDur, int amount, double price, String trader, Boolean dryrun){
 		Player player = findPlayerByName(buyerName);
-		String itemName = itemdb.getItemName(itemID, itemDur);
 		if (player != null){
+			String itemName = itemdb.getItemName(itemID, itemDur);
+		
+			String preview = "";
+			if (dryrun == true)
+				preview = L("preview");
+		
+		
 			//sendMessage(player, "Your " + itemName+"x"+amount+" just sold for $" +(price*amount) + " ($"+price+"e)");
-			sendMessage(player, F("youSold", itemName, amount, Round(price*amount,Config.priceRounding), Round(price,Config.priceRounding), trader));
+			sendMessage(player, preview+F("youSold", itemName, amount, Round(price*amount,Config.priceRounding), Round(price,Config.priceRounding), trader));
 			
 			
 			
 			
 		}
 	}
+	
+	//public void notifySellerOfExchange(String buyerName, int itemID, int itemDur, int amount, double price, String trader){
+	//	notifySellerOfExchange(buyerName, itemID, itemDur, amount, price, trader, false);
+	//}
+	
 	private String F(String string, Object... args) {
 		return Localization.F(string, args);
 	}
