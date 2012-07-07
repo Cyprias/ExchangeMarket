@@ -219,6 +219,7 @@ public class Database {
 
 					if (dryrun == false) {
 						if (infinite == false){
+							decreaseInt(Config.sqlPrefix + "Orders", id, "amount", amount, con);
 							increaseInt(Config.sqlPrefix + "Orders", id, "exchanged", amount, con);
 						}
 
