@@ -227,8 +227,11 @@ class Commands implements CommandExecutor {
 				if (!hasCommandPermission(sender, "exchangemarket.search")) {
 					return true;
 				}
+				if (args.length <= 1) {
+					plugin.sendMessage(sender, F("invalidItem", ""));
+					return true;
+				}
 				ItemStack item = null;
-				int amount = 1;
 				if (args.length > 1) {
 					item = ItemDb.getItemStack(args[1]);
 				}
