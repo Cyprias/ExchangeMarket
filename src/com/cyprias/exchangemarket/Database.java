@@ -5,6 +5,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -1218,11 +1219,11 @@ public class Database {
 				// toCollect);
 				if (type == 1) {
 					sender.sendMessage(F("playerOrder", ChatColor.RED + TypeToString(type, infinite), id, itemName, amount,
-						plugin.Round(amount * price, Config.priceRounding), plugin.Round(price, Config.priceRounding), trader)
+						plugin.Round(amount * price, Config.priceRounding), plugin.Round(price, Config.priceRounding), ColourName(sender, trader))
 						+ toCollect);
 				} else {
 					sender.sendMessage(F("playerOrder", ChatColor.GREEN + TypeToString(type, infinite), id, itemName, amount,
-						plugin.Round(amount * price, Config.priceRounding), plugin.Round(price, Config.priceRounding), trader)
+						plugin.Round(amount * price, Config.priceRounding), plugin.Round(price, Config.priceRounding), ColourName(sender, trader))
 						+ toCollect);
 				}
 
@@ -1244,6 +1245,20 @@ public class Database {
 
 		return updateSuccessful;
 	}
+	
+	public String ColourName(CommandSender sender, String name){
+		if (plugin.pluginName.equalsIgnoreCase(name)){
+			return ChatColor.GOLD+name+ChatColor.RESET;
+			
+		}
+		if (sender.getName().equalsIgnoreCase(name)){
+			return ChatColor.YELLOW+name+ChatColor.RESET;
+			
+		}
+		
+		return name;
+	}
+	
 	public int removeOrder(CommandSender sender, int orderID) {
 		Connection con = getSQLConnection();
 		int success = 0;
@@ -1267,6 +1282,108 @@ public class Database {
 
 		closeSQLConnection(con);
 		return success;
+	}
+	
+	public static class queryReturn {
+		Connection con;
+		PreparedStatement statement;
+		ResultSet result;
+		
+		public queryReturn(Connection con, PreparedStatement statement, ResultSet result) {
+			this.con = con;
+			this.statement = statement;
+			this.result = result;
+		}
+	}
+	
+	public queryReturn executeQuery(String query, Object... args){
+		Connection con = getSQLConnection();
+		// myreturn = null;
+		//List<Object> results = new ArrayList<Object>();
+		
+		queryReturn myreturn = null;// = new queryReturn();
+		
+		try {
+			PreparedStatement statement = con.prepareStatement(query);
+			
+		//	plugin.info("executeQuery: " + args.length);
+
+			int i=0;
+			for(Object a:args){
+				i+=1;
+					plugin.info("executeQuery "+i+": " + a);
+					statement.setObject(i, a);
+			}
+				
+			
+			ResultSet result = statement.executeQuery();
+			
+			myreturn = new queryReturn(con, statement, result);
+			
+			//result.close();
+			//statement.close();
+			
+			
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		//closeSQLConnection(con);
+		
+		return myreturn;
+	}
+	
+	public Boolean closeQuery(queryReturn qReturn){
+		try {
+			qReturn.result.close();
+			qReturn.statement.close();
+			qReturn.con.close();
+			return true;
+		} catch (SQLException e) {e.printStackTrace();}
+		return false;
+	}
+	
+	public void searchOrders(CommandSender sender, int itemID, short itemDur){
+		String query = "SELECT * FROM " + Config.sqlPrefix + "Orders WHERE `itemID` = ? AND `itemDur` = ? AND amount > 0 ORDER BY `price` ASC;";
+		
+		/**/
+		queryReturn qReturn = executeQuery(query, itemID, itemDur);
+		int results = 0;
+		try {
+			int id, type, amount, exchanged;
+			Boolean infinite;
+			String itemName, trader;
+			Double price;
+			
+			
+			
+			while (qReturn.result.next()) {
+				results +=1;
+				id = qReturn.result.getInt(1);
+				type = qReturn.result.getInt(2);
+				infinite = qReturn.result.getBoolean(3);
+				trader = qReturn.result.getString(4);
+				price = qReturn.result.getDouble(8);
+				amount = qReturn.result.getInt(9);
+				itemName = plugin.itemdb.getItemName(itemID, itemDur);
+
+				if (type == 1) {
+
+					sender.sendMessage(F("playerOrder", ChatColor.RED + TypeToString(type, infinite), id, itemName, amount,
+						plugin.Round(amount * price, Config.priceRounding), plugin.Round(price, Config.priceRounding), ColourName(sender, trader)));
+				} else {
+					sender.sendMessage(F("playerOrder", ChatColor.GREEN + TypeToString(type, infinite), id, itemName, amount,
+						plugin.Round(amount * price, Config.priceRounding), plugin.Round(price, Config.priceRounding), ColourName(sender, trader)));
+				}
+				
+			}
+		} catch (SQLException e) {e.printStackTrace();}
+	
+		if (results == 0)
+			plugin.sendMessage(sender, L("noActiveList"));
+		
+		closeQuery(qReturn);
 	}
 	
 	public int cancelOrder(CommandSender sender, int orderID, Connection con) {
@@ -1467,10 +1584,10 @@ public class Database {
 				if (type == 1) {
 
 					sender.sendMessage(F("playerOrder", ChatColor.RED + TypeToString(type, infinite), id, itemName, amount,
-						plugin.Round(amount * price, Config.priceRounding), plugin.Round(price, Config.priceRounding), trader));
+						plugin.Round(amount * price, Config.priceRounding), plugin.Round(price, Config.priceRounding), ColourName(sender, trader)));
 				} else {
 					sender.sendMessage(F("playerOrder", ChatColor.GREEN + TypeToString(type, infinite), id, itemName, amount,
-						plugin.Round(amount * price, Config.priceRounding), plugin.Round(price, Config.priceRounding), trader));
+						plugin.Round(amount * price, Config.priceRounding), plugin.Round(price, Config.priceRounding), ColourName(sender, trader)));
 				}
 				// plugin.sendMessage(sender, );
 

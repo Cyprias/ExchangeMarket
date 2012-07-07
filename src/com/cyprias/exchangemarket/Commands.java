@@ -104,6 +104,8 @@ class Commands implements CommandExecutor {
 				if (plugin.hasPermission(sender, "exchangemarket.infsell"))
 					plugin.sendMessage(sender, "  §a/" + commandLabel + " infsell <itemName> <price> §7- " + L("cmdInfSellDesc"));
 
+				if (plugin.hasPermission(sender, "exchangemarket.search"))
+					plugin.sendMessage(sender, "  §a/" + commandLabel + " search <itemName>§7- " + L("cmdSearchDesc"));
 				if (plugin.hasPermission(sender, "exchangemarket.list"))
 					plugin.sendMessage(sender, "  §a/" + commandLabel + " list [Buy/Sell]§7- " + L("cmdListDesc"));
 				if (plugin.hasPermission(sender, "exchangemarket.orders"))
@@ -217,6 +219,29 @@ class Commands implements CommandExecutor {
 				}else{
 					plugin.sendMessage(sender, F("invalidOrderNumber", args[1]));
 				}
+				return true;
+				
+				
+			//searchOrders
+			} else if (args[0].equalsIgnoreCase("search")) {
+				if (!hasCommandPermission(sender, "exchangemarket.search")) {
+					return true;
+				}
+				ItemStack item = null;
+				int amount = 1;
+				if (args.length > 1) {
+					item = ItemDb.getItemStack(args[1]);
+				}
+				
+				if (item == null) {
+					plugin.sendMessage(sender, F("invalidItem", args[1]));
+					return true;
+				}
+				
+				
+				
+				plugin.database.searchOrders(sender, item.getTypeId(), item.getDurability());
+				
 				return true;
 				
 			} else if (args[0].equalsIgnoreCase("cancel")) {
