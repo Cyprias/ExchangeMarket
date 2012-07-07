@@ -9,7 +9,6 @@ locale: enUS.yml
 convertCreatePriceToPerItem: true
 cancelSelfSalesWhenBuying: true
 priceRounding: 3
-autoPricePerUnit: true
 clearRequestAfterConfirm: false
 autoPriceConfirm: true
 confirmAllOrders: false

@@ -261,7 +261,8 @@ public class Database {
 		sellAmount = checkBuyOrders(sender, itemID, itemDur, sellAmount, sellPrice, dryrun, con);
 
 		if (beforeAmount != sellAmount)
-			success = 1;
+			return 1;
+			//success = 1;
 
 		// plugin.info("sellAmountB: " + sellAmount);
 
@@ -554,30 +555,42 @@ public class Database {
 							is.addEnchantments(MaterialUtil.Enchantment.getEnchantments(enchants));
 						}
 
-						if (!InventoryUtil.fits(is, player.getInventory())) {
-							plugin.sendMessage(sender, F("notEnoughInvSpace", itemName, amount));
-							return 0;
-						}
+						//if (!InventoryUtil.fits(is, player.getInventory())) {
+						//	plugin.sendMessage(sender, F("notEnoughInvSpace", itemName, amount));
+						//	return 0;
+						//}
 
-						if (dryrun == false) {
-							InventoryUtil.add(is, player.getInventory());
+						for (int i = amount; i > 0; i--) {
+							if (dryrun == true || plugin.database.giveItemToPlayer(player, ciID, ciDur, i) == true) {
+								//plugin.sendMessage(sender, F("collectedItem", itemName, i));
+								if (dryrun == false)
+									plugin.database.decreaseInt(Config.sqlPrefix + "Orders", id, "amount", i);
+									
+								plugin.sendMessage(sender, F("returnedYourItem", itemName, i));
+								
+								break;
+							}
 						}
-						plugin.sendMessage(sender, F("returnedYourItem", itemName, canBuy));
+						
+						//if (dryrun == false) {
+						//	InventoryUtil.add(is, player.getInventory());
+						//}
+						//plugin.sendMessage(sender, F("returnedYourItem", itemName, canBuy));
 
 					} else if (cType == 2) {// Buy, return money.
 						double money = price * canBuy;
-						if (dryrun == false)
+						if (dryrun == false) {
 							plugin.payPlayer(sender.getName(), money);
-
+							if (infinite == false) {
+								decreaseInt(Config.sqlPrefix + "Orders", id, "amount", canBuy);
+							}
+						}
+						
 						plugin.sendMessage(sender, F("refundedYourMoney", plugin.Round(money, Config.priceRounding)));
 
 					}
 
-					if (dryrun == false) {
-						if (infinite == false) {
-							decreaseInt(Config.sqlPrefix + "Orders", id, "amount", canBuy);
-						}
-					}
+
 
 					cAmount -= canBuy;
 
@@ -697,9 +710,8 @@ public class Database {
 		// plugin.info("buyAmountB: " + buyAmount);
 
 		if (buyAmount != beforeAmount)
-			success = 1;
-
-		// /// ABC
+			return 1;
+		//success = 1;
 
 		if (buyAmount > 0) {
 
@@ -1309,15 +1321,25 @@ public class Database {
 								is.addEnchantments(MaterialUtil.Enchantment.getEnchantments(enchants));
 							}
 
-							if (!InventoryUtil.fits(is, player.getInventory())) {
-								plugin.sendMessage(sender, F("notEnoughInvSpace", itemName, amount));
+							//if (!InventoryUtil.fits(is, player.getInventory())) {
+							//	plugin.sendMessage(sender, F("notEnoughInvSpace", itemName, amount));
+							//	return 0;
+								
+								for (int i = amount; i > 0; i--) {
+									if (plugin.database.giveItemToPlayer(player, itemID, itemDur, i) == true) {
+										//plugin.sendMessage(sender, F("collectedItem", itemName, i));
+										plugin.database.decreaseInt(Config.sqlPrefix + "Orders", orderID, "amount", i);
+										plugin.sendMessage(sender, F("returnedYourItem", itemName, i));
+										updateSuccessful =1;
+										break;
+									}
+								}
+								
+						//	}
 
-								return 0;
-							}
+							//InventoryUtil.add(is, player.getInventory());
 
-							InventoryUtil.add(is, player.getInventory());
-
-							plugin.sendMessage(sender, F("returnedYourItem", itemName, amount));
+							
 
 						} else if (type == 2) {// Buy, return money.
 							double money = price * amount;
@@ -1325,21 +1347,25 @@ public class Database {
 							plugin.payPlayer(sender.getName(), money);
 							plugin.sendMessage(sender, F("refundedYourMoney", plugin.Round(money, Config.priceRounding)));
 
+							updateSuccessful = removeRow(Config.sqlPrefix + "Orders", orderID, con);
+
+							if (updateSuccessful > 0) {
+								plugin.sendMessage(sender, F("canceledOrder", TypeToString(type, infinite), orderID, itemName, amount));
+							}
 						}
 
 					}
-					updateSuccessful = removeRow(Config.sqlPrefix + "Orders", orderID, con);
-
-					if (updateSuccessful > 0) {
-						plugin.sendMessage(sender, F("canceledOrder", TypeToString(type, infinite), orderID, itemName, amount));
-					}
-
-					// plugin.info("cancelOrder updateSuccessful: " +
-					// updateSuccessful);
+					
+					
+					
+					
 
 				}
 			}
 
+			cleanSellOrders(con);
+			
+			
 			if (updateSuccessful == 0)
 				plugin.sendMessage(sender, F("cannotCancelOrder", orderID));
 

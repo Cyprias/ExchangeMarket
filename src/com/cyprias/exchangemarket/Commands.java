@@ -586,33 +586,6 @@ class Commands implements CommandExecutor {
 						dryrun = Config.autoPriceConfirm;
 					
 					price = -1;
-					
-					/*
-					Database.itemStats stats = plugin.database.getItemStats(stock.getTypeId(), stock.getDurability(), 0);//2
-
-					//if (stats.total <= 0) {
-					//	stats = plugin.database.getItemStats(stock.getTypeId(), stock.getDurability(), 0);//1
-					//}
-					
-					if (stats.total <= 0) {
-						plugin.sendMessage(sender, L("mustSupplyAPrice"));
-
-						return true;
-					}
-					//plugin.info("avgPrice: " + plugin.Round(stats.avgPrice, Config.priceRounding));
-					if (Config.autoPricePerUnit == true){
-						price = stats.avgPrice + (Config.autoSellPrice*Math.min(amount, invAmount));
-						//price = stats.avgPrice + (Config.autoSellPrice*amount);
-					}else{
-						price = stats.avgPrice + Config.autoSellPrice;
-					}
-					
-					*/
-
-					//plugin.info("avgPrice: " + plugin.Round(price, Config.priceRounding));
-
-					//
-
 				}
 
 
