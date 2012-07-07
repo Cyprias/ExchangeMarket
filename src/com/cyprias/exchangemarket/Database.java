@@ -551,7 +551,7 @@ public class Database {
 							is.addEnchantments(MaterialUtil.Enchantment.getEnchantments(enchants));
 						}
 
-						for (int i = amount; i > 0; i--) {
+						for (int i = canBuy; i > 0; i--) {
 							if (dryrun == true || plugin.database.giveItemToPlayer(player, ciID, ciDur, i) == true) {
 								if (dryrun == false)
 									plugin.database.decreaseInt(Config.sqlPrefix + "Orders", id, "amount", i);
