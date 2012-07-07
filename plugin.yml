@@ -1,6 +1,6 @@
 name: ExchangeMarket
 main: com.cyprias.exchangemarket.ExchangeMarket
-version: 0.4.1
+version: 0.5.0
 
 commands:
   em:
@@ -31,4 +31,8 @@ permissions:
   exchangemarket.reload:
     default: false
   exchangemarket.version:
+    default: false
+  exchangemarket.search:
+    default: false
+  exchangemarket.remove:
     default: false

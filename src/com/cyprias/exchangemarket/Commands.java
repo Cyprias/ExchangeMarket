@@ -118,7 +118,8 @@ class Commands implements CommandExecutor {
 				if (plugin.hasPermission(sender, "exchangemarket.remove"))
 					plugin.sendMessage(sender, "§a/" + commandLabel + " remove <ID> §7- " + L("cmdRemoveDesc"));
 				
-				
+				if (plugin.hasPermission(sender, "exchangemarket.version"))
+					plugin.sendMessage(sender, "  §a/" + commandLabel + " version §7- " + L("cmdVersionDesc"));
 				if (plugin.hasPermission(sender, "exchangemarket.reload"))
 					plugin.sendMessage(sender, "  §a/" + commandLabel + " reload §7- " + L("cmdReloadDesc"));
 

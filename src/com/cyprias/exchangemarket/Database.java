@@ -631,7 +631,7 @@ public class Database {
 				price = result.getDouble(8);
 				amount = result.getInt(9);
 
-				plugin.info("checkPlayerSellOrders id: " + id + ", price: " + price + ", amount: " + amount);
+				//plugin.info("checkPlayerSellOrders id: " + id + ", price: " + price + ", amount: " + amount);
 
 				canBuy = Math.min(buyAmount, amount);
 
@@ -1311,7 +1311,7 @@ public class Database {
 			int i=0;
 			for(Object a:args){
 				i+=1;
-					plugin.info("executeQuery "+i+": " + a);
+			//		plugin.info("executeQuery "+i+": " + a);
 					statement.setObject(i, a);
 			}
 				

@@ -74,9 +74,9 @@ public class ExchangeMarket extends JavaPlugin {
 			return true;
 		}
 		Player player = (Player) sender;
-		if (player.isOp()) {
-			return true;
-		}
+		//if (player.isOp()) {
+		//	return true;
+		//}
 
 		if (player.isPermissionSet(node))
 			return player.hasPermission(node);
