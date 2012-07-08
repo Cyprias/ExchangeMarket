@@ -743,6 +743,7 @@ public class Database {
 	public int insertOrder(int type, Boolean infinite, String player, int itemID, int itemDur, String itemEnchants, double price, int amount, Boolean dryrun,
 		Connection con) {
 		int updateSuccessful = 0;
+		price = plugin.Round(price, Config.priceRounding);
 		String query = "SELECT *  FROM " + Config.sqlPrefix
 			+ "Orders WHERE `type` = ? AND `infinite` = ? AND `player` LIKE ? AND `itemID` = ? AND `itemDur` = ? AND `itemEnchants` IS NULL  AND `price` = ?;";
 		int id = 0;

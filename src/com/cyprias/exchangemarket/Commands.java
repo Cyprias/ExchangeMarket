@@ -493,7 +493,6 @@ class Commands implements CommandExecutor {
 				String itemName = plugin.itemdb.getItemName(stock.getTypeId(), stock.getDurability());
 
 				
-				
 				int success = plugin.database.insertOrder(2, true, plugin.pluginName, stock.getTypeId(), stock.getDurability(), null, price, 1, dryrun);
 
 				if (success > 0) {
