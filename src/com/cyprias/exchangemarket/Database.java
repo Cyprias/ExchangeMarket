@@ -541,7 +541,10 @@ public class Database {
 				canBuy = Math.min(amount, cAmount);
 
 				if (canBuy > 0) {
-
+					String preview = "";
+					if (dryrun == true)
+						preview = L("preview");
+					
 					if (cType == 1) {// Sale, return items.
 						ItemStack is = new ItemStack(ciID, 1);
 						is.setDurability(ciDur);
@@ -556,7 +559,7 @@ public class Database {
 								if (dryrun == false)
 									plugin.database.decreaseInt(Config.sqlPrefix + "Orders", id, "amount", i);
 
-								plugin.sendMessage(sender, F("returnedYourItem", itemName, i));
+								plugin.sendMessage(sender, preview+F("returnedYourItem", itemName, i));
 
 								break;
 							}
@@ -571,7 +574,7 @@ public class Database {
 							}
 						}
 
-						plugin.sendMessage(sender, F("refundedYourMoney", plugin.Round(money, Config.priceRounding)));
+						plugin.sendMessage(sender, preview+F("refundedYourMoney", plugin.Round(money, Config.priceRounding)));
 
 					}
 
@@ -1471,6 +1474,7 @@ public class Database {
 							updateSuccessful = removeRow(Config.sqlPrefix + "Orders", orderID, con);
 
 							if (updateSuccessful > 0) {
+
 								plugin.sendMessage(sender, F("canceledOrder", TypeToString(type, infinite), orderID, itemName, amount));
 							}
 						}
