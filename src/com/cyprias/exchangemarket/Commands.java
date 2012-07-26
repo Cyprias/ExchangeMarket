@@ -90,42 +90,42 @@ class Commands implements CommandExecutor {
 				plugin.sendMessage(sender, F("pluginsCommands", plugin.pluginName));
 
 				if (plugin.hasPermission(sender, "exchangemarket.sell"))
-					plugin.sendMessage(sender, "  §a/" + commandLabel + " sell <itemName> [amount] [price[e]] §7- " + L("cmdSellDesc"));
+					plugin.sendMessage(sender, "§a/" + commandLabel + " sell <itemName> [amount] [price[e]] §7- " + L("cmdSellDesc"));
 				if (plugin.hasPermission(sender, "exchangemarket.sellorder"))
-					plugin.sendMessage(sender, "  §a/" + commandLabel + " sellorder <itemName> [amount] [price[e]] §7- " + L("cmdSellDesc"));
+					plugin.sendMessage(sender, "§a/" + commandLabel + " sellorder <itemName> [amount] [price[e]] §7- " + L("cmdSellOrderDesc"));
 				
 				if (plugin.hasPermission(sender, "exchangemarket.buy"))
-					plugin.sendMessage(sender, "  §a/" + commandLabel + " buy <itemName> [amount] [price[e]] §7- " + L("cmdBuyDesc"));
+					plugin.sendMessage(sender, "§a/" + commandLabel + " buy <itemName> [amount] [price[e]] §7- " + L("cmdBuyDesc"));
 
 				if (plugin.hasPermission(sender, "exchangemarket.buyorder"))
-					plugin.sendMessage(sender, "  §a/" + commandLabel + " buyorder <itemName> <amount> [price[e]] §7- " + L("cmdBuyDesc"));
+					plugin.sendMessage(sender, "§a/" + commandLabel + " buyorder <itemName> [amount] [price[e]] §7- " + L("cmdBuyOrderDesc"));
 				
 				if (plugin.hasPermission(sender, "exchangemarket.price"))
-					plugin.sendMessage(sender, "  §a/" + commandLabel + " price [itemName] [amount] [sale/buy] §7- " + L("cmdPriceDesc"));
+					plugin.sendMessage(sender, "§a/" + commandLabel + " price [itemName] [amount] [sale/buy] §7- " + L("cmdPriceDesc"));
 
 				if (plugin.hasPermission(sender, "exchangemarket.infbuy"))
-					plugin.sendMessage(sender, "  §a/" + commandLabel + " infbuy <itemName> <price> §7- " + L("cmdInfBuyDesc"));
+					plugin.sendMessage(sender, "§a/" + commandLabel + " infbuy <itemName> <price> §7- " + L("cmdInfBuyDesc"));
 				if (plugin.hasPermission(sender, "exchangemarket.infsell"))
-					plugin.sendMessage(sender, "  §a/" + commandLabel + " infsell <itemName> <price> §7- " + L("cmdInfSellDesc"));
+					plugin.sendMessage(sender, "§a/" + commandLabel + " infsell <itemName> <price> §7- " + L("cmdInfSellDesc"));
 
 				if (plugin.hasPermission(sender, "exchangemarket.search"))
-					plugin.sendMessage(sender, "  §a/" + commandLabel + " search <itemName> §7- " + L("cmdSearchDesc"));
+					plugin.sendMessage(sender, "§a/" + commandLabel + " search <itemName> §7- " + L("cmdSearchDesc"));
 				if (plugin.hasPermission(sender, "exchangemarket.list"))
-					plugin.sendMessage(sender, "  §a/" + commandLabel + " list [Buy/Sell]§7- " + L("cmdListDesc"));
+					plugin.sendMessage(sender, "§a/" + commandLabel + " list [Buy/Sell]§7- " + L("cmdListDesc"));
 				if (plugin.hasPermission(sender, "exchangemarket.orders"))
-					plugin.sendMessage(sender, "  §a/" + commandLabel + " orders §7- " + L("cmdOrdersDesc"));
+					plugin.sendMessage(sender, "§a/" + commandLabel + " orders §7- " + L("cmdOrdersDesc"));
 				if (plugin.hasPermission(sender, "exchangemarket.collect"))
-					plugin.sendMessage(sender, "  §a/" + commandLabel + " collect §7- " + L("cmdCollectDesc"));
+					plugin.sendMessage(sender, "§a/" + commandLabel + " collect §7- " + L("cmdCollectDesc"));
 				if (plugin.hasPermission(sender, "exchangemarket.cancel"))
-					plugin.sendMessage(sender, "  §a/" + commandLabel + " cancel <ID/Buy/Sell> [itemName] [amount] §7- " + L("cmdCancelDesc"));
+					plugin.sendMessage(sender, "§a/" + commandLabel + " cancel <ID/Buy/Sell> [itemName] [amount] §7- " + L("cmdCancelDesc"));
 
 				if (plugin.hasPermission(sender, "exchangemarket.remove"))
 					plugin.sendMessage(sender, "§a/" + commandLabel + " remove <ID> §7- " + L("cmdRemoveDesc"));
 
 				if (plugin.hasPermission(sender, "exchangemarket.version"))
-					plugin.sendMessage(sender, "  §a/" + commandLabel + " version §7- " + L("cmdVersionDesc"));
+					plugin.sendMessage(sender, "§a/" + commandLabel + " version §7- " + L("cmdVersionDesc"));
 				if (plugin.hasPermission(sender, "exchangemarket.reload"))
-					plugin.sendMessage(sender, "  §a/" + commandLabel + " reload §7- " + L("cmdReloadDesc"));
+					plugin.sendMessage(sender, "§a/" + commandLabel + " reload §7- " + L("cmdReloadDesc"));
 
 				return true;
 			}
@@ -604,7 +604,7 @@ class Commands implements CommandExecutor {
 					return true;
 				}
 				if (args.length < 3) {
-					plugin.sendMessage(sender, "  §a/" + commandLabel + " infbuy <itemName> <price> §7- " + L("cmdInfBuyDesc"));
+					plugin.sendMessage(sender, "§a/" + commandLabel + " infbuy <itemName> <price> §7- " + L("cmdInfBuyDesc"));
 					return true;
 				}
 
@@ -643,7 +643,7 @@ class Commands implements CommandExecutor {
 				}
 
 				if (args.length < 3) {
-					plugin.sendMessage(sender, "  §a/" + commandLabel + " infsell <itemName> <price> §7- " + L("cmdInfSellDesc"));
+					plugin.sendMessage(sender, "§a/" + commandLabel + " infsell <itemName> <price> §7- " + L("cmdInfSellDesc"));
 					return true;
 				}
 				ItemStack stock = ItemDb.getItemStack(args[1]);
