@@ -481,7 +481,7 @@ public class Database {
 					
 					itemStack.setAmount(canBuy);
 					
-					plugin.info("getAmount: " + itemStack.getAmount());
+					//plugin.info("getAmount: " + itemStack.getAmount());
 					
 					
 					
