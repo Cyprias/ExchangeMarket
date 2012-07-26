@@ -8,7 +8,7 @@ mysql:
 locale: enUS.yml
 convertCreatePriceToPerItem: true
 cancelSelfSalesWhenBuying: true
-priceRounding: 3
+priceRounding: 4
 clearRequestAfterConfirm: false
 autoPriceConfirm: true
 confirmAllOrders: false

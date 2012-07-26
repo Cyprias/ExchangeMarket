@@ -164,7 +164,7 @@ public class Database {
 
 		int found = 0;
 		int initialAmount = sellAmount;
-		
+
 		try {
 			PreparedStatement statement = con.prepareStatement(query);
 			statement.setInt(1, itemID);
@@ -188,16 +188,13 @@ public class Database {
 			Boolean infinite;
 			while (result.next()) {
 				// patron = result.getString(1);
-				found+=1;
-				
+				found += 1;
+
 				id = result.getInt(1);
 				infinite = result.getBoolean(3);
 				trader = result.getString(4);
 				price = result.getDouble(8);
 				amount = result.getInt(9);
-
-				// plugin.info("processBuyOrder id: " + id + ", price: " + price
-				// + ", amount: " + amount);
 
 				if (infinite == true) {
 					amount = sellAmount;
@@ -214,10 +211,10 @@ public class Database {
 				if (dryrun == true || removeItemFromPlayer(player, itemID, itemDur, amount) == true) {
 					sellAmount -= amount;
 
-					if (dryrun == false)
+					if (dryrun == false){
 						plugin.payPlayer(sender.getName(), amount * price);
-
-					plugin.sendMessage(sender, preview + F("withdrewItem", itemName, amount));
+						plugin.sendMessage(sender, preview + F("withdrewItem", itemName, amount));
+					}
 
 					plugin.notifySellerOfExchange(sender.getName(), itemID, itemDur, amount, price, trader, dryrun);
 
@@ -244,13 +241,13 @@ public class Database {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		if (found == 0){
-			//String itemName = plugin.itemdb.getItemName(itemID, itemDur);
+		if (found == 0) {
+			// String itemName = plugin.itemdb.getItemName(itemID, itemDur);
 			plugin.sendMessage(sender, F("noBuyersForSell", itemName, sellAmount));
-		}else if (found > 0 && initialAmount == sellAmount){
-			plugin.sendMessage(sender, F("noBuyersForSellPrice", itemName, sellAmount, sellPrice*sellAmount, sellPrice));
+		} else if (found > 0 && initialAmount == sellAmount) {
+			plugin.sendMessage(sender, F("noBuyersForSellPrice", itemName, sellAmount, sellPrice * sellAmount, sellPrice));
 		}
-		
+
 		return sellAmount;
 	}
 
@@ -260,7 +257,7 @@ public class Database {
 		closeSQLConnection(con);
 		return value;
 	}
-	
+
 	public int postSellOrder(CommandSender sender, int itemID, short itemDur, int sellAmount, double sellPrice, Boolean dryrun, Connection con) {
 		int success = 0;
 		String itemName = plugin.itemdb.getItemName(itemID, itemDur);
@@ -282,16 +279,14 @@ public class Database {
 			ItemStack itemStack = new ItemStack(itemID, 1);
 			itemStack.setDurability(itemDur);
 
-			if (InventoryUtil.getAmount(itemStack, player.getInventory()) <= 0){
+			if (InventoryUtil.getAmount(itemStack, player.getInventory()) <= 0) {
 
 				plugin.sendMessage(sender, F("noItemInInventory", itemName));
 				return 0;
 			}
-			
-			sellAmount = Math.min(sellAmount, InventoryUtil.getAmount(itemStack, player.getInventory()));
-			
 
-			
+			sellAmount = Math.min(sellAmount, InventoryUtil.getAmount(itemStack, player.getInventory()));
+
 			// plugin.info("sellAmountC: " + sellAmount);
 			itemStack.setAmount(sellAmount);
 
@@ -318,7 +313,7 @@ public class Database {
 		}
 		return success;
 	}
-	
+
 	public int processSellOrder(CommandSender sender, int itemID, short itemDur, int sellAmount, double sellPrice, Boolean dryrun) {
 		Connection con = getSQLConnection();
 		int success = 0;
@@ -332,8 +327,6 @@ public class Database {
 		// success = 1;
 
 		// plugin.info("sellAmountB: " + sellAmount);
-
-	
 
 		if (dryrun == false)
 			cleanSellOrders(con);
@@ -397,6 +390,20 @@ public class Database {
 		return value;
 	}
 
+	public int getFitAmount(ItemStack itemStack, int amount, Player player){
+		//int amount = itemStack.getAmount();
+		//
+		
+		for (int i = amount; i > 0; i--) {
+			itemStack.setAmount(i);
+			if (InventoryUtil.fits(itemStack, player.getInventory()) == true){
+				return i;
+			}
+		}
+		
+		return 0;
+	}
+	
 	public int checkSellOrders(CommandSender sender, int itemID, short itemDur, int buyAmount, double buyPrice, Boolean dryrun, Connection con) {
 
 		String query = "SELECT * FROM " + Config.sqlPrefix
@@ -408,6 +415,13 @@ public class Database {
 		Player player = (Player) sender;
 		int found = 0;
 		int initialAmount = buyAmount;
+		int tAmount = 0;
+		double tPrice = 0;
+
+		String preview = "";
+		if (dryrun == true)
+			preview = L("preview");
+
 		try {
 			PreparedStatement statement = con.prepareStatement(query);
 			statement.setInt(1, itemID);
@@ -431,7 +445,7 @@ public class Database {
 			ItemStack itemStack;
 			Boolean infinite;
 			while (result.next()) {
-				found+=1;
+				found += 1;
 				// patron = result.getString(1);
 
 				id = result.getInt(1);
@@ -458,16 +472,25 @@ public class Database {
 				if (canBuy > 0) {
 					itemStack = new ItemStack(itemID, 1);
 					itemStack.setDurability(itemDur);
-					itemStack.setAmount(canBuy);
+					//itemStack.setAmount(canBuy);
 
-					if (dryrun == true || InventoryUtil.fits(itemStack, player.getInventory())) {
-						String preview = "";
-						if (dryrun == true)
-							preview = L("preview");
+					canBuy = getFitAmount(itemStack, canBuy, player);
+					
+					if (canBuy < 0)
+						break;
+					
+					itemStack.setAmount(canBuy);
+					
+					plugin.info("getAmount: " + itemStack.getAmount());
+					
+					
+					
+					//if (dryrun == true || InventoryUtil.fits(itemStack, player.getInventory())) {
 
 						if (dryrun == false) {
 							plugin.debtPlayer(sender.getName(), canBuy * price);
-
+						//	plugin.sendMessage(sender, preview + F("withdrewMoney", plugin.Round(canBuy * price, Config.priceRounding)));
+							
 							if (infinite == false)
 								plugin.payPlayer(trader, canBuy * price);
 
@@ -479,19 +502,27 @@ public class Database {
 							}
 
 							plugin.notifySellerOfExchange(trader, itemID, itemDur, canBuy, price, sender.getName(), dryrun);// buy
-
+							
 						}
-						plugin.sendMessage(sender, preview + F("withdrewMoney", plugin.Round(canBuy * price, Config.priceRounding)));
 
-						// if (infinite == false)
-						plugin.sendMessage(
-							sender,
-							preview
-								+ F("buyingItem", itemName, canBuy, plugin.Round(price * canBuy, Config.priceRounding),
-									plugin.Round(price, Config.priceRounding), trader));
+						
+						tAmount += canBuy;
+						tPrice += price * canBuy;
+
+					//	if (dryrun == true) {
+							plugin.sendMessage(
+								sender,
+								F("foundItem", itemName, canBuy, plugin.Round(price * canBuy, Config.priceRounding),
+										plugin.Round(price, Config.priceRounding), trader));
+						//} else {
+						//	plugin.sendMessage(
+						//		sender,
+						//		F("buyingItem", itemName, canBuy, plugin.Round(price * canBuy, Config.priceRounding),
+						//				plugin.Round(price, Config.priceRounding), trader));
+						//}
 
 						buyAmount -= canBuy;
-					}
+					//}
 
 				}
 			}
@@ -501,13 +532,21 @@ public class Database {
 			e.printStackTrace();
 		}
 
-		if (found == 0){
-			//String itemName = plugin.itemdb.getItemName(itemID, itemDur);
-			plugin.sendMessage(sender, F("noSellersForBuy", itemName, buyAmount));
-		}else if (found > 0 && initialAmount == buyAmount){
-			plugin.sendMessage(sender, F("noSellersForBuyPrice", itemName, buyAmount, buyPrice*buyAmount, buyPrice));
+		if (tAmount > 0) {
+			plugin.sendMessage(sender,
+				preview + F("buyingItemsTotal", itemName, tAmount, plugin.Round(tPrice, Config.priceRounding), plugin.Round(tPrice / tAmount, Config.priceRounding)));
+
+		} else {
+
+			if (found == 0) {
+				// String itemName = plugin.itemdb.getItemName(itemID, itemDur);
+				plugin.sendMessage(sender, F("noSellersForBuy", itemName, buyAmount));
+			} else if (found > 0 && initialAmount == buyAmount) {
+				plugin.sendMessage(sender, F("noSellersForBuyPrice", itemName, buyAmount, buyPrice * buyAmount, buyPrice));
+			}
+
 		}
-		
+
 		return buyAmount;
 	}
 
@@ -750,15 +789,18 @@ public class Database {
 				if (dryrun == true)
 					preview = L("preview");
 
-				plugin.sendMessage(sender, preview + F("withdrewMoney", plugin.Round(buyPrice * buyAmount, Config.priceRounding)));
+				
 
 				plugin.sendMessage(
 					sender,
 					F("createdBuyOrder", itemName, buyAmount, plugin.Round(buyPrice * buyAmount, Config.priceRounding),
 						plugin.Round(buyPrice, Config.priceRounding)));
 
-				if (dryrun == false)
+				if (dryrun == false){
+					plugin.sendMessage(sender, preview + F("withdrewMoney", plugin.Round(buyPrice * buyAmount, Config.priceRounding)));
 					plugin.debtPlayer(sender.getName(), buyAmount * buyPrice);
+				}
+					
 
 			}
 		}
@@ -770,24 +812,22 @@ public class Database {
 		int beforeAmount = buyAmount;
 
 		// plugin.info("buyAmountA: " + buyAmount);
-		
-		//if (Config.cancelSelfSalesWhenBuying == true)
-		//	buyAmount = checkPlayerSellOrders(sender, itemID, itemDur, buyAmount, buyPrice, dryrun, con);
+
+		// if (Config.cancelSelfSalesWhenBuying == true)
+		// buyAmount = checkPlayerSellOrders(sender, itemID, itemDur, buyAmount,
+		// buyPrice, dryrun, con);
 
 		buyAmount = checkSellOrders(sender, itemID, itemDur, buyAmount, buyPrice, dryrun, con);
 		// plugin.info("buyAmountB: " + buyAmount);
 
-
-		
-		if (buyAmount != beforeAmount){
+		if (buyAmount != beforeAmount) {
 			cleanSellOrders(con);
 			return 1;
 		}
 		// success = 1;
 
-		//success = postBuyOrder(sender, itemID, itemDur, buyAmount, buyPrice, dryrun, con);
-
-
+		// success = postBuyOrder(sender, itemID, itemDur, buyAmount, buyPrice,
+		// dryrun, con);
 
 		return success;
 	}
@@ -1241,8 +1281,8 @@ public class Database {
 		Connection con = getSQLConnection();
 
 		String SQL = "SELECT * FROM " + Config.sqlPrefix + "Orders WHERE `player` LIKE ? ORDER BY id ASC;";// `amount`
-																												// >
-																												// 0
+																											// >
+																											// 0
 		int count = 0;
 		try {
 			PreparedStatement statement = con.prepareStatement(SQL);
@@ -1574,7 +1614,7 @@ public class Database {
 			statement.setInt(2, itemID);
 			statement.setShort(3, itemDur);
 			statement.setInt(4, type);
-			
+
 			ResultSet result = statement.executeQuery();
 
 			while (result.next()) {
@@ -1593,7 +1633,7 @@ public class Database {
 		return price;
 	}
 
-	public Double getTradersLastPrice(String trader, int itemID, short itemDur,int type) {
+	public Double getTradersLastPrice(String trader, int itemID, short itemDur, int type) {
 		Connection con = getSQLConnection();
 		Double value = getTradersLastPrice(trader, itemID, itemDur, type, con);
 		closeSQLConnection(con);
