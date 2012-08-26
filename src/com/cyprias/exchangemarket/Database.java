@@ -241,8 +241,6 @@ public class Database {
 			e.printStackTrace();
 		}
 
-		plugin.info("insertTransaction: " + reply);
-
 		return reply;
 	}
 

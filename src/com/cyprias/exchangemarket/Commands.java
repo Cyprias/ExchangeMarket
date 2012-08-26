@@ -904,6 +904,9 @@ class Commands implements CommandExecutor {
 				return true;
 				// insertOrder
 			}
+			
+			plugin.sendMessage(sender, F("invalidCommand", args[0]));
+			
 		}
 
 		return false;
