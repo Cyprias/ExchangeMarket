@@ -1,6 +1,6 @@
 name: ExchangeMarket
 main: com.cyprias.exchangemarket.ExchangeMarket
-version: 0.8.0
+version: 0.8.1
 
 commands:
   em:

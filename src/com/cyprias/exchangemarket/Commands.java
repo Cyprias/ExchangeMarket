@@ -1,5 +1,6 @@
 package com.cyprias.exchangemarket;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.bukkit.ChatColor;
@@ -73,7 +74,47 @@ class Commands implements CommandExecutor {
 		return onCommand(sender, cmd, commandLabel, args, null);
 	}
 
+	static class cmdRequest {
+		CommandSender sender;
+		Command cmd;
+		String commandLabel;
+		String[] args;
+	}
+
+	public ArrayList<cmdRequest> queuedCommands = new ArrayList<cmdRequest>();
+	
 	public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args, Boolean confirmed) {
+		/**/
+		cmdRequest newCmd = new cmdRequest();
+		newCmd.sender = sender;
+		newCmd.cmd = cmd;
+		newCmd.commandLabel = commandLabel;
+		newCmd.args = args;
+
+		queuedCommands.add(0, newCmd);
+
+		
+		plugin.getServer().getScheduler().scheduleAsyncDelayedTask(plugin, new Runnable() {
+			public void run() {
+
+				for (int i = queuedCommands.size() - 1; i >= 0; i--) {
+					try {
+						commandHandler(queuedCommands.get(i).sender, queuedCommands.get(i).cmd, queuedCommands.get(i).commandLabel, queuedCommands.get(i).args, null);
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					queuedCommands.remove(i);
+				}
+			}
+		}, 0L);
+		
+		return true;
+	}
+	
+
+	
+	public boolean commandHandler(CommandSender sender, Command cmd, String commandLabel, String[] args, Boolean confirmed) {
 		// TODO Auto-generated method stub
 
 		if (commandLabel.equalsIgnoreCase("em")) {
@@ -304,7 +345,7 @@ class Commands implements CommandExecutor {
 					// plugin.info("itemName: " +itemName);
 					// plugin.info("amount: " +amount);
 
-					int success = plugin.database.cancelOrders(sender, type, item.getTypeId(), item.getDurability(), amount, dryrun);
+					int success = plugin.database.cancelOrders(sender, type, item.getTypeId(), item.getDurability(), amount, false);
 					// plugin.info("success: " +success);
 
 					if (success > 0 && dryrun == true) {
@@ -796,7 +837,7 @@ class Commands implements CommandExecutor {
 					return true;
 				}
 
-				onCommand(sender, cmd, commandLabel, lastRequest.get(sender.getName()), true);
+				commandHandler(sender, cmd, commandLabel, lastRequest.get(sender.getName()), true);
 
 				if (Config.clearRequestAfterConfirm == true)
 					lastRequest.remove(sender.getName());

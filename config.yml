@@ -7,7 +7,6 @@ mysql:
   prefix: "EM_"
 locale: enUS.yml
 convertCreatePriceToPerItem: true
-cancelSelfSalesWhenBuying: true
 priceRounding: 4
 clearRequestAfterConfirm: false
 autoPriceConfirm: true
