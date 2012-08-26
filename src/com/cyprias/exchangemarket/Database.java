@@ -377,7 +377,7 @@ public class Database {
 		}
 		if (found == 0) {
 			// String itemName = plugin.itemdb.getItemName(itemID, itemDur);
-			plugin.sendMessage(sender, F("noBuyersForSell", itemName, sellAmount));
+			plugin.sendMessage(sender, F("noBuyersForSell", itemName));
 		} else if (found > 0 && initialAmount == sellAmount) {
 			plugin.sendMessage(sender, F("noBuyersForSellPrice", itemName, sellAmount, sellPrice * sellAmount, sellPrice));
 		}
@@ -684,7 +684,7 @@ public class Database {
 
 			if (found == 0) {
 				// String itemName = plugin.itemdb.getItemName(itemID, itemDur);
-				plugin.sendMessage(sender, F("noSellersForBuy", itemName, buyAmount));
+				plugin.sendMessage(sender, F("noSellersForBuy", itemName));
 			} else if (found > 0 && initialAmount == buyAmount) {
 				plugin.sendMessage(sender, F("noSellersForBuyPrice", itemName, buyAmount, buyPrice * buyAmount, buyPrice));
 			}
