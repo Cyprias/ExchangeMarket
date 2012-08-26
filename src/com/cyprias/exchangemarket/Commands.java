@@ -163,7 +163,7 @@ class Commands implements CommandExecutor {
 					plugin.sendMessage(sender, "§a/" + commandLabel + " cancel §7- " + L("cmdCancelDesc"));
 
 				if (plugin.hasPermission(sender, "exchangemarket.transactions"))
-					plugin.sendMessage(sender, "§a/" + commandLabel + " transactions §7- " + L("cmdTransactionsDesc"));
+					plugin.sendMessage(sender, "§a/" + commandLabel + " transactions [compact] §7- " + L("cmdTransactionsDesc"));
 				
 				if (plugin.hasPermission(sender, "exchangemarket.remove"))
 					plugin.sendMessage(sender, "§a/" + commandLabel + " remove §7- " + L("cmdRemoveDesc"));
@@ -838,8 +838,11 @@ class Commands implements CommandExecutor {
 				if (!hasCommandPermission(sender, "exchangemarket.transactions")) {
 					return true;
 				}
+				boolean compact = false;
+				if (args.length > 1 && args[1].equalsIgnoreCase("compact"))
+					compact = true;
 				
-				plugin.database.listPlayerTransactions(sender);
+				plugin.database.listPlayerTransactions(sender, compact);
 				
 				return true;
 			} else if (args[0].equalsIgnoreCase("confirm")) {

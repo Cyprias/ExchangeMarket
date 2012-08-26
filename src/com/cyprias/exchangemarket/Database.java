@@ -140,7 +140,7 @@ public class Database {
 
 	}
 
-	public void listPlayerTransactions(CommandSender sender){
+	public void listPlayerTransactions(CommandSender sender, boolean compact){
 		
 		String query = "SELECT * FROM "+Config.sqlPrefix + "Transactions"+" WHERE `seller` LIKE ?";
 		Connection con = getSQLConnection();
@@ -178,8 +178,26 @@ public class Database {
 				
 				String itemName = plugin.itemdb.getItemName(itemID, itemDur);
 				
+				if (compact == true){
+					if (type == 1){
+						plugin.sendMessage(sender, buyer + " " +
+							L("bought") + " "+
+							itemName + "x"+
+							amount + " $"+
+							plugin.Round(price*amount,Config.priceRounding)
+						);
+					
+					}else{
+						plugin.sendMessage(sender, buyer + " " +
+							L("bought") + " "+
+							itemName + "x"+
+							amount + " $"+
+							plugin.Round(price*amount,Config.priceRounding)
+						);
+					}
+					
+				}else{
 				if (type == 1){
-				
 					plugin.sendMessage(sender, F("transactionMsgBuy", 
 						buyer, 
 						itemName, 
@@ -199,6 +217,7 @@ public class Database {
 						timestamp.toString()
 					));
 				}
+			}
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();

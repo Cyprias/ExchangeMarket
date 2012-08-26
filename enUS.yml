@@ -69,3 +69,5 @@ transactionMsgSell: "&f%s&7 sold you &f%s&7x&f%s&7 for $&f%s&7 ($&f%s&7e) at &f%
 noTransactions: "&7No one has filled your orders."
 cmdTransactionsDesc: "&7Show transactions for your orders."
 invalidCommand: "&7Invalid command: &f%s&7"
+bought: "Bought"
+sold: "Sold"
