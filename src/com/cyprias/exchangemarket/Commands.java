@@ -656,7 +656,7 @@ class Commands implements CommandExecutor {
 
 				ItemStack stock = ItemDb.getItemStack(args[1]);
 
-				if (stock == null) {
+				if (stock == null || stock.getType() == null) {
 					plugin.sendMessage(sender, F("invalidItem", args[1]));
 					return true;
 				}
@@ -694,7 +694,7 @@ class Commands implements CommandExecutor {
 				}
 				ItemStack stock = ItemDb.getItemStack(args[1]);
 
-				if (stock == null) {
+				if (stock == null || stock.getType() == null) {
 					plugin.sendMessage(sender, F("invalidItem", args[1]));
 					return true;
 				}
@@ -752,7 +752,7 @@ class Commands implements CommandExecutor {
 
 				ItemStack stock = ItemDb.getItemStack(args[1]);
 
-				if (stock == null) {
+				if (stock == null || stock.getType() == null) {
 					plugin.sendMessage(sender, F("invalidItem", args[1]));
 					return true;
 				}
