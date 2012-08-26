@@ -177,16 +177,28 @@ public class Database {
 				
 				
 				String itemName = plugin.itemdb.getItemName(itemID, itemDur);
-				plugin.sendMessage(sender, F("transactionMsg", 
-					buyer, 
-					itemName, 
-					amount, 
-					plugin.Round(price*amount,Config.priceRounding), 
-					plugin.Round(price,Config.priceRounding),
-					timestamp.toString()
-				));
 				
+				if (type == 1){
 				
+					plugin.sendMessage(sender, F("transactionMsgBuy", 
+						buyer, 
+						itemName, 
+						amount, 
+						plugin.Round(price*amount,Config.priceRounding), 
+						plugin.Round(price,Config.priceRounding),
+						timestamp.toString()
+					));
+				
+				}else{
+					plugin.sendMessage(sender, F("transactionMsgSell", 
+						buyer, 
+						itemName, 
+						amount, 
+						plugin.Round(price*amount,Config.priceRounding), 
+						plugin.Round(price,Config.priceRounding),
+						timestamp.toString()
+					));
+				}
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();

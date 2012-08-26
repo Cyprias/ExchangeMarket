@@ -64,6 +64,7 @@ noSellersForBuyPrice: "&7No one is selling &f%s&7x&f%s&7 for under $&f%s&7 ($&f%
 noBuyersForSellPrice: "&7No one is buying &f%s&7x&f%s&7 for over $&f%s&7 ($&f%s&7e), try a lower price or create a sell order."
 noItemInInventory: "&7You do not have any &f%s&7 in your inventory."
 buyingItemsTotal: "&7Buying &f%s&7x&f%s&7 for $&f%s&7."
-transactionMsg: "&f%s&7 bought &f%s&7x&f%s&7 for $&f%s&7 ($&f%s&7e) at &f%s&7."
+transactionMsgBuy: "&f%s&7 bought your &f%s&7x&f%s&7 for $&f%s&7 ($&f%s&7e) at &f%s&7."
+transactionMsgSell: "&f%s&7 sold you &f%s&7x&f%s&7 for $&f%s&7 ($&f%s&7e) at &f%s&7."
 noTransactions: "&7No one has filled your orders."
 cmdTransactionsDesc: "&7Show transactions for your orders."
