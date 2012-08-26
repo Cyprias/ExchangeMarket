@@ -347,8 +347,9 @@ class Commands implements CommandExecutor {
 					// plugin.info("type: " +type);
 					// plugin.info("itemName: " +itemName);
 					// plugin.info("amount: " +amount);
-
-					int success = plugin.database.cancelOrders(sender, type, item.getTypeId(), item.getDurability(), amount, false);
+					
+					dryrun = false;
+					int success = plugin.database.cancelOrders(sender, type, item.getTypeId(), item.getDurability(), amount, dryrun);
 					// plugin.info("success: " +success);
 
 					if (success > 0 && dryrun == true) {
