@@ -13,3 +13,4 @@ autoPriceConfirm: true
 confirmAllOrders: false
 notifyOpsOfNewVersion: true
 listSortOrder: "id ASC"
+logTransactions: true

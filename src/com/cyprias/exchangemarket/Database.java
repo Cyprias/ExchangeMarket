@@ -8,6 +8,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -74,27 +75,21 @@ public class Database {
 		return null;
 	}
 
-	public void setupMysql() {
+	public boolean tableExists(String tableName) {
+		boolean exists = false;
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
 			Connection con = getSQLConnection();
 
 			String query;
 
-			PreparedStatement statement = con.prepareStatement("show tables like '%" + Config.sqlPrefix + "Orders%'");
+			PreparedStatement statement = con.prepareStatement("show tables like '" + tableName + "'");
 			ResultSet result = statement.executeQuery();
 
-			/**/
-
 			result.last();
-			if (result.getRow() == 0) {
+			if (result.getRow() != 0) {
 
-				query = "CREATE TABLE "
-					+ Config.sqlPrefix
-					+ "Orders (`id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY, `type` INT NOT NULL, `infinite` BOOLEAN NOT NULL DEFAULT '0' , `player` VARCHAR(32) NOT NULL, `itemID` INT NOT NULL, `itemDur` INT NOT NULL, `itemEnchants` VARCHAR(16) NULL, `price` DOUBLE NOT NULL, `amount` INT NOT NULL, `exchanged` INT NOT NULL DEFAULT '0')";
-
-				statement = con.prepareStatement(query);
-				statement.executeUpdate();
+				exists = true;
 			}
 
 			// //////
@@ -109,7 +104,134 @@ public class Database {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		return exists;
+	}
 
+	public void setupMysql() {
+		String query;
+
+		Connection con = getSQLConnection();
+		PreparedStatement statement = null;
+
+		try {
+
+			if (tableExists(Config.sqlPrefix + "Orders") == false) {
+				query = "CREATE TABLE "
+					+ Config.sqlPrefix
+					+ "Orders (`id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY, `type` INT NOT NULL, `infinite` BOOLEAN NOT NULL DEFAULT '0' , `player` VARCHAR(32) NOT NULL, `itemID` INT NOT NULL, `itemDur` INT NOT NULL, `itemEnchants` VARCHAR(16) NULL, `price` DOUBLE NOT NULL, `amount` INT NOT NULL, `exchanged` INT NOT NULL DEFAULT '0')";
+				statement = con.prepareStatement(query);
+				statement.executeUpdate();
+			}
+
+			if (tableExists(Config.sqlPrefix + "Transactions") == false) {
+				query = "CREATE TABLE "
+					+ Config.sqlPrefix
+					+ "Transactions"
+					+ " (`id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY, `type` INT NOT NULL, `buyer` VARCHAR(32) NOT NULL, `itemID` INT NOT NULL, `itemDur` INT NOT NULL, `itemEnchants` VARCHAR(16) NOT NULL, `amount` INT NOT NULL, `price` DOUBLE NOT NULL, `seller` VARCHAR(32) NOT NULL, `timestamp` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP)";
+				statement = con.prepareStatement(query);
+				statement.executeUpdate();
+			}
+
+			// statement.close();
+			con.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+	}
+
+	public void listPlayerTransactions(CommandSender sender){
+		
+		String query = "SELECT * FROM "+Config.sqlPrefix + "Transactions"+" WHERE `seller` LIKE ?";
+		Connection con = getSQLConnection();
+		boolean found =false;
+		try {
+			
+			
+			PreparedStatement statement = con.prepareStatement(query);
+			statement.setString(1, sender.getName());
+
+			// statement.setString(3, sender.getName());
+
+			// statement.setDouble(3, buyPrice);
+
+			ResultSet result = statement.executeQuery();
+
+			double price;
+			int type, itemID, itemDur, amount;
+			String buyer, itemEnchants, seller;
+			Timestamp timestamp;
+			
+			while (result.next()) {
+				found = true;
+
+				type = result.getInt(2);
+				buyer  =result.getString(3);
+				itemID = result.getInt(4);
+				itemDur = result.getInt(5);
+				itemEnchants  =result.getString(6);
+				amount = result.getInt(7);
+				price = result.getDouble(8);
+				timestamp = result.getTimestamp(10);
+				
+				
+				
+				String itemName = plugin.itemdb.getItemName(itemID, itemDur);
+				plugin.sendMessage(sender, F("transactionMsg", 
+					buyer, 
+					itemName, 
+					amount, 
+					plugin.Round(price*amount,Config.priceRounding), 
+					plugin.Round(price,Config.priceRounding),
+					timestamp.toString()
+				));
+				
+				
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		if (found == false)
+			plugin.sendMessage(sender, L("noTransactions"));
+			
+		
+	}
+
+	public int insertTransaction(int type, String buyer, int itemID, int itemDur, String itemEnchants, int amount, double price, String seller) {
+		int reply = 0;
+		String query = "INSERT INTO "
+			+ Config.sqlPrefix
+			+ "Transactions"
+			+ " (`id`, `type`, `buyer`, `itemID`, `itemDur`, `itemEnchants`, `amount`, `price`, `seller`, `timestamp`) VALUES (NULL, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP);";
+
+		Connection con = getSQLConnection();
+		PreparedStatement statement = null;
+
+		try {
+			statement = con.prepareStatement(query);
+			statement.setInt(1, type);
+			statement.setString(2, buyer);
+			statement.setInt(3, itemID);
+			statement.setInt(4, itemDur);
+			if (itemEnchants == null)
+				itemEnchants = "";
+			statement.setString(5, itemEnchants);
+			statement.setInt(6, amount);
+			statement.setDouble(7, price);
+			statement.setString(8, seller);
+
+			reply = statement.executeUpdate();
+			statement.close();
+
+			con.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		plugin.info("insertTransaction: " + reply);
+
+		return reply;
 	}
 
 	public boolean removeItemFromPlayer(Player player, int itemID, short itemDur, int amount, String enchants) {
@@ -183,7 +305,7 @@ public class Database {
 			double price;
 			int id, amount;
 			double senderBalance;
-			String trader;
+			String trader, enchants;
 			int canSell = 0;
 			Boolean infinite;
 			while (result.next()) {
@@ -195,6 +317,7 @@ public class Database {
 				trader = result.getString(4);
 				price = result.getDouble(8);
 				amount = result.getInt(9);
+				enchants = result.getString(7);
 
 				if (infinite == true) {
 					amount = sellAmount;
@@ -211,7 +334,7 @@ public class Database {
 				if (dryrun == true || removeItemFromPlayer(player, itemID, itemDur, amount) == true) {
 					sellAmount -= amount;
 
-					if (dryrun == false){
+					if (dryrun == false) {
 						plugin.payPlayer(sender.getName(), amount * price);
 						plugin.sendMessage(sender, preview + F("withdrewItem", itemName, amount));
 					}
@@ -225,6 +348,7 @@ public class Database {
 						}
 
 						plugin.notifyBuyerOfExchange(trader, itemID, itemDur, amount, price, sender.getName(), dryrun);
+						insertTransaction(2, sender.getName(), itemID, itemDur, enchants, amount, price, trader);
 
 					}
 
@@ -390,20 +514,20 @@ public class Database {
 		return value;
 	}
 
-	public int getFitAmount(ItemStack itemStack, int amount, Player player){
-		//int amount = itemStack.getAmount();
+	public int getFitAmount(ItemStack itemStack, int amount, Player player) {
+		// int amount = itemStack.getAmount();
 		//
-		
+
 		for (int i = amount; i > 0; i--) {
 			itemStack.setAmount(i);
-			if (InventoryUtil.fits(itemStack, player.getInventory()) == true){
+			if (InventoryUtil.fits(itemStack, player.getInventory()) == true) {
 				return i;
 			}
 		}
-		
+
 		return 0;
 	}
-	
+
 	public int checkSellOrders(CommandSender sender, int itemID, short itemDur, int buyAmount, double buyPrice, Boolean dryrun, Connection con) {
 
 		String query = "SELECT * FROM " + Config.sqlPrefix
@@ -444,6 +568,7 @@ public class Database {
 			int canBuy;
 			ItemStack itemStack;
 			Boolean infinite;
+			String enchants;
 			while (result.next()) {
 				found += 1;
 				// patron = result.getString(1);
@@ -453,6 +578,7 @@ public class Database {
 				trader = result.getString(4);
 				price = result.getDouble(8);
 				amount = result.getInt(9);
+				enchants = result.getString(7);
 
 				// plugin.info("processBuyOrder id: " + id + ", price: " + price
 				// + ", amount: " + amount);
@@ -472,57 +598,61 @@ public class Database {
 				if (canBuy > 0) {
 					itemStack = new ItemStack(itemID, 1);
 					itemStack.setDurability(itemDur);
-					//itemStack.setAmount(canBuy);
+					// itemStack.setAmount(canBuy);
 
 					canBuy = getFitAmount(itemStack, canBuy, player);
-					
+
 					if (canBuy < 0)
 						break;
-					
+
 					itemStack.setAmount(canBuy);
-					
-					//plugin.info("getAmount: " + itemStack.getAmount());
-					
-					
-					
-					//if (dryrun == true || InventoryUtil.fits(itemStack, player.getInventory())) {
 
-						if (dryrun == false) {
-							plugin.debtPlayer(sender.getName(), canBuy * price);
-						//	plugin.sendMessage(sender, preview + F("withdrewMoney", plugin.Round(canBuy * price, Config.priceRounding)));
-							
-							if (infinite == false)
-								plugin.payPlayer(trader, canBuy * price);
+					// plugin.info("getAmount: " + itemStack.getAmount());
 
-							InventoryUtil.add(itemStack, player.getInventory());
+					// if (dryrun == true || InventoryUtil.fits(itemStack,
+					// player.getInventory())) {
 
-							if (infinite == false) {
-								decreaseInt(Config.sqlPrefix + "Orders", id, "amount", canBuy);
-								increaseInt(Config.sqlPrefix + "Orders", id, "exchanged", canBuy);
-							}
+					if (dryrun == false) {
+						plugin.debtPlayer(sender.getName(), canBuy * price);
+						// plugin.sendMessage(sender, preview +
+						// F("withdrewMoney", plugin.Round(canBuy * price,
+						// Config.priceRounding)));
 
-							plugin.notifySellerOfExchange(trader, itemID, itemDur, canBuy, price, sender.getName(), dryrun);// buy
-							
+						if (infinite == false)
+							plugin.payPlayer(trader, canBuy * price);
+
+						InventoryUtil.add(itemStack, player.getInventory());
+
+						if (infinite == false) {
+							decreaseInt(Config.sqlPrefix + "Orders", id, "amount", canBuy);
+							increaseInt(Config.sqlPrefix + "Orders", id, "exchanged", canBuy);
 						}
 
-						
-						tAmount += canBuy;
-						tPrice += price * canBuy;
+						plugin.notifySellerOfExchange(trader, itemID, itemDur, canBuy, price, sender.getName(), dryrun);// buy
 
-					//	if (dryrun == true) {
-							plugin.sendMessage(
-								sender,
-								F("foundItem", itemName, canBuy, plugin.Round(price * canBuy, Config.priceRounding),
-										plugin.Round(price, Config.priceRounding), trader));
-						//} else {
-						//	plugin.sendMessage(
-						//		sender,
-						//		F("buyingItem", itemName, canBuy, plugin.Round(price * canBuy, Config.priceRounding),
-						//				plugin.Round(price, Config.priceRounding), trader));
-						//}
+						insertTransaction(1, sender.getName(), itemID, itemDur, enchants, canBuy, price, trader);
 
-						buyAmount -= canBuy;
-					//}
+					}
+
+					tAmount += canBuy;
+					tPrice += price * canBuy;
+
+					// if (dryrun == true) {
+					plugin
+						.sendMessage(
+							sender,
+							F("foundItem", itemName, canBuy, plugin.Round(price * canBuy, Config.priceRounding), plugin.Round(price, Config.priceRounding),
+								trader));
+					// } else {
+					// plugin.sendMessage(
+					// sender,
+					// F("buyingItem", itemName, canBuy, plugin.Round(price *
+					// canBuy, Config.priceRounding),
+					// plugin.Round(price, Config.priceRounding), trader));
+					// }
+
+					buyAmount -= canBuy;
+					// }
 
 				}
 			}
@@ -533,8 +663,12 @@ public class Database {
 		}
 
 		if (tAmount > 0) {
-			plugin.sendMessage(sender,
-				preview + F("buyingItemsTotal", itemName, tAmount, plugin.Round(tPrice, Config.priceRounding), plugin.Round(tPrice / tAmount, Config.priceRounding)));
+			plugin
+				.sendMessage(
+					sender,
+					preview
+						+ F("buyingItemsTotal", itemName, tAmount, plugin.Round(tPrice, Config.priceRounding),
+							plugin.Round(tPrice / tAmount, Config.priceRounding)));
 
 		} else {
 
@@ -789,18 +923,15 @@ public class Database {
 				if (dryrun == true)
 					preview = L("preview");
 
-				
-
 				plugin.sendMessage(
 					sender,
 					F("createdBuyOrder", itemName, buyAmount, plugin.Round(buyPrice * buyAmount, Config.priceRounding),
 						plugin.Round(buyPrice, Config.priceRounding)));
 
-				if (dryrun == false){
+				if (dryrun == false) {
 					plugin.sendMessage(sender, preview + F("withdrewMoney", plugin.Round(buyPrice * buyAmount, Config.priceRounding)));
 					plugin.debtPlayer(sender.getName(), buyAmount * buyPrice);
 				}
-					
 
 			}
 		}

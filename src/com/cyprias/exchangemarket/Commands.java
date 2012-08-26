@@ -162,6 +162,9 @@ class Commands implements CommandExecutor {
 				if (plugin.hasPermission(sender, "exchangemarket.cancel"))
 					plugin.sendMessage(sender, "§a/" + commandLabel + " cancel §7- " + L("cmdCancelDesc"));
 
+				if (plugin.hasPermission(sender, "exchangemarket.transactions"))
+					plugin.sendMessage(sender, "§a/" + commandLabel + " transactions §7- " + L("cmdTransactionsDesc"));
+				
 				if (plugin.hasPermission(sender, "exchangemarket.remove"))
 					plugin.sendMessage(sender, "§a/" + commandLabel + " remove §7- " + L("cmdRemoveDesc"));
 
@@ -830,8 +833,19 @@ class Commands implements CommandExecutor {
 				}
 
 				return true;
+			} else if (args[0].equalsIgnoreCase("transactions")) {
+				if (!hasCommandPermission(sender, "exchangemarket.transactions")) {
+					return true;
+				}
+				
+				plugin.database.listPlayerTransactions(sender);
+				
+				return true;
 			} else if (args[0].equalsIgnoreCase("confirm")) {
-
+				if (!hasCommandPermission(sender, "exchangemarket.confirm")) {
+					return true;
+				}
+				
 				if (!lastRequest.containsKey(sender.getName())) {
 					plugin.sendMessage(sender, L("noRequestYet"));
 					return true;
