@@ -14,3 +14,4 @@ confirmAllOrders: false
 notifyOpsOfNewVersion: true
 listSortOrder: "id ASC"
 logTransactions: true
+announceNewOrders: true

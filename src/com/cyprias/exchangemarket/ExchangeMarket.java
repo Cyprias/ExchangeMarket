@@ -350,8 +350,38 @@ public class ExchangeMarket extends JavaPlugin {
 
 	}
 	
+	public void announceNewOrder(int type, CommandSender sender, int itemID, int itemDur, String itemEnchants, int amount, double price) {
+		
+		Player player = (Player) sender;
+		
+		String itemName = itemdb.getItemName(itemID, itemDur);
+		
+		String sType = L("sell").toLowerCase();
+		
+		if (type == 2)
+			sType = L("buy").toLowerCase();
+		
+		info("announceNewOrder: " + type + ", " + sType);
+		
+		String msg = F("newOrder", player.getDisplayName(), sType, itemName, amount,  Round(price*amount,Config.priceRounding), Round(price,Config.priceRounding));
+		
+		if (type == 1){
+			permMessage("exchangemarket.announceneworder.sell", msg, sender.getName());
+		}else if (type == 2){
+			permMessage("exchangemarket.announceneworder.buy", msg, sender.getName());
+		}
 
+	}
 	
+	public void permMessage(String permissionNode, String message, String excludeName){
+		for (Player p : getServer().getOnlinePlayers()) {
+			if (hasPermission(p, permissionNode) && !p.getName().equalsIgnoreCase(excludeName))
+			//if (hasPermission(p, permissionNode))
+				p.sendMessage(chatPrefix + message);
+		}
+	}
 	
-	
+	public void permMessage(String permissionNode, String message){
+		permMessage(permissionNode, message, "");
+	}
 }

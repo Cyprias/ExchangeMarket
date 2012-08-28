@@ -229,6 +229,8 @@ public class Database {
 		
 	}
 
+	
+	
 	public int insertTransaction(int type, String buyer, int itemID, int itemDur, String itemEnchants, int amount, double price, String seller) {
 		int reply = 0;
 		String query = "INSERT INTO "
@@ -378,7 +380,8 @@ public class Database {
 
 						plugin.notifyBuyerOfExchange(trader, itemID, itemDur, amount, price, sender.getName(), dryrun);
 						insertTransaction(2, sender.getName(), itemID, itemDur, enchants, amount, price, trader);
-
+						
+						
 					}
 
 					// plugin.info("sellAmount: " + sellAmount);
@@ -458,9 +461,12 @@ public class Database {
 							plugin.Round(sellPrice, Config.priceRounding)));
 
 				// plugin.debtPlayer(sender.getName(), sellPrice * sellPrice);
-				if (dryrun == false)
+				if (dryrun == false){
 					InventoryUtil.remove(itemStack, player.getInventory());
-
+					
+					if (Config.announceNewOrders == true)
+						plugin.announceNewOrder(1, sender, itemID, itemDur, null, sellAmount, sellPrice);
+				}
 			}
 
 		}
@@ -960,6 +966,9 @@ public class Database {
 				if (dryrun == false) {
 					plugin.sendMessage(sender, preview + F("withdrewMoney", plugin.Round(buyPrice * buyAmount, Config.priceRounding)));
 					plugin.debtPlayer(sender.getName(), buyAmount * buyPrice);
+					
+					if (Config.announceNewOrders == true)
+						plugin.announceNewOrder(2, sender, itemID, itemDur, null, buyAmount, buyPrice);
 				}
 
 			}

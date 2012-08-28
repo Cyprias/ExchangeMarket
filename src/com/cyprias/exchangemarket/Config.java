@@ -25,7 +25,7 @@ public class Config {
 	public static String sqlUsername, sqlPassword, sqlURL, sqlPrefix, sqlDatabase, sqlHost, sqlPort;
 	//public static int sqlPort;
 	public static String locale, listSortOrder;
-	public static Boolean notifyOpsOfNewVersion, logTransactions, convertCreatePriceToPerItem, cancelSelfSalesWhenBuying, autoPricePerUnit, clearRequestAfterConfirm, confirmAllOrders, autoPriceConfirm;
+	public static Boolean notifyOpsOfNewVersion, announceNewOrders, logTransactions, convertCreatePriceToPerItem, cancelSelfSalesWhenBuying, autoPricePerUnit, clearRequestAfterConfirm, confirmAllOrders, autoPriceConfirm;
 	public static int priceRounding;
 	public static Double autoBuyPrice, autoSellPrice;
 	
@@ -49,6 +49,8 @@ public class Config {
 			
 		notifyOpsOfNewVersion = config.getBoolean("notifyOpsOfNewVersion");
 			
+		announceNewOrders = config.getBoolean("announceNewOrders");
+		
 		clearRequestAfterConfirm = config.getBoolean("clearRequestAfterConfirm");
 		autoPriceConfirm = config.getBoolean("autoPriceConfirm");
 		confirmAllOrders = config.getBoolean("confirmAllOrders");
