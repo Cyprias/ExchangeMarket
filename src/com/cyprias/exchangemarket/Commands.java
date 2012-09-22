@@ -81,45 +81,75 @@ class Commands implements CommandExecutor {
 		String[] args;
 	}
 
-	public ArrayList<cmdRequest> queuedCommands = new ArrayList<cmdRequest>();
+	public class cmdTask implements Runnable {
+		private int id = 0;
 
-	int lastTask = 0;
+		public void setId(int n) {
+			this.id = n;
+		}
+
+		// cmdRequest savedCmd = null;
+		// public void addCommand(cmdRequest newCmd) {
+		// savedCmd = newCmd;
+		// }
+
+		CommandSender sender;
+		Command cmd;
+		String commandLabel;
+		String[] args;
+
+		public void setSender(CommandSender value) {
+			sender = value;
+		}
+
+		public void setCmd(Command value) {
+			cmd = value;
+		}
+
+		public void setCommandLable(String value) {
+			commandLabel = value;
+		}
+
+		public void setArgs(String[] value) {
+			args = value;
+		}
+
+		public void run() {
+			// commandHandler(savedCmd.sender, savedCmd.cmd,
+			// savedCmd.commandLabel, savedCmd.args, null);
+			commandHandler(sender, cmd, commandLabel, args, null);
+			// plugin.getServer().getScheduler().cancelTask(id);
+
+			
+			cmdTasks.remove(this);
+		}
+	}
+
+	public ArrayList<cmdTask> cmdTasks = new ArrayList<cmdTask>();
 
 	public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args, Boolean confirmed) {
-		/**/
-		cmdRequest newCmd = new cmdRequest();
-		newCmd.sender = sender;
-		newCmd.cmd = cmd;
-		newCmd.commandLabel = commandLabel;
-		newCmd.args = args;
-
-		if (queuedCommands.size() > 0) {
-			for (int i = queuedCommands.size() - 1; i >= 0; i--) {
-				if (queuedCommands.get(i).sender.equals(sender)) {
+		if (Config.allowMultipleQueuedCommands == false) {
+			for (int i = 0; i < cmdTasks.size(); i++) {
+				if (cmdTasks.get(i).sender.equals(sender)) {
 					plugin.sendMessage(sender, F("processingPreviousCMD"));
 					return true;
 				}
-
 			}
-
 		}
 
-		plugin.getServer().getScheduler().scheduleAsyncDelayedTask(plugin, new Runnable() {
-			public void run() {
-				for (int i = queuedCommands.size() - 1; i >= 0; i--) {
-					try {
-						commandHandler(queuedCommands.get(i).sender, queuedCommands.get(i).cmd, queuedCommands.get(i).commandLabel, queuedCommands.get(i).args,
-							null);
-					} catch (Exception e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-					queuedCommands.remove(i);
+		//for (int x = 0; x < 5; x++) {
 
-				}
-			}
-		}, 0L);
-		queuedCommands.add(0, newCmd);
+			cmdTask task = new cmdTask();
+			int taskID = plugin.getServer().getScheduler().scheduleAsyncDelayedTask(plugin, task, 0L);
+			task.setId(taskID);
+			task.setSender(sender);
+			task.setCmd(cmd);
+			task.setCommandLable(commandLabel);
+			task.setArgs(args);
+			// task.addCommand(newCmd);
+
+			cmdTasks.add(task);
+		//}
 
 		return true;
 	}

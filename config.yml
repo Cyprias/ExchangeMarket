@@ -15,3 +15,4 @@ notifyOpsOfNewVersion: true
 listSortOrder: "id ASC"
 logTransactions: true
 announceNewOrders: true
+allowMultipleQueuedCommands: false
