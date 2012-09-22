@@ -180,7 +180,7 @@ public class Database {
 				
 				if (compact == true){
 					if (type == 1){
-						plugin.sendMessage(sender, buyer + " " +
+						sender.sendMessage(buyer + " " +
 							L("bought").toLowerCase() + " "+
 							itemName + "x"+
 							amount + " $"+
@@ -188,7 +188,7 @@ public class Database {
 						);
 					
 					}else{
-						plugin.sendMessage(sender, buyer + " " +
+						sender.sendMessage(buyer + " " +
 							L("bought").toLowerCase() + " "+
 							itemName + "x"+
 							amount + " $"+
@@ -198,7 +198,7 @@ public class Database {
 					
 				}else{
 				if (type == 1){
-					plugin.sendMessage(sender, F("transactionMsgBuy", 
+					sender.sendMessage(F("transactionMsgBuy", 
 						buyer, 
 						itemName, 
 						amount, 
@@ -208,7 +208,7 @@ public class Database {
 					));
 				
 				}else{
-					plugin.sendMessage(sender, F("transactionMsgSell", 
+					sender.sendMessage(F("transactionMsgSell", 
 						buyer, 
 						itemName, 
 						amount, 
