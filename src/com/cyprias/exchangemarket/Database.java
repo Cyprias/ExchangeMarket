@@ -181,7 +181,7 @@ public class Database {
 				if (compact == true){
 					if (type == 1){
 						plugin.sendMessage(sender, buyer + " " +
-							L("bought") + " "+
+							L("bought").toLowerCase() + " "+
 							itemName + "x"+
 							amount + " $"+
 							plugin.Round(price*amount,Config.priceRounding)
@@ -189,7 +189,7 @@ public class Database {
 					
 					}else{
 						plugin.sendMessage(sender, buyer + " " +
-							L("bought") + " "+
+							L("bought").toLowerCase() + " "+
 							itemName + "x"+
 							amount + " $"+
 							plugin.Round(price*amount,Config.priceRounding)

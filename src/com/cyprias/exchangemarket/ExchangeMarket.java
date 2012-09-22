@@ -197,9 +197,11 @@ public class ExchangeMarket extends JavaPlugin {
 			// return econ.getBalance(pName);
 			if (!econ.hasAccount(pName))
 				econ.createPlayerAccount(pName);
-			double balance = econ.getBalance(pName);
-			econ.depositPlayer(pName.toLowerCase(), amount);
+			double balance = econ.getBalance(pName.toLowerCase());
+			econ.depositPlayer(pName, amount);
 			info("§aCrediting §f" + pName + "'s account. " + Round(balance,2) + "+§a" + Round(amount,2) + "§f=" + Round(econ.getBalance(pName),2));
+			
+			
 			
 			
 			return true;
@@ -218,7 +220,7 @@ public class ExchangeMarket extends JavaPlugin {
 			
 			econ.withdrawPlayer(pName, amount);
 
-			info("§cDebting §f" + pName + "'s account. " + Round(balance,2) + "-§c" + Round(amount,2) + "§f=" + Round(econ.getBalance(pName),2));
+			info("§cDebting §f" + pName + "'s account. " + Round(balance,2) + "-§c" + Round(amount,2) + "§f=" + Round(econ.getBalance(pName.toLowerCase()),2));
 			
 			return true;
 		}
@@ -361,7 +363,7 @@ public class ExchangeMarket extends JavaPlugin {
 		if (type == 2)
 			sType = L("buy").toLowerCase();
 		
-		info("announceNewOrder: " + type + ", " + sType);
+		//info("announceNewOrder: " + type + ", " + sType);
 		
 		String msg = F("newOrder", player.getDisplayName(), sType, itemName, amount,  Round(price*amount,Config.priceRounding), Round(price,Config.priceRounding));
 		

@@ -82,7 +82,9 @@ class Commands implements CommandExecutor {
 	}
 
 	public ArrayList<cmdRequest> queuedCommands = new ArrayList<cmdRequest>();
-	
+
+	int lastTask = 0;
+
 	public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args, Boolean confirmed) {
 		/**/
 		cmdRequest newCmd = new cmdRequest();
@@ -91,29 +93,37 @@ class Commands implements CommandExecutor {
 		newCmd.commandLabel = commandLabel;
 		newCmd.args = args;
 
-		queuedCommands.add(0, newCmd);
+		if (queuedCommands.size() > 0) {
+			for (int i = queuedCommands.size() - 1; i >= 0; i--) {
+				if (queuedCommands.get(i).sender.equals(sender)) {
+					plugin.sendMessage(sender, F("processingPreviousCMD"));
+					return true;
+				}
 
-		
+			}
+
+		}
+
 		plugin.getServer().getScheduler().scheduleAsyncDelayedTask(plugin, new Runnable() {
 			public void run() {
-
 				for (int i = queuedCommands.size() - 1; i >= 0; i--) {
 					try {
-						commandHandler(queuedCommands.get(i).sender, queuedCommands.get(i).cmd, queuedCommands.get(i).commandLabel, queuedCommands.get(i).args, null);
+						commandHandler(queuedCommands.get(i).sender, queuedCommands.get(i).cmd, queuedCommands.get(i).commandLabel, queuedCommands.get(i).args,
+							null);
 					} catch (Exception e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 					queuedCommands.remove(i);
+
 				}
 			}
 		}, 0L);
-		
+		queuedCommands.add(0, newCmd);
+
 		return true;
 	}
-	
 
-	
 	public boolean commandHandler(CommandSender sender, Command cmd, String commandLabel, String[] args, Boolean confirmed) {
 		// TODO Auto-generated method stub
 
@@ -132,17 +142,15 @@ class Commands implements CommandExecutor {
 
 				if (plugin.hasPermission(sender, "exchangemarket.sell"))
 					plugin.sendMessage(sender, "§a/" + commandLabel + " sell §7- " + L("cmdSellDesc"));
-				
+
 				if (plugin.hasPermission(sender, "exchangemarket.buy"))
 					plugin.sendMessage(sender, "§a/" + commandLabel + " buy §7- " + L("cmdBuyDesc"));
 
-				
 				if (plugin.hasPermission(sender, "exchangemarket.sellorder"))
 					plugin.sendMessage(sender, "§a/" + commandLabel + " sellorder §7- " + L("cmdSellOrderDesc"));
 				if (plugin.hasPermission(sender, "exchangemarket.buyorder"))
 					plugin.sendMessage(sender, "§a/" + commandLabel + " buyorder §7- " + L("cmdBuyOrderDesc"));
-				
-				
+
 				if (plugin.hasPermission(sender, "exchangemarket.price"))
 					plugin.sendMessage(sender, "§a/" + commandLabel + " price §7- " + L("cmdPriceDesc"));
 
@@ -164,7 +172,7 @@ class Commands implements CommandExecutor {
 
 				if (plugin.hasPermission(sender, "exchangemarket.transactions"))
 					plugin.sendMessage(sender, "§a/" + commandLabel + " transactions [compact] §7- " + L("cmdTransactionsDesc"));
-				
+
 				if (plugin.hasPermission(sender, "exchangemarket.remove"))
 					plugin.sendMessage(sender, "§a/" + commandLabel + " remove §7- " + L("cmdRemoveDesc"));
 
@@ -181,10 +189,10 @@ class Commands implements CommandExecutor {
 				if (!hasCommandPermission(sender, "exchangemarket.price")) {
 					return true;
 				}
-				 if (args.length < 2 && player.getItemInHand().getTypeId() == 0) {
+				if (args.length < 2 && player.getItemInHand().getTypeId() == 0) {
 					plugin.sendMessage(sender, " §a/" + commandLabel + " price [itemName] [amount] [sale/buy] §7- " + L("cmdPriceDesc"));
 					return true;
-				 }
+				}
 
 				ItemStack item = null;
 				int amount = 1;
@@ -271,7 +279,7 @@ class Commands implements CommandExecutor {
 					return true;
 				}
 				if (args.length <= 1) {
-				//	plugin.sendMessage(sender, F("invalidItem", ""));
+					// plugin.sendMessage(sender, F("invalidItem", ""));
 					plugin.sendMessage(sender, "§a/" + commandLabel + " search <itemName> §7- " + L("cmdSearchDesc"));
 					return true;
 				}
@@ -347,7 +355,7 @@ class Commands implements CommandExecutor {
 					// plugin.info("type: " +type);
 					// plugin.info("itemName: " +itemName);
 					// plugin.info("amount: " +amount);
-					
+
 					dryrun = false;
 					int success = plugin.database.cancelOrders(sender, type, item.getTypeId(), item.getDurability(), amount, dryrun);
 					// plugin.info("success: " +success);
@@ -390,7 +398,7 @@ class Commands implements CommandExecutor {
 				plugin.database.listOrders(sender, type);
 
 				return true;
-				
+
 			} else if (args[0].equalsIgnoreCase("sellorder")) {
 				if (!hasCommandPermission(sender, "exchangemarket.sellorder")) {
 					return true;
@@ -399,7 +407,6 @@ class Commands implements CommandExecutor {
 					plugin.sendMessage(sender, "§a/" + commandLabel + " sellorder <itemName> <amount> [price[e]] §7- " + L("cmdSellOrderDesc"));
 					return true;
 				}
-				
 
 				ItemStack item = ItemDb.getItemStack(args[1]);
 
@@ -425,7 +432,6 @@ class Commands implements CommandExecutor {
 
 				if (args.length > 3) {
 
-					
 					// if (args.length > 2) {
 
 					Boolean priceEach = false;
@@ -447,24 +453,23 @@ class Commands implements CommandExecutor {
 					}
 					if (priceEach == false && Config.convertCreatePriceToPerItem == true)
 						price = price / rawAmount;
-					
+
 					price = plugin.Round(price, Config.priceRounding);
-					
-					if (price == 0){
+
+					if (price == 0) {
 						plugin.sendMessage(sender, F("invalidPrice", price));
 						return true;
 					}
 				}
 
-				//postBuyOrder
-				
-				
+				// postBuyOrder
+
 				int success = plugin.database.postSellOrder(sender, item.getTypeId(), item.getDurability(), amount, price, false);
-				
-				if (success == 0){
+
+				if (success == 0) {
 					plugin.sendMessage(sender, L("failedToCreateOrder"));
 				}
-				
+
 				return true;
 			} else if (args[0].equalsIgnoreCase("buyorder")) {
 				if (!hasCommandPermission(sender, "exchangemarket.buyorder")) {
@@ -501,7 +506,6 @@ class Commands implements CommandExecutor {
 
 				if (args.length > 3) {
 
-					
 					// if (args.length > 2) {
 
 					Boolean priceEach = false;
@@ -517,32 +521,30 @@ class Commands implements CommandExecutor {
 						plugin.sendMessage(sender, F("invalidPrice", args[3]));
 						return true;
 					}
-					
+
 					if (price == 0) {
 						plugin.sendMessage(sender, F("invalidPrice", 0));
 						return true;
 					}
 					if (priceEach == false && Config.convertCreatePriceToPerItem == true)
 						price = price / rawAmount;
-					
-					price = plugin.Round(price, Config.priceRounding);
-					
 
-				}else{
+					price = plugin.Round(price, Config.priceRounding);
+
+				} else {
 					price = plugin.database.getTradersLastPrice(sender.getName(), item.getTypeId(), item.getDurability(), 2);
 				}
-				
-				if (price == 0){
+
+				if (price == 0) {
 					plugin.sendMessage(sender, F("invalidPrice", price));
 					return true;
 				}
-				
-				//postBuyOrder
-				
-				
+
+				// postBuyOrder
+
 				int success = plugin.database.postBuyOrder(sender, item.getTypeId(), item.getDurability(), amount, price, false);
-				
-				if (success == 0){
+
+				if (success == 0) {
 					plugin.sendMessage(sender, L("failedToCreateOrder"));
 				}
 
@@ -636,7 +638,6 @@ class Commands implements CommandExecutor {
 
 				int success = plugin.database.processBuyOrder(sender, item.getTypeId(), item.getDurability(), amount, price, dryrun);
 
-				
 				if (success > 0 && dryrun == true) {
 					lastRequest.put(sender.getName(), args);
 					plugin.sendMessage(sender, L("confirmRequest"));
@@ -824,10 +825,11 @@ class Commands implements CommandExecutor {
 
 				int success = plugin.database.processSellOrder(sender, stock.getTypeId(), stock.getDurability(), amount, price, dryrun);
 
-			//	if (success == 0){
-			//		plugin.sendMessage(sender, F("noBuyersForSell", itemName, amount, price*amount, price));
-			//	}
-				
+				// if (success == 0){
+				// plugin.sendMessage(sender, F("noBuyersForSell", itemName,
+				// amount, price*amount, price));
+				// }
+
 				if (success > 0 && dryrun == true) {
 					lastRequest.put(sender.getName(), args);
 					plugin.sendMessage(sender, L("confirmRequest"));
@@ -841,15 +843,15 @@ class Commands implements CommandExecutor {
 				boolean compact = false;
 				if (args.length > 1 && args[1].equalsIgnoreCase("compact"))
 					compact = true;
-				
+
 				plugin.database.listPlayerTransactions(sender, compact);
-				
+
 				return true;
 			} else if (args[0].equalsIgnoreCase("confirm")) {
 				if (!hasCommandPermission(sender, "exchangemarket.confirm")) {
 					return true;
 				}
-				
+
 				if (!lastRequest.containsKey(sender.getName())) {
 					plugin.sendMessage(sender, L("noRequestYet"));
 					return true;
@@ -907,9 +909,9 @@ class Commands implements CommandExecutor {
 				return true;
 				// insertOrder
 			}
-			
+
 			plugin.sendMessage(sender, F("invalidCommand", args[0]));
-			
+
 		}
 
 		return false;
