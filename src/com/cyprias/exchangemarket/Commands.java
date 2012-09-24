@@ -200,7 +200,7 @@ class Commands implements CommandExecutor {
 					plugin.sendMessage(sender, "§a/" + commandLabel + " cancel §7- " + L("cmdCancelDesc"));
 
 				if (plugin.hasPermission(sender, "exchangemarket.transactions"))
-					plugin.sendMessage(sender, "§a/" + commandLabel + " transactions §7- " + L("cmdTransactionsDesc"));
+					plugin.sendMessage(sender, "§a/" + commandLabel + " transactions [page] §7- " + L("cmdTransactionsDesc"));
 
 				if (plugin.hasPermission(sender, "exchangemarket.remove"))
 					plugin.sendMessage(sender, "§a/" + commandLabel + " remove §7- " + L("cmdRemoveDesc"));
