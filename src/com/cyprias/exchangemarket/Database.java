@@ -2,6 +2,7 @@ package com.cyprias.exchangemarket;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -9,9 +10,12 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
@@ -140,14 +144,34 @@ public class Database {
 
 	}
 
-	public void listPlayerTransactions(CommandSender sender, boolean compact){
+	public void listPlayerTransactions(CommandSender sender, int page) {
+		page = Math.abs(page);
 		
-		String query = "SELECT * FROM "+Config.sqlPrefix + "Transactions"+" WHERE `seller` LIKE ?";
+		String query = "SELECT COUNT(*) FROM " + Config.sqlPrefix + "Transactions" + " WHERE `seller` LIKE ?";
+		
 		Connection con = getSQLConnection();
-		boolean found =false;
+		int rows = 0;
 		try {
-			
-			
+			PreparedStatement statement = con.prepareStatement(query);
+			statement.setString(1, sender.getName());
+			ResultSet result = statement.executeQuery();
+			while (result.next()) {
+				rows = result.getInt(1);
+			}
+		} catch (SQLException e) {e.printStackTrace();}
+		
+		int maxLines = Config.transactionsPerPage;
+		int maxPages = (int)Math.ceil(rows / maxLines);
+
+		plugin.sendMessage(sender, F("transactionPage", page, maxPages));
+
+		
+		
+		query = "SELECT * FROM " + Config.sqlPrefix + "Transactions" + " WHERE `seller` LIKE ? LIMIT " + (maxLines * page) + ", "+maxLines;
+		
+		boolean found = false;
+		try {
+
 			PreparedStatement statement = con.prepareStatement(query);
 			statement.setString(1, sender.getName());
 
@@ -157,80 +181,67 @@ public class Database {
 
 			ResultSet result = statement.executeQuery();
 
+			
+			
 			double price;
 			int type, itemID, itemDur, amount;
 			String buyer, itemEnchants, seller;
 			Timestamp timestamp;
-			
+
 			while (result.next()) {
 				found = true;
 
 				type = result.getInt(2);
-				buyer  =result.getString(3);
+				buyer = result.getString(3);
 				itemID = result.getInt(4);
 				itemDur = result.getInt(5);
-				itemEnchants  =result.getString(6);
+				itemEnchants = result.getString(6);
 				amount = result.getInt(7);
 				price = result.getDouble(8);
 				timestamp = result.getTimestamp(10);
-				
-				
-				
+
 				String itemName = plugin.itemdb.getItemName(itemID, itemDur);
-				
-				if (compact == true){
-					if (type == 1){
-						sender.sendMessage(buyer + " " +
-							L("bought").toLowerCase() + " "+
-							itemName + "x"+
-							amount + " $"+
-							plugin.Round(price*amount,Config.priceRounding)
-						);
-					
-					}else{
-						sender.sendMessage(buyer + " " +
-							L("bought").toLowerCase() + " "+
-							itemName + "x"+
-							amount + " $"+
-							plugin.Round(price*amount,Config.priceRounding)
-						);
-					}
-					
-				}else{
-				if (type == 1){
-					sender.sendMessage(F("transactionMsgBuy", 
-						buyer, 
-						itemName, 
-						amount, 
-						plugin.Round(price*amount,Config.priceRounding), 
-						plugin.Round(price,Config.priceRounding),
-						timestamp.toString()
-					));
-				
-				}else{
-					sender.sendMessage(F("transactionMsgSell", 
-						buyer, 
-						itemName, 
-						amount, 
-						plugin.Round(price*amount,Config.priceRounding), 
-						plugin.Round(price,Config.priceRounding),
-						timestamp.toString()
-					));
+
+				/*
+				 * if (compact == true){ if (type == 1){
+				 * sender.sendMessage(buyer + " " + L("bought").toLowerCase() +
+				 * " "+ itemName + "x"+ amount + " $"+
+				 * plugin.Round(price*amount,Config.priceRounding) );
+				 * 
+				 * }else{ sender.sendMessage(buyer + " " +
+				 * L("bought").toLowerCase() + " "+ itemName + "x"+ amount +
+				 * " $"+ plugin.Round(price*amount,Config.priceRounding) ); }
+				 * 
+				 * }else{
+				 */
+
+				// timestamp.getMonth() + "/"+timestamp.getDay() +
+				// "/"+timestamp.getYear();
+				// String date = "??";
+				// Pattern pattern =
+				// Pattern.compile("[0-9]{1,4}-[0-9]{1,2}-[0-9]{1,2} [0-9]{1,2}:[0-9]{1,2}:[0-9]{1,2}.0");
+				// Matcher matcher = pattern.matcher(timestamp.toString());
+				String date = new SimpleDateFormat("MM/dd/yy").format(timestamp);
+
+				if (type == 1) {
+					sender.sendMessage(F("transactionMsgSold", itemName, amount, buyer, plugin.Round(price * amount, Config.priceRounding), date));
+					// timestamp.toString()
+
+				} else {
+					sender.sendMessage(F("transactionMsgBought", itemName, amount, buyer, plugin.Round(price * amount, Config.priceRounding), date));
+
 				}
 			}
-			}
+			// }
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		
+
 		if (found == false)
 			plugin.sendMessage(sender, L("noTransactions"));
-			
-		
+
 	}
 
-	
-	
 	public int insertTransaction(int type, String buyer, int itemID, int itemDur, String itemEnchants, int amount, double price, String seller) {
 		int reply = 0;
 		String query = "INSERT INTO "
@@ -380,8 +391,7 @@ public class Database {
 
 						plugin.notifyBuyerOfExchange(trader, itemID, itemDur, amount, price, sender.getName(), dryrun);
 						insertTransaction(2, sender.getName(), itemID, itemDur, enchants, amount, price, trader);
-						
-						
+
 					}
 
 					// plugin.info("sellAmount: " + sellAmount);
@@ -461,9 +471,9 @@ public class Database {
 							plugin.Round(sellPrice, Config.priceRounding)));
 
 				// plugin.debtPlayer(sender.getName(), sellPrice * sellPrice);
-				if (dryrun == false){
+				if (dryrun == false) {
 					InventoryUtil.remove(itemStack, player.getInventory());
-					
+
 					if (Config.announceNewOrders == true)
 						plugin.announceNewOrder(1, sender, itemID, itemDur, null, sellAmount, sellPrice);
 				}
@@ -966,7 +976,7 @@ public class Database {
 				if (dryrun == false) {
 					plugin.sendMessage(sender, preview + F("withdrewMoney", plugin.Round(buyPrice * buyAmount, Config.priceRounding)));
 					plugin.debtPlayer(sender.getName(), buyAmount * buyPrice);
-					
+
 					if (Config.announceNewOrders == true)
 						plugin.announceNewOrder(2, sender, itemID, itemDur, null, buyAmount, buyPrice);
 				}

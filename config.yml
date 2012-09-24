@@ -16,3 +16,4 @@ listSortOrder: "id ASC"
 logTransactions: true
 announceNewOrders: true
 allowMultipleQueuedCommands: false
+transactionsPerPage: 10

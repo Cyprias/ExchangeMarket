@@ -26,7 +26,7 @@ public class Config {
 	//public static int sqlPort;
 	public static String locale, listSortOrder;
 	public static Boolean notifyOpsOfNewVersion, allowMultipleQueuedCommands, announceNewOrders, logTransactions, convertCreatePriceToPerItem, cancelSelfSalesWhenBuying, autoPricePerUnit, clearRequestAfterConfirm, confirmAllOrders, autoPriceConfirm;
-	public static int priceRounding;
+	public static int priceRounding, transactionsPerPage;
 	public static Double autoBuyPrice, autoSellPrice;
 	
 	
@@ -66,6 +66,7 @@ public class Config {
 		cancelSelfSalesWhenBuying = config.getBoolean("cancelSelfSalesWhenBuying");
 		
 		priceRounding = config.getInt("priceRounding");
+		transactionsPerPage = config.getInt("transactionsPerPage");
 		
 		autoBuyPrice = config.getDouble("autoBuyPrice");
 		autoSellPrice = config.getDouble("autoSellPrice");
