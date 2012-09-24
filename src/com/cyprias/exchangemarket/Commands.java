@@ -873,12 +873,11 @@ class Commands implements CommandExecutor {
 				// if (args.length > 1 && args[1].equalsIgnoreCase("compact"))
 				// compact = true;
 
-				int page = 0;
+				int page = -1;
 				if (args.length > 1) {// && args[1].equalsIgnoreCase("compact"))
 					if (isInt(args[1])) {
-						page = Integer.parseInt(args[1]);
+						page = Math.abs(Integer.parseInt(args[1]));
 					} else {
-						
 						plugin.sendMessage(sender, F("invalidPageNumber", args[1]));
 						return true;
 					}

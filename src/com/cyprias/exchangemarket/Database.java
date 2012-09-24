@@ -145,8 +145,6 @@ public class Database {
 	}
 
 	public void listPlayerTransactions(CommandSender sender, int page) {
-		page = Math.abs(page);
-		
 		String query = "SELECT COUNT(*) FROM " + Config.sqlPrefix + "Transactions" + " WHERE `seller` LIKE ?";
 		
 		Connection con = getSQLConnection();
@@ -163,6 +161,9 @@ public class Database {
 		int maxLines = Config.transactionsPerPage;
 		int maxPages = (int)Math.ceil(rows / maxLines);
 
+		if (page < 0)
+			page = maxPages;
+		
 		plugin.sendMessage(sender, F("transactionPage", page, maxPages));
 
 		
