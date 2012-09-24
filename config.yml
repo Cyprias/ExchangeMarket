@@ -17,3 +17,4 @@ logTransactions: true
 announceNewOrders: true
 allowMultipleQueuedCommands: false
 transactionsPerPage: 10
+blockUsageInCreativeMode: true

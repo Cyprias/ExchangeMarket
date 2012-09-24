@@ -127,6 +127,14 @@ class Commands implements CommandExecutor {
 	public ArrayList<cmdTask> cmdTasks = new ArrayList<cmdTask>();
 
 	public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args, Boolean confirmed) {
+		if ((sender instanceof Player)) {
+			Player player = (Player) sender;
+			if (Config.blockUsageInCreativeMode == true && player.getGameMode().getValue() == 1){
+				plugin.sendMessage(sender, F("pleaseLeaveCreativeMode"));
+				return true;
+			}
+		}
+
 		if (Config.allowMultipleQueuedCommands == false) {
 			for (int i = 0; i < cmdTasks.size(); i++) {
 				if (cmdTasks.get(i).sender.equals(sender)) {
