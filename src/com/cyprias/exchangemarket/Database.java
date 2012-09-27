@@ -1283,6 +1283,7 @@ public class Database {
 		return sucessful;
 	}
 
+	
 	public itemStats getItemStats(int itemID, int itemDur, int getType) {
 		itemStats myReturn = new itemStats();
 

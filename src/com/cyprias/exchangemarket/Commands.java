@@ -277,7 +277,6 @@ class Commands implements CommandExecutor {
 
 				plugin.sendMessage(sender, F("itemShort", itemName, amount));
 				plugin.sendMessage(sender, getItemStatsMsg(stats, amount));
-
 				
 				return true;
 
