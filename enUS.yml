@@ -1,9 +1,7 @@
 cmdSellDesc: "&7Sell an item to existing buy orders."
 cmdBuyDesc: "&7Buy an item from existing sell orders."
-
 cmdSellOrderDesc: "&7Create a sell order."
 cmdBuyOrderDesc: "&7Create a buy order."
-
 buyNotEnoughFunds: "&7You don't have $&f%s&7 ($&f%s&7e) to submit that buy order."
 sellNotEnoughItems: "&7You don't have &f%s&7x&f%s&7 to submit that sell order."
 cmdInfBuyDesc: "&7Create a infinite buy order (No stock needed)"
@@ -78,3 +76,4 @@ newOrder: "&f%s&7 created %s order for &f%s&7x&f%s&7 at $&f%s&7 ($&f%s&7e)"
 processingPreviousCMD: "&7Please wait, we're processing your previous command."
 transactionPage: "&7=== Page &a%d&7/&f%d &7==="
 pleaseLeaveCreativeMode: "&7Please leave creative mode."
+resultsForItem: "&7=== &a%d&7 results &f%s&7 &7==="

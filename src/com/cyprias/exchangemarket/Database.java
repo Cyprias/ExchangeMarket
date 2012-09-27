@@ -154,12 +154,12 @@ public class Database {
 			statement.setString(1, sender.getName());
 			ResultSet result = statement.executeQuery();
 			while (result.next()) {
-				rows = result.getInt(1);
+				rows = (result.getInt(1)-1);
 			}
 		} catch (SQLException e) {e.printStackTrace();}
 		
-		int maxLines = Config.transactionsPerPage;
-		int maxPages = (int)Math.ceil(rows / maxLines);
+	//	int Config.transactionsPerPage = Config.transactionsPerPage;
+		int maxPages = (int)Math.floor(rows / Config.transactionsPerPage);
 
 		if (page < 0)
 			page = maxPages;
@@ -168,7 +168,7 @@ public class Database {
 
 		
 		
-		query = "SELECT * FROM " + Config.sqlPrefix + "Transactions" + " WHERE `seller` LIKE ? LIMIT " + (maxLines * page) + ", "+maxLines;
+		query = "SELECT * FROM " + Config.sqlPrefix + "Transactions" + " WHERE `seller` LIKE ? LIMIT " + (Config.transactionsPerPage * page) + ", "+Config.transactionsPerPage;
 		
 		boolean found = false;
 		try {
@@ -1455,13 +1455,50 @@ public class Database {
 		return success;
 	}
 
-	public int listPlayerOrders(CommandSender sender, String trader) {
+	public int getResultCount(String query, Object... args){
+		//String query = "SELECT COUNT(*) FROM " + Config.sqlPrefix + "Orders WHERE `player` LIKE ? ";
+		
+		Connection con = getSQLConnection();
+		int rows = 0;
+		try {
+			PreparedStatement statement = con.prepareStatement(query);
+			//statement.setString(1, sender.getName());
+			
+			int i = 0;
+			for (Object a : args) {
+				i += 1;
+				// plugin.info("executeQuery "+i+": " + a);
+				statement.setObject(i, a);
+			}
+			
+			ResultSet result = statement.executeQuery();
+			while (result.next()) {
+				rows = result.getInt(1);
+			}
+		} catch (SQLException e) {e.printStackTrace();}
+		
+		
+		return rows;
+	}
+	
+	public int listPlayerOrders(CommandSender sender, String trader, int page) {
+
+		int rows = getResultCount("SELECT COUNT(*) FROM " + Config.sqlPrefix + "Orders WHERE `player` LIKE ?", sender.getName());
+		
+		int maxPages = (int)Math.floor(rows / Config.transactionsPerPage);
+
+		
+		
+		if (page < 0)
+			page = maxPages;
+		
+		plugin.sendMessage(sender, F("transactionPage", page, maxPages));		
+		
+		
 		int updateSuccessful = 0;
 
-		Connection con = getSQLConnection();
-
-		String SQL = "SELECT * FROM " + Config.sqlPrefix + "Orders WHERE `player` LIKE ? ORDER BY id ASC;";// `amount`
-																											// >
+		String SQL = "SELECT * FROM " + Config.sqlPrefix + "Orders WHERE `player` LIKE ? ORDER BY id ASC LIMIT " + (Config.transactionsPerPage * page) + ", "+Config.transactionsPerPage;// `amount`
+		Connection con = getSQLConnection();																						// >
 																											// 0
 		int count = 0;
 		try {
@@ -1626,6 +1663,15 @@ public class Database {
 	}
 
 	public void searchOrders(CommandSender sender, int itemID, short itemDur) {
+
+		int rows = getResultCount("SELECT COUNT(*) FROM " + Config.sqlPrefix + "Orders WHERE `itemID` = ? AND `itemDur` = ? AND amount > 0", itemID, itemDur);
+		
+		String itemName = plugin.itemdb.getItemName(itemID, itemDur);
+		plugin.sendMessage(sender, F("resultsForItem",rows , itemName));	
+		if (rows <= 0)
+			return;
+		
+		
 		String query = "SELECT * FROM " + Config.sqlPrefix + "Orders WHERE `itemID` = ? AND `itemDur` = ? AND amount > 0 ORDER BY `price` ASC;";
 
 		/**/
@@ -1634,7 +1680,7 @@ public class Database {
 		try {
 			int id, type, amount, exchanged;
 			Boolean infinite;
-			String itemName, trader;
+			String trader;
 			Double price;
 
 			while (qReturn.result.next()) {
@@ -1645,7 +1691,7 @@ public class Database {
 				trader = qReturn.result.getString(4);
 				price = qReturn.result.getDouble(8);
 				amount = qReturn.result.getInt(9);
-				itemName = plugin.itemdb.getItemName(itemID, itemDur);
+				
 
 				if (type == 1) {
 
@@ -1820,17 +1866,58 @@ public class Database {
 		return value;
 	}
 
-	public int listOrders(CommandSender sender, int getType, Connection con) {
+	public int listOrders(CommandSender sender, int getType, int page, Connection con) {
+		String query = "SELECT COUNT(*) FROM " + Config.sqlPrefix + "Orders WHERE `amount` > 0";
+		if (getType > 0) {
+			// query = "SELECT * FROM " + Config.sqlPrefix
+			// +
+			// "Orders WHERE `itemID` = ? AND `itemDur` = ? AND `itemEnchants` IS NULL AND `amount` > 0 AND `type` = ?;";
+
+			query = "SELECT COUNT(*) FROM " + Config.sqlPrefix + "Orders WHERE `amount` > 0 AND `type` = ?";
+			//SQL = "SELECT * FROM " + Config.sqlPrefix + "Orders WHERE `amount` > 0 AND `type` = ? ORDER BY " + Config.listSortOrder + " LIMIT " + (Config.transactionsPerPage * page) + ", "+Config.transactionsPerPage;
+		}
+		
+		//Connection con = getSQLConnection();
+		int rows = 0;
+		try {
+			PreparedStatement statement = con.prepareStatement(query);
+			//statement.setString(1, sender.getName());
+			
+			if (getType > 0) {
+				statement.setInt(1, getType);
+			}
+			ResultSet result = statement.executeQuery();
+			while (result.next()) {
+				rows = (result.getInt(1)-1);
+			}
+		} catch (SQLException e) {e.printStackTrace();}
+		
+		//int Config.transactionsPerPage = ;
+		int maxPages = (int)Math.floor(rows / Config.transactionsPerPage);
+
+		if (page < 0)
+			page = maxPages;
+		
+		plugin.sendMessage(sender, F("transactionPage", page, maxPages));
+
+		
+		
+		//query = "SELECT * FROM " + Config.sqlPrefix + "Transactions" + " WHERE `seller` LIKE ? LIMIT " + (Config.transactionsPerPage * page) + ", "+Config.transactionsPerPage;
+				
+		
+		
+		
+		
 		int updateSuccessful = 0;
 
-		String SQL = "SELECT * FROM " + Config.sqlPrefix + "Orders WHERE `amount` > 0 ORDER BY " + Config.listSortOrder + ";";
+		String SQL = "SELECT * FROM " + Config.sqlPrefix + "Orders WHERE `amount` > 0 ORDER BY " + Config.listSortOrder + " LIMIT " + (Config.transactionsPerPage * page) + ", "+Config.transactionsPerPage;
 
 		if (getType > 0) {
 			// query = "SELECT * FROM " + Config.sqlPrefix
 			// +
 			// "Orders WHERE `itemID` = ? AND `itemDur` = ? AND `itemEnchants` IS NULL AND `amount` > 0 AND `type` = ?;";
 
-			SQL = "SELECT * FROM " + Config.sqlPrefix + "Orders WHERE `amount` > 0 AND `type` = ? ORDER BY " + Config.listSortOrder + ";";
+			SQL = "SELECT * FROM " + Config.sqlPrefix + "Orders WHERE `amount` > 0 AND `type` = ? ORDER BY " + Config.listSortOrder + " LIMIT " + (Config.transactionsPerPage * page) + ", "+Config.transactionsPerPage;
 		}
 
 		int count = 0;
@@ -1891,9 +1978,9 @@ public class Database {
 		return updateSuccessful;
 	}
 
-	public int listOrders(CommandSender sender, int getType) {
+	public int listOrders(CommandSender sender, int getType, int page) {
 		Connection con = getSQLConnection();
-		int value = listOrders(sender, getType, con);
+		int value = listOrders(sender, getType, page, con);
 		closeSQLConnection(con);
 		return value;
 	}

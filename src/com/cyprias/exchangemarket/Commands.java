@@ -30,7 +30,7 @@ class Commands implements CommandExecutor {
 
 		// "§7Total: §f" + stats.total
 
-		return "§7items: §f"
+		return "§7Items: §f"
 			+ plugin.Round(stats.totalAmount, 0)
 			// "§7, price: $§f" + Database.Round(stats.avgPrice * stackCount,
 			// roundTo) + "/" + Database.Round(stats.median * stackCount,
@@ -199,9 +199,9 @@ class Commands implements CommandExecutor {
 				if (plugin.hasPermission(sender, "exchangemarket.search"))
 					plugin.sendMessage(sender, "§a/" + commandLabel + " search §7- " + L("cmdSearchDesc"));
 				if (plugin.hasPermission(sender, "exchangemarket.list"))
-					plugin.sendMessage(sender, "§a/" + commandLabel + " list [Buy/Sell]§7- " + L("cmdListDesc"));
+					plugin.sendMessage(sender, "§a/" + commandLabel + " list [Buy/Sell] [page]§7- " + L("cmdListDesc"));
 				if (plugin.hasPermission(sender, "exchangemarket.orders"))
-					plugin.sendMessage(sender, "§a/" + commandLabel + " orders §7- " + L("cmdOrdersDesc"));
+					plugin.sendMessage(sender, "§a/" + commandLabel + " orders [page] §7- " + L("cmdOrdersDesc"));
 				if (plugin.hasPermission(sender, "exchangemarket.collect"))
 					plugin.sendMessage(sender, "§a/" + commandLabel + " collect §7- " + L("cmdCollectDesc"));
 				if (plugin.hasPermission(sender, "exchangemarket.cancel"))
@@ -278,6 +278,7 @@ class Commands implements CommandExecutor {
 				plugin.sendMessage(sender, F("itemShort", itemName, amount));
 				plugin.sendMessage(sender, getItemStatsMsg(stats, amount));
 
+				
 				return true;
 
 			} else if (args[0].equalsIgnoreCase("version") && args.length == 1) {
@@ -411,7 +412,17 @@ class Commands implements CommandExecutor {
 					return true;
 				}
 
-				plugin.database.listPlayerOrders(sender, sender.getName());
+				int page = -1;
+				if (args.length > 1) {// && args[1].equalsIgnoreCase("compact"))
+					if (isInt(args[1])) {
+						page = Math.abs(Integer.parseInt(args[1]));
+					} else {
+						plugin.sendMessage(sender, F("invalidPageNumber", args[1]));
+						return true;
+					}
+				}
+				
+				plugin.database.listPlayerOrders(sender, sender.getName(), page);
 
 				return true;
 			} else if (args[0].equalsIgnoreCase("list")) {
@@ -432,7 +443,17 @@ class Commands implements CommandExecutor {
 					}
 				}
 
-				plugin.database.listOrders(sender, type);
+				int page = -1;
+				if (args.length > 2) {// && args[1].equalsIgnoreCase("compact"))
+					if (isInt(args[2])) {
+						page = Math.abs(Integer.parseInt(args[2]));
+					} else {
+						plugin.sendMessage(sender, F("invalidPageNumber", args[2]));
+						return true;
+					}
+				}
+				
+				plugin.database.listOrders(sender, type, page);
 
 				return true;
 
