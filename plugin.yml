@@ -43,4 +43,4 @@ permissions:
   exchangemarket.transactions:
     default: false
   exchangemarket.loginNewVersion:
-    default: false
+    default: op
