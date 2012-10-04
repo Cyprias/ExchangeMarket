@@ -215,6 +215,10 @@ class Commands implements CommandExecutor {
 
 				if (plugin.hasPermission(sender, "exchangemarket.version"))
 					plugin.sendMessage(sender, "§a/" + commandLabel + " version §7- " + L("cmdVersionDesc"));
+				if (plugin.hasPermission(sender, "exchangemarket.whatsnew"))
+					plugin.sendMessage(sender, "§a/" + commandLabel + " whatsnew §7- " + L("cmdWhatsnewDesc"));
+				
+				
 				if (plugin.hasPermission(sender, "exchangemarket.reload"))
 					plugin.sendMessage(sender, "§a/" + commandLabel + " reload §7- " + L("cmdReloadDesc"));
 
@@ -285,8 +289,20 @@ class Commands implements CommandExecutor {
 					return true;
 				}
 
-				plugin.queueVersionCheck((Player) sender);
+				//plugin.queueVersionRSS();
+				
+				plugin.queueVersionCheck(sender, false, false);
 				return true;
+			} else if (args[0].equalsIgnoreCase("whatsnew") && args.length == 1) {
+				if (!hasCommandPermission(sender, "exchangemarket.whatsnew")) {
+					return true;
+				}
+
+				//plugin.queueVersionRSS();
+				
+				plugin.queueVersionCheck(sender, true, false);
+				return true;
+				
 			} else if (args[0].equalsIgnoreCase("remove")) {
 				if (!hasCommandPermission(sender, "exchangemarket.remove")) {
 					return true;

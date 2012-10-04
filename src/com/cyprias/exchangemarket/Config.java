@@ -25,7 +25,7 @@ public class Config {
 	public static String sqlUsername, sqlPassword, sqlURL, sqlPrefix, sqlDatabase, sqlHost, sqlPort;
 	//public static int sqlPort;
 	public static String locale, listSortOrder;
-	public static Boolean blockUsageInCreativeMode, notifyOpsOfNewVersion, allowMultipleQueuedCommands, announceNewOrders, logTransactions, convertCreatePriceToPerItem, cancelSelfSalesWhenBuying, autoPricePerUnit, clearRequestAfterConfirm, confirmAllOrders, autoPriceConfirm;
+	public static Boolean blockUsageInCreativeMode,  allowMultipleQueuedCommands, announceNewOrders, logTransactions, convertCreatePriceToPerItem, cancelSelfSalesWhenBuying, autoPricePerUnit, clearRequestAfterConfirm, confirmAllOrders, autoPriceConfirm;
 	public static int priceRounding, transactionsPerPage;
 	public static Double autoBuyPrice, autoSellPrice;
 	
@@ -46,8 +46,6 @@ public class Config {
 		//}else if (sqlSystem.equals("mysql")){
 			sqlURL = "jdbc:mysql://" + sqlHost + ":" + sqlPort + "/" + sqlDatabase;
 		//}
-			
-		notifyOpsOfNewVersion = config.getBoolean("notifyOpsOfNewVersion");
 			
 		announceNewOrders = config.getBoolean("announceNewOrders");
 		blockUsageInCreativeMode = config.getBoolean("blockUsageInCreativeMode");
