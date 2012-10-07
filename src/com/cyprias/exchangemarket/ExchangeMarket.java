@@ -263,9 +263,10 @@ public class ExchangeMarket extends JavaPlugin {
 				NodeList titleNodes, descriptionNodes;
 				Element titleElement, descriptionElement;
 				String versionName, descriptionText;
-				for (int v = 0; v < nodes.getLength(); v++) {
+				//for (int v = 0; v < nodes.getLength(); v++) {
 					// info("v: " +v);
-
+					int v = 0;
+					
 					latestVersion = (Element) nodes.item(v);
 
 					titleNodes = latestVersion.getElementsByTagName("title");
@@ -274,15 +275,15 @@ public class ExchangeMarket extends JavaPlugin {
 
 					if (curVersion.compareTo(versionName) == 0) {
 						if (newVersionCheck == true)
-							break;
+							return;
 						if (v == 0)
 							sendMessage(this.sender, F("version", curVersion));
 
-						break;
+						return;
 					} else if (v == 0) {
 						sendMessage(this.sender, F("versionAvailable", curVersion, versionName));
 						if (newVersionCheck == true)
-							break;
+							return;
 					}
 
 					if (this.includeDesc == true) {
@@ -301,7 +302,7 @@ public class ExchangeMarket extends JavaPlugin {
 						sendMessage(this.sender, F("seeNewChanges"));
 					}
 
-				}
+				//}
 
 			} catch (Exception localException) {
 			}
