@@ -1,38 +1,21 @@
 package com.cyprias.exchangemarket;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLConnection;
-import java.util.ArrayList;
-import java.util.List;
+import java.text.DecimalFormat;
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import net.milkbowl.vault.economy.Economy;
 
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-
-import com.cyprias.exchangemarket.Commands.cmdTask;
 
 public class ExchangeMarket extends JavaPlugin {
 	public static String chatPrefix = "§f[§6EM§f] ";
@@ -247,6 +230,23 @@ public class ExchangeMarket extends JavaPlugin {
 		return (double) tmp / p;
 	}
 
+	public static String formatDecimal(double d, int precision) {
+		String myformat = "###,###,###,###,##0";
+		if (precision == 0) {
+			// System.out.println("OK Decimal is: " + d);
+			DecimalFormat df = new DecimalFormat(myformat);
+			return df.format(d);
+		}
+
+		myformat = "###,###,###,###,##0.";
+
+		for (int x = 0; x < precision; x++)
+			myformat = myformat + "0";
+
+		DecimalFormat df = new DecimalFormat(myformat);
+		return df.format(d);
+	}
+
 	public class versionTask implements Runnable {
 		private int id = 0;
 		CommandSender sender;
@@ -303,8 +303,8 @@ public class ExchangeMarket extends JavaPlugin {
 					}
 
 					if (this.includeDesc == true) {
-						sendMessage(this.sender, ChatColor.GRAY.toString() + "=== " + ChatColor.GREEN.toString() + versionName + ChatColor.GRAY.toString() + " ===");
-					
+						sendMessage(this.sender, ChatColor.GRAY.toString() + "=== " + ChatColor.GREEN.toString() + versionName + ChatColor.GRAY.toString()
+							+ " ===");
 
 						descriptionNodes = latestVersion.getElementsByTagName("description");
 						descriptionElement = (Element) descriptionNodes.item(0);
@@ -314,7 +314,7 @@ public class ExchangeMarket extends JavaPlugin {
 						for (int l = 0; l < lines.length; l++) {
 							sendMessage(this.sender, ChatColor.GRAY.toString() + "* " + lines[l]);
 						}
-					}else if (v == 0 && hasPermission(this.sender, "exchangemarket.whatsnew")) {
+					} else if (v == 0 && hasPermission(this.sender, "exchangemarket.whatsnew")) {
 						sendMessage(this.sender, F("seeNewChanges"));
 					}
 

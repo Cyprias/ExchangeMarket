@@ -1036,7 +1036,7 @@ public class Database {
 				statement.setString(3, player);
 				statement.setInt(4, itemID);
 				statement.setInt(5, itemDur);
-				statement.setDouble(6, plugin.Round(price, Config.priceRounding));
+				statement.setDouble(6, price); //plugin.Round(
 
 				ResultSet result = statement.executeQuery();
 
@@ -1076,7 +1076,7 @@ public class Database {
 			statement.setInt(4, itemID);
 			statement.setInt(5, itemDur);
 			statement.setString(6, itemEnchants);
-			statement.setDouble(7, plugin.Round(price, Config.priceRounding));
+			statement.setDouble(7, price); //plugin.Round(Config.priceRounding
 			statement.setInt(8, amount);
 
 			updateSuccessful = statement.executeUpdate();

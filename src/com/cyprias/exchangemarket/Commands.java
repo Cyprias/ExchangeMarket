@@ -527,7 +527,7 @@ class Commands implements CommandExecutor {
 					if (priceEach == false && Config.convertCreatePriceToPerItem == true)
 						price = price / rawAmount;
 
-					price = plugin.Round(price, Config.priceRounding);
+					//price = plugin.Round(price, Config.priceRounding);
 
 					if (price == 0) {
 						plugin.sendMessage(sender, F("invalidPrice", price));
@@ -602,7 +602,7 @@ class Commands implements CommandExecutor {
 					if (priceEach == false && Config.convertCreatePriceToPerItem == true)
 						price = price / rawAmount;
 
-					price = plugin.Round(price, Config.priceRounding);
+				//	price = plugin.Round(price, Config.priceRounding);
 
 				} else {
 					price = plugin.database.getTradersLastPrice(sender.getName(), item.getTypeId(), item.getDurability(), 2);
