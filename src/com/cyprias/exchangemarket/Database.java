@@ -163,14 +163,13 @@ public class Database {
 		// int Config.transactionsPerPage = Config.transactionsPerPage;
 		int maxPages = (int) Math.floor(rows / Config.transactionsPerPage);
 
-
 		if (page < 0) {
 			page = maxPages;
 		} else {
 			page -= 1;
 		}
 
-		plugin.sendMessage(sender, F("transactionPage", page+1, maxPages+1));
+		plugin.sendMessage(sender, F("transactionPage", page + 1, maxPages + 1));
 
 		query = "SELECT * FROM " + Config.sqlPrefix + "Transactions" + " WHERE `seller` LIKE ? LIMIT " + (Config.transactionsPerPage * page) + ", "
 			+ Config.transactionsPerPage;
@@ -321,7 +320,7 @@ public class Database {
 		return giveItemToPlayer(player, itemID, itemDur, amount, null);
 	}
 
-	public int checkBuyOrders(CommandSender sender, int itemID, short itemDur, int sellAmount, double sellPrice, Boolean dryrun, Connection con) {
+	public int checkBuyOrders(CommandSender sender, int itemID, short itemDur, int sellAmount, double sellPrice, Boolean dryrun, Connection con, Boolean silent) {
 		String query = "SELECT * FROM " + Config.sqlPrefix
 			+ "Orders WHERE `type` = 2 AND `itemID` = ? AND `itemDur` = ? AND `price` >= ? AND `amount` > 0 AND `player` NOT LIKE ? ORDER BY `price` DESC";
 		// AND `player` NOT LIKE ?
@@ -411,13 +410,14 @@ public class Database {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		if (found == 0) {
-			// String itemName = plugin.itemdb.getItemName(itemID, itemDur);
-			plugin.sendMessage(sender, F("noBuyersForSell", itemName));
-		} else if (found > 0 && initialAmount == sellAmount) {
-			plugin.sendMessage(sender, F("noBuyersForSellPrice", itemName, sellAmount, sellPrice * sellAmount, sellPrice));
+		if (silent == false) {
+			if (found == 0) {
+				// String itemName = plugin.itemdb.getItemName(itemID, itemDur);
+				plugin.sendMessage(sender, F("noBuyersForSell", itemName));
+			} else if (found > 0 && initialAmount == sellAmount) {
+				plugin.sendMessage(sender, F("noBuyersForSellPrice", itemName, sellAmount, sellPrice * sellAmount, sellPrice));
+			}
 		}
-
 		return sellAmount;
 	}
 
@@ -465,7 +465,7 @@ public class Database {
 			// int success = plugin.database.processSellOrder(sender,
 			// stock.getTypeId(), stock.getDurability(), amount, price, dryrun);
 
-			sellAmount = checkBuyOrders(sender, itemID, itemDur, sellAmount, sellPrice, false, con);
+			sellAmount = checkBuyOrders(sender, itemID, itemDur, sellAmount, sellPrice, false, con, true);
 
 			if (sellAmount == 0)
 				return;
@@ -505,7 +505,7 @@ public class Database {
 
 		// plugin.info("sellAmountA: " + sellAmount);
 		int beforeAmount = sellAmount;
-		sellAmount = checkBuyOrders(sender, itemID, itemDur, sellAmount, sellPrice, dryrun, con);
+		sellAmount = checkBuyOrders(sender, itemID, itemDur, sellAmount, sellPrice, dryrun, con, false);
 
 		if (beforeAmount != sellAmount)
 			return 1;
@@ -589,7 +589,7 @@ public class Database {
 		return 0;
 	}
 
-	public int checkSellOrders(CommandSender sender, int itemID, short itemDur, int buyAmount, double buyPrice, Boolean dryrun, Connection con) {
+	public int checkSellOrders(CommandSender sender, int itemID, short itemDur, int buyAmount, double buyPrice, Boolean dryrun, Connection con, Boolean silent) {
 
 		String query = "SELECT * FROM " + Config.sqlPrefix
 			+ "Orders WHERE `type` = 1 AND `itemID` = ? AND `itemDur` = ? AND `price` <= ? AND `amount` > 0 AND `player` NOT LIKE ? ORDER BY `price` ASC";
@@ -731,7 +731,7 @@ public class Database {
 						+ F("buyingItemsTotal", itemName, tAmount, plugin.Round(tPrice, Config.priceRounding),
 							plugin.Round(tPrice / tAmount, Config.priceRounding)));
 
-		} else {
+		} else if (silent == false) {
 
 			if (found == 0) {
 				// String itemName = plugin.itemdb.getItemName(itemID, itemDur);
@@ -978,7 +978,7 @@ public class Database {
 				return;
 			}
 
-			buyAmount = checkSellOrders(sender, itemID, itemDur, buyAmount, buyPrice, false, con);
+			buyAmount = checkSellOrders(sender, itemID, itemDur, buyAmount, buyPrice, false, con, true);
 
 			if (buyAmount == 0)
 				return;
@@ -1021,7 +1021,7 @@ public class Database {
 		// buyAmount = checkPlayerSellOrders(sender, itemID, itemDur, buyAmount,
 		// buyPrice, dryrun, con);
 
-		buyAmount = checkSellOrders(sender, itemID, itemDur, buyAmount, buyPrice, dryrun, con);
+		buyAmount = checkSellOrders(sender, itemID, itemDur, buyAmount, buyPrice, dryrun, con, false);
 		// plugin.info("buyAmountB: " + buyAmount);
 
 		if (buyAmount != beforeAmount) {
@@ -1513,15 +1513,13 @@ public class Database {
 
 		int maxPages = (int) Math.floor(rows / Config.transactionsPerPage);
 
-		
-
 		if (page < 0) {
 			page = maxPages;
 		} else {
 			page -= 1;
 		}
 
-		plugin.sendMessage(sender, F("transactionPage", page+1, maxPages+1));
+		plugin.sendMessage(sender, F("transactionPage", page + 1, maxPages + 1));
 
 		int updateSuccessful = 0;
 
@@ -1933,7 +1931,7 @@ public class Database {
 			page -= 1;
 		}
 
-		plugin.sendMessage(sender, F("transactionPage", page+1, maxPages+1));
+		plugin.sendMessage(sender, F("transactionPage", page + 1, maxPages + 1));
 
 		// query = "SELECT * FROM " + Config.sqlPrefix + "Transactions" +
 		// " WHERE `seller` LIKE ? LIMIT " + (Config.transactionsPerPage * page)
