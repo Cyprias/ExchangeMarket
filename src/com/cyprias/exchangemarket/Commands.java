@@ -535,13 +535,14 @@ class Commands implements CommandExecutor {
 					}
 				}
 
+				
+				
+				
+				
 				// postBuyOrder
 
-				int success = plugin.database.postSellOrder(sender, item.getTypeId(), item.getDurability(), amount, price, false);
+				plugin.database.postSellOrder(sender, item.getTypeId(), item.getDurability(), amount, price, false);
 
-				if (success == 0) {
-					plugin.sendMessage(sender, L("failedToCreateOrder"));
-				}
 
 				return true;
 			} else if (args[0].equalsIgnoreCase("buyorder")) {
@@ -615,11 +616,7 @@ class Commands implements CommandExecutor {
 
 				// postBuyOrder
 
-				int success = plugin.database.postBuyOrder(sender, item.getTypeId(), item.getDurability(), amount, price, false);
-
-				if (success == 0) {
-					plugin.sendMessage(sender, L("failedToCreateOrder"));
-				}
+				plugin.database.postBuyOrder(sender, item.getTypeId(), item.getDurability(), amount, price, false);
 
 				// //////////////
 				return true;

@@ -230,23 +230,6 @@ public class ExchangeMarket extends JavaPlugin {
 		return (double) tmp / p;
 	}
 
-	public static String formatDecimal(double d, int precision) {
-		String myformat = "###,###,###,###,##0";
-		if (precision == 0) {
-			// System.out.println("OK Decimal is: " + d);
-			DecimalFormat df = new DecimalFormat(myformat);
-			return df.format(d);
-		}
-
-		myformat = "###,###,###,###,##0.";
-
-		for (int x = 0; x < precision; x++)
-			myformat = myformat + "0";
-
-		DecimalFormat df = new DecimalFormat(myformat);
-		return df.format(d);
-	}
-
 	public class versionTask implements Runnable {
 		private int id = 0;
 		CommandSender sender;

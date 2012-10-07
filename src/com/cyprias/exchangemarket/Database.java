@@ -418,14 +418,13 @@ public class Database {
 		return sellAmount;
 	}
 
-	public int postSellOrder(CommandSender sender, int itemID, short itemDur, int sellAmount, double sellPrice, Boolean dryrun) {
+	public void postSellOrder(CommandSender sender, int itemID, short itemDur, int sellAmount, double sellPrice, Boolean dryrun) {
 		Connection con = getSQLConnection();
-		int value = postSellOrder(sender, itemID, itemDur, sellAmount, sellPrice, dryrun, con);
+		postSellOrder(sender, itemID, itemDur, sellAmount, sellPrice, dryrun, con);
 		closeSQLConnection(con);
-		return value;
 	}
 
-	public int postSellOrder(CommandSender sender, int itemID, short itemDur, int sellAmount, double sellPrice, Boolean dryrun, Connection con) {
+	public void postSellOrder(CommandSender sender, int itemID, short itemDur, int sellAmount, double sellPrice, Boolean dryrun, Connection con) {
 		int success = 0;
 		String itemName = plugin.itemdb.getItemName(itemID, itemDur);
 		Player player = (Player) sender;
@@ -438,7 +437,11 @@ public class Database {
 
 				if (sellPrice <= 0) {
 					plugin.sendMessage(sender, L("mustSupplyAPrice"));
-					return success;
+					
+					if (success == 0) 
+						plugin.sendMessage(sender, L("failedToCreateOrder"));
+
+					return;
 				}
 
 			}
@@ -449,14 +452,22 @@ public class Database {
 			if (InventoryUtil.getAmount(itemStack, player.getInventory()) <= 0) {
 
 				plugin.sendMessage(sender, F("noItemInInventory", itemName));
-				return 0;
+				plugin.sendMessage(sender, L("failedToCreateOrder"));
+				return;
 			}
 
 			sellAmount = Math.min(sellAmount, InventoryUtil.getAmount(itemStack, player.getInventory()));
-
-			// plugin.info("sellAmountC: " + sellAmount);
 			itemStack.setAmount(sellAmount);
 
+			
+			//int success = plugin.database.processSellOrder(sender, stock.getTypeId(), stock.getDurability(), amount, price, dryrun);
+
+			sellAmount = checkBuyOrders(sender, itemID, itemDur, sellAmount, sellPrice, false, con);
+			
+			if (sellAmount == 0)
+				return;
+			
+			
 			success = insertOrder(1, false, sender.getName(), itemID, itemDur, null, sellPrice, sellAmount, dryrun, con);
 			if (success > 0) {
 				String preview = "";
@@ -481,7 +492,9 @@ public class Database {
 			}
 
 		}
-		return success;
+		if (success == 0) 
+			plugin.sendMessage(sender, L("failedToCreateOrder"));
+		
 	}
 
 	public int processSellOrder(CommandSender sender, int itemID, short itemDur, int sellAmount, double sellPrice, Boolean dryrun) {
@@ -934,14 +947,13 @@ public class Database {
 		return buyAmount;
 	}
 
-	public int postBuyOrder(CommandSender sender, int itemID, short itemDur, int buyAmount, double buyPrice, Boolean dryrun) {
+	public void postBuyOrder(CommandSender sender, int itemID, short itemDur, int buyAmount, double buyPrice, Boolean dryrun) {
 		Connection con = getSQLConnection();
-		int value = postBuyOrder(sender, itemID, itemDur, buyAmount, buyPrice, dryrun, con);
+		postBuyOrder(sender, itemID, itemDur, buyAmount, buyPrice, dryrun, con);
 		closeSQLConnection(con);
-		return value;
 	}
 
-	public int postBuyOrder(CommandSender sender, int itemID, short itemDur, int buyAmount, double buyPrice, Boolean dryrun, Connection con) {
+	public void postBuyOrder(CommandSender sender, int itemID, short itemDur, int buyAmount, double buyPrice, Boolean dryrun, Connection con) {
 		int success = 0;
 
 		String itemName = plugin.itemdb.getItemName(itemID, itemDur);
@@ -953,16 +965,22 @@ public class Database {
 
 				if (buyPrice <= 0) {
 					plugin.sendMessage(sender, L("mustSupplyAPrice"));
-					return success;
+					return;
 				}
 			}
 
 			if (plugin.getBalance(sender.getName()) < (buyAmount * buyPrice)) {
 				plugin.sendMessage(sender,
 					F("buyNotEnoughFunds", plugin.Round(buyPrice * buyAmount, Config.priceRounding), plugin.Round(buyPrice, Config.priceRounding)));
-				return 0;
+				plugin.sendMessage(sender, L("failedToCreateOrder"));
+				return;
 			}
 
+			buyAmount = checkSellOrders(sender, itemID, itemDur, buyAmount, buyPrice, false, con);
+			
+			if (buyAmount == 0)
+				return;
+			
 			success = insertOrder(2, false, sender.getName(), itemID, itemDur, null, buyPrice, buyAmount, dryrun, con);
 			if (dryrun == true || success > 0) {
 				String preview = "";
@@ -984,7 +1002,11 @@ public class Database {
 
 			}
 		}
-		return success;
+		
+		if (success == 0) {
+			plugin.sendMessage(sender, L("failedToCreateOrder"));
+		}
+
 	}
 
 	public int processBuyOrder(CommandSender sender, int itemID, short itemDur, int buyAmount, double buyPrice, Boolean dryrun, Connection con) {
