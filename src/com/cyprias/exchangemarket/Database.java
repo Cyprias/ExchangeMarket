@@ -139,7 +139,15 @@ public class Database {
 			}
 
 			if (tableExists(Config.sqlPrefix + "Passwords") == false) {
-				query = "CREATE TABLE `"+Config.sqlPrefix+"Passwords` (`id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY, `username` VARCHAR(32) NOT NULL, `salt` VARCHAR(32) NOT NULL, `hash` VARCHAR(64) NOT NULL, `timestamp` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, UNIQUE (`username`))";
+				
+				
+				query = "CREATE TABLE `"+Config.sqlPrefix+"Passwords` (`id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY, `username` VARCHAR(32) NOT NULL, `hash` VARCHAR(64) NOT NULL, `timestamp` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, UNIQUE (`username`))";
+				statement = con.prepareStatement(query);
+				statement.executeUpdate();
+			}else if (tableFieldExists(Config.sqlPrefix + "Passwords", "salt", con) == true){
+				//
+				
+				query = "ALTER TABLE `"+Config.sqlPrefix + "Passwords` DROP `salt`";
 				statement = con.prepareStatement(query);
 				statement.executeUpdate();
 			}
@@ -154,6 +162,35 @@ public class Database {
 
 	}
 
+	public boolean tableFieldExists(String table, String field, Connection con){
+		boolean found = false;
+		String query = "SELECT * FROM " + table + ";";
+
+		try {
+			PreparedStatement statement = con.prepareStatement(query);
+			
+			ResultSet result = statement.executeQuery();
+			ResultSetMetaData rsMetaData = result.getMetaData();
+			int numberOfColumns = rsMetaData.getColumnCount();
+
+			String columnName;
+			for (int i = 1; i < numberOfColumns + 1; i++) {
+				columnName = rsMetaData.getColumnName(i);
+				if (columnName.equalsIgnoreCase(field)) {
+					// plugin.info("offline XP  world found.");
+					found = true;
+					break;
+				}
+			}
+			
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return found;
+	}
+	
 	public void listPlayerTransactions(CommandSender sender, int page) {
 		String query = "SELECT COUNT(*) FROM " + Config.sqlPrefix + "Transactions" + " WHERE `seller` LIKE ?";
 
@@ -244,6 +281,7 @@ public class Database {
 		
 		String hash = BCrypt.hashpw(password, salt);
 		//plugin.info("hash: " + hash);
+
 		
 		//boolean check = BCrypt.checkpw(password, hash);
 		//plugin.info("check: " + check);
@@ -254,13 +292,12 @@ public class Database {
 		PreparedStatement statement = null;
 		int success = 0;
 		
-		String query = "UPDATE `" + table + "` SET `salt` = ?, `hash` = ?, `timestamp` = CURRENT_TIMESTAMP WHERE `username` = ? ;";
+		String query = "UPDATE `" + table + "` SET `hash` = ?, `timestamp` = CURRENT_TIMESTAMP WHERE `username` = ? ;";
 
 		try {
 			statement = con.prepareStatement(query);
-			statement.setString(1, salt);
-			statement.setString(2, hash);
-			statement.setString(3, sender.getName());
+			statement.setString(1, hash);
+			statement.setString(2, sender.getName());
 			
 			success = statement.executeUpdate();
 			statement.close();
@@ -270,12 +307,11 @@ public class Database {
 		}
 		
 		if (success == 0){
-			query = "INSERT INTO `"+table+"` (`id`, `username`, `salt`, `hash`, `timestamp`) VALUES (NULL, ?, ?, ?, CURRENT_TIMESTAMP);";
+			query = "INSERT INTO `"+table+"` (`id`, `username`, `hash`, `timestamp`) VALUES (NULL, ?, ?, CURRENT_TIMESTAMP);";
 			try {
 				statement = con.prepareStatement(query);
 				statement.setString(1, sender.getName());
-				statement.setString(2, salt);
-				statement.setString(3, hash);
+				statement.setString(2, hash);
 				
 				success = statement.executeUpdate();
 				statement.close();
