@@ -9,6 +9,9 @@ import net.milkbowl.vault.economy.Economy;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.event.HandlerList;
+import org.bukkit.event.block.SignChangeEvent;
+import org.bukkit.plugin.RegisteredListener;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -263,46 +266,45 @@ public class ExchangeMarket extends JavaPlugin {
 				NodeList titleNodes, descriptionNodes;
 				Element titleElement, descriptionElement;
 				String versionName, descriptionText;
-				//for (int v = 0; v < nodes.getLength(); v++) {
-					// info("v: " +v);
-					int v = 0;
-					
-					latestVersion = (Element) nodes.item(v);
+				// for (int v = 0; v < nodes.getLength(); v++) {
+				// info("v: " +v);
+				int v = 0;
 
-					titleNodes = latestVersion.getElementsByTagName("title");
-					titleElement = (Element) titleNodes.item(0);
-					versionName = titleElement.getChildNodes().item(0).getNodeValue();
+				latestVersion = (Element) nodes.item(v);
 
-					if (curVersion.compareTo(versionName) == 0) {
-						if (newVersionCheck == true)
-							return;
-						if (v == 0)
-							sendMessage(this.sender, F("version", curVersion));
+				titleNodes = latestVersion.getElementsByTagName("title");
+				titleElement = (Element) titleNodes.item(0);
+				versionName = titleElement.getChildNodes().item(0).getNodeValue();
 
+				if (curVersion.compareTo(versionName) == 0) {
+					if (newVersionCheck == true)
 						return;
-					} else if (v == 0) {
-						sendMessage(this.sender, F("versionAvailable", curVersion, versionName));
-						if (newVersionCheck == true)
-							return;
+					if (v == 0)
+						sendMessage(this.sender, F("version", curVersion));
+
+					return;
+				} else if (v == 0) {
+					sendMessage(this.sender, F("versionAvailable", curVersion, versionName));
+					if (newVersionCheck == true)
+						return;
+				}
+
+				if (this.includeDesc == true) {
+					sendMessage(this.sender, ChatColor.GRAY.toString() + "=== " + ChatColor.GREEN.toString() + versionName + ChatColor.GRAY.toString() + " ===");
+
+					descriptionNodes = latestVersion.getElementsByTagName("description");
+					descriptionElement = (Element) descriptionNodes.item(0);
+					descriptionText = descriptionElement.getChildNodes().item(0).getNodeValue();
+					descriptionText = descriptionText.replaceAll("\\<.*?>", "");
+					String lines[] = descriptionText.split("\\r?\\n");
+					for (int l = 0; l < lines.length; l++) {
+						sendMessage(this.sender, ChatColor.GRAY.toString() + "* " + lines[l]);
 					}
+				} else if (v == 0 && hasPermission(this.sender, "exchangemarket.whatsnew")) {
+					sendMessage(this.sender, F("seeNewChanges"));
+				}
 
-					if (this.includeDesc == true) {
-						sendMessage(this.sender, ChatColor.GRAY.toString() + "=== " + ChatColor.GREEN.toString() + versionName + ChatColor.GRAY.toString()
-							+ " ===");
-
-						descriptionNodes = latestVersion.getElementsByTagName("description");
-						descriptionElement = (Element) descriptionNodes.item(0);
-						descriptionText = descriptionElement.getChildNodes().item(0).getNodeValue();
-						descriptionText = descriptionText.replaceAll("\\<.*?>", "");
-						String lines[] = descriptionText.split("\\r?\\n");
-						for (int l = 0; l < lines.length; l++) {
-							sendMessage(this.sender, ChatColor.GRAY.toString() + "* " + lines[l]);
-						}
-					} else if (v == 0 && hasPermission(this.sender, "exchangemarket.whatsnew")) {
-						sendMessage(this.sender, F("seeNewChanges"));
-					}
-
-				//}
+				// }
 
 			} catch (Exception localException) {
 			}

@@ -1,5 +1,7 @@
 package com.cyprias.exchangemarket;
 
+import jBCrypt.BCrypt;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -10,7 +12,10 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.event.HandlerList;
+import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.RegisteredListener;
 
 import com.Acrobot.Breeze.Utils.InventoryUtil;
 import com.Acrobot.Breeze.Utils.MaterialUtil;
@@ -129,7 +134,7 @@ class Commands implements CommandExecutor {
 	public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args, Boolean confirmed) {
 		if ((sender instanceof Player)) {
 			Player player = (Player) sender;
-			if (Config.blockUsageInCreativeMode == true && player.getGameMode().getValue() == 1){
+			if (Config.blockUsageInCreativeMode == true && player.getGameMode().getValue() == 1) {
 				plugin.sendMessage(sender, F("pleaseLeaveCreativeMode"));
 				return true;
 			}
@@ -213,12 +218,14 @@ class Commands implements CommandExecutor {
 				if (plugin.hasPermission(sender, "exchangemarket.remove"))
 					plugin.sendMessage(sender, "§a/" + commandLabel + " remove §7- " + L("cmdRemoveDesc"));
 
+				if (plugin.hasPermission(sender, "exchangemarket.password"))
+					plugin.sendMessage(sender, "§a/" + commandLabel + " password §7- " + L("cmdPasswordDesc"));
+				
 				if (plugin.hasPermission(sender, "exchangemarket.version"))
 					plugin.sendMessage(sender, "§a/" + commandLabel + " version §7- " + L("cmdVersionDesc"));
 				if (plugin.hasPermission(sender, "exchangemarket.whatsnew"))
 					plugin.sendMessage(sender, "§a/" + commandLabel + " whatsnew §7- " + L("cmdWhatsnewDesc"));
-				
-				
+
 				if (plugin.hasPermission(sender, "exchangemarket.reload"))
 					plugin.sendMessage(sender, "§a/" + commandLabel + " reload §7- " + L("cmdReloadDesc"));
 
@@ -281,7 +288,7 @@ class Commands implements CommandExecutor {
 
 				plugin.sendMessage(sender, F("itemShort", itemName, amount));
 				plugin.sendMessage(sender, getItemStatsMsg(stats, amount));
-				
+
 				return true;
 
 			} else if (args[0].equalsIgnoreCase("version") && args.length == 1) {
@@ -289,8 +296,8 @@ class Commands implements CommandExecutor {
 					return true;
 				}
 
-				//plugin.queueVersionRSS();
-				
+				// plugin.queueVersionRSS();
+
 				plugin.queueVersionCheck(sender, false, false);
 				return true;
 			} else if (args[0].equalsIgnoreCase("whatsnew") && args.length == 1) {
@@ -298,11 +305,11 @@ class Commands implements CommandExecutor {
 					return true;
 				}
 
-				//plugin.queueVersionRSS();
-				
+				// plugin.queueVersionRSS();
+
 				plugin.queueVersionCheck(sender, true, false);
 				return true;
-				
+
 			} else if (args[0].equalsIgnoreCase("remove")) {
 				if (!hasCommandPermission(sender, "exchangemarket.remove")) {
 					return true;
@@ -436,7 +443,7 @@ class Commands implements CommandExecutor {
 						return true;
 					}
 				}
-				
+
 				plugin.database.listPlayerOrders(sender, sender.getName(), page);
 
 				return true;
@@ -467,7 +474,7 @@ class Commands implements CommandExecutor {
 						return true;
 					}
 				}
-				
+
 				plugin.database.listOrders(sender, type, page);
 
 				return true;
@@ -527,7 +534,7 @@ class Commands implements CommandExecutor {
 					if (priceEach == false && Config.convertCreatePriceToPerItem == true)
 						price = price / rawAmount;
 
-					//price = plugin.Round(price, Config.priceRounding);
+					// price = plugin.Round(price, Config.priceRounding);
 
 					if (price == 0) {
 						plugin.sendMessage(sender, F("invalidPrice", price));
@@ -535,14 +542,9 @@ class Commands implements CommandExecutor {
 					}
 				}
 
-				
-				
-				
-				
 				// postBuyOrder
 
 				plugin.database.postSellOrder(sender, item.getTypeId(), item.getDurability(), amount, price, false);
-
 
 				return true;
 			} else if (args[0].equalsIgnoreCase("buyorder")) {
@@ -603,7 +605,7 @@ class Commands implements CommandExecutor {
 					if (priceEach == false && Config.convertCreatePriceToPerItem == true)
 						price = price / rawAmount;
 
-				//	price = plugin.Round(price, Config.priceRounding);
+					// price = plugin.Round(price, Config.priceRounding);
 
 				} else {
 					price = plugin.database.getTradersLastPrice(sender.getName(), item.getTypeId(), item.getDurability(), 2);
@@ -798,7 +800,7 @@ class Commands implements CommandExecutor {
 					return true;
 				}
 
-				plugin.database.collectPenderingBuys(sender);
+				plugin.database.collectPendingBuys(sender);
 
 				return true;
 			} else if (args[0].equalsIgnoreCase("reload")) {
@@ -987,7 +989,24 @@ class Commands implements CommandExecutor {
 				}
 
 				return true;
-				// insertOrder
+				
+				
+				
+			} else if (args[0].equalsIgnoreCase("password")) {
+				if (!hasCommandPermission(sender, "exchangemarket.password")) {
+					return true;
+				}
+				
+				if (args.length < 2) {
+					plugin.sendMessage(sender, "§a/" + commandLabel + " password <password>");
+					return true;
+				}
+				
+				String password = args[1].toString();
+				
+				plugin.database.setPassword(sender, password);
+
+				return true;
 			}
 
 			plugin.sendMessage(sender, F("invalidCommand", args[0]));

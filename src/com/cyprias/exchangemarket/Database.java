@@ -1,5 +1,7 @@
 package com.cyprias.exchangemarket;
 
+import jBCrypt.BCrypt;
+
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.Date;
@@ -136,6 +138,14 @@ public class Database {
 				statement.executeUpdate();
 			}
 
+			if (tableExists(Config.sqlPrefix + "Passwords") == false) {
+				query = "CREATE TABLE `"+Config.sqlPrefix+"Passwords` (`id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY, `username` VARCHAR(32) NOT NULL, `salt` VARCHAR(32) NOT NULL, `hash` VARCHAR(64) NOT NULL, `timestamp` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, UNIQUE (`username`))";
+				statement = con.prepareStatement(query);
+				statement.executeUpdate();
+			}
+			
+			
+			
 			// statement.close();
 			con.close();
 		} catch (SQLException e) {
@@ -205,25 +215,6 @@ public class Database {
 
 				String itemName = plugin.itemdb.getItemName(itemID, itemDur);
 
-				/*
-				 * if (compact == true){ if (type == 1){
-				 * sender.sendMessage(buyer + " " + L("bought").toLowerCase() +
-				 * " "+ itemName + "x"+ amount + " $"+
-				 * plugin.Round(price*amount,Config.priceRounding) );
-				 * 
-				 * }else{ sender.sendMessage(buyer + " " +
-				 * L("bought").toLowerCase() + " "+ itemName + "x"+ amount +
-				 * " $"+ plugin.Round(price*amount,Config.priceRounding) ); }
-				 * 
-				 * }else{
-				 */
-
-				// timestamp.getMonth() + "/"+timestamp.getDay() +
-				// "/"+timestamp.getYear();
-				// String date = "??";
-				// Pattern pattern =
-				// Pattern.compile("[0-9]{1,4}-[0-9]{1,2}-[0-9]{1,2} [0-9]{1,2}:[0-9]{1,2}:[0-9]{1,2}.0");
-				// Matcher matcher = pattern.matcher(timestamp.toString());
 				String date = new SimpleDateFormat("MM/dd/yy").format(timestamp);
 
 				if (type == 1) {
@@ -245,6 +236,68 @@ public class Database {
 
 	}
 
+	public void setPassword(CommandSender sender, String password){
+		
+		//plugin.info("password: " + password);
+		String salt = BCrypt.gensalt();
+		//plugin.info("salt: " + salt);
+		
+		String hash = BCrypt.hashpw(password, salt);
+		//plugin.info("hash: " + hash);
+		
+		//boolean check = BCrypt.checkpw(password, hash);
+		//plugin.info("check: " + check);
+		
+		String table = Config.sqlPrefix + "Passwords";
+
+		Connection con = getSQLConnection();
+		PreparedStatement statement = null;
+		int success = 0;
+		
+		String query = "UPDATE `" + table + "` SET `salt` = ?, `hash` = ?, `timestamp` = CURRENT_TIMESTAMP WHERE `username` = ? ;";
+
+		try {
+			statement = con.prepareStatement(query);
+			statement.setString(1, salt);
+			statement.setString(2, hash);
+			statement.setString(3, sender.getName());
+			
+			success = statement.executeUpdate();
+			statement.close();
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		if (success == 0){
+			query = "INSERT INTO `"+table+"` (`id`, `username`, `salt`, `hash`, `timestamp`) VALUES (NULL, ?, ?, ?, CURRENT_TIMESTAMP);";
+			try {
+				statement = con.prepareStatement(query);
+				statement.setString(1, sender.getName());
+				statement.setString(2, salt);
+				statement.setString(3, hash);
+				
+				success = statement.executeUpdate();
+				statement.close();
+				con.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		
+
+		if (success > 0){
+			plugin.sendMessage(sender, L("savePassSuccessful"));
+		}else{
+			plugin.sendMessage(sender, L("savePassFailed"));
+		}
+		
+		try {
+			con.close();
+		} catch (SQLException e) {e.printStackTrace();}
+		
+	}
+	
 	public int insertTransaction(int type, String buyer, int itemID, int itemDur, String itemEnchants, int amount, double price, String seller) {
 		int reply = 0;
 		String query = "INSERT INTO "
@@ -354,6 +407,10 @@ public class Database {
 			int canSell = 0;
 			Boolean infinite;
 			while (result.next()) {
+				amount = result.getInt(9);
+				if (amount <= 0)
+					continue;
+				
 				// patron = result.getString(1);
 				found += 1;
 
@@ -361,7 +418,7 @@ public class Database {
 				infinite = result.getBoolean(3);
 				trader = result.getString(4);
 				price = result.getDouble(8);
-				amount = result.getInt(9);
+
 				enchants = result.getString(7);
 
 				if (infinite == true) {
@@ -631,6 +688,10 @@ public class Database {
 			Boolean infinite;
 			String enchants;
 			while (result.next()) {
+				amount = result.getInt(9);
+				if (amount <= 0)
+					continue;
+				
 				found += 1;
 				// patron = result.getString(1);
 
@@ -638,7 +699,6 @@ public class Database {
 				infinite = result.getBoolean(3);
 				trader = result.getString(4);
 				price = result.getDouble(8);
-				amount = result.getInt(9);
 				enchants = result.getString(7);
 
 				// plugin.info("processBuyOrder id: " + id + ", price: " + price
@@ -869,84 +929,6 @@ public class Database {
 			plugin.sendMessage(sender, L("noActiveOrders"));
 
 		return changes;
-	}
-
-	public int checkPlayerSellOrders(CommandSender sender, int itemID, short itemDur, int buyAmount, double buyPrice, Boolean dryrun, Connection con) {
-
-		String query = "SELECT * FROM " + Config.sqlPrefix
-			+ "Orders WHERE `type` = 1 AND `itemID` = ? AND `itemDur` = ? AND `amount` > 0 AND `player` LIKE ? AND `infinite` = 0 ORDER BY `price` DESC"; // Remove
-
-		int updateSuccessful = 0;
-		String itemName = plugin.itemdb.getItemName(itemID, itemDur);
-
-		Player player = (Player) sender;
-		try {
-			PreparedStatement statement = con.prepareStatement(query);
-			statement.setInt(1, itemID);
-			statement.setInt(2, itemDur);
-
-			statement.setString(3, sender.getName());
-
-			ResultSet result = statement.executeQuery();
-
-			double price;
-			int id, amount, type;
-			double senderBalance;
-			String trader;
-			int canBuy;
-			ItemStack itemStack;
-			Boolean infinite;
-			while (result.next()) {
-				// patron = result.getString(1);
-
-				id = result.getInt(1);
-				type = result.getInt(2);
-				infinite = result.getBoolean(3);
-				trader = result.getString(4);
-				price = result.getDouble(8);
-				amount = result.getInt(9);
-
-				// plugin.info("checkPlayerSellOrders id: " + id + ", price: " +
-				// price + ", amount: " + amount);
-
-				canBuy = Math.min(buyAmount, amount);
-
-				if (canBuy > 0) {
-					itemStack = new ItemStack(itemID, 1);
-					itemStack.setDurability(itemDur);
-					itemStack.setAmount(canBuy);
-
-					if (dryrun == true || InventoryUtil.fits(itemStack, player.getInventory())) {
-						String preview = "";
-						if (dryrun == true)
-							preview = L("preview");
-
-						if (dryrun == false) {
-
-							InventoryUtil.add(itemStack, player.getInventory());
-
-							decreaseInt(Config.sqlPrefix + "Orders", id, "amount", canBuy);
-
-						}
-
-						plugin.sendMessage(
-							sender,
-							preview
-								+ F("buyFromSelf", ChatColor.GREEN + TypeToString(type, infinite), itemName, canBuy,
-									plugin.Round(price * canBuy, Config.priceRounding), plugin.Round(price, Config.priceRounding)));
-
-						buyAmount -= canBuy;
-					}
-
-				}
-			}
-
-			statement.close();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-
-		return buyAmount;
 	}
 
 	public void postBuyOrder(CommandSender sender, int itemID, short itemDur, int buyAmount, double buyPrice, Boolean dryrun) {
@@ -1409,14 +1391,14 @@ public class Database {
 		return myReturn;
 	}
 
-	public int collectPenderingBuys(CommandSender sender) {
+	public int collectPendingBuys(CommandSender sender) {
 		Connection con = getSQLConnection();
-		int value = collectPenderingBuys(sender, con);
+		int value = collectPendingBuys(sender, con);
 		closeSQLConnection(con);
 		return value;
 	}
 
-	public int collectPenderingBuys(CommandSender sender, Connection con) {
+	public int collectPendingBuys(CommandSender sender, Connection con) {
 		int success = 0;
 
 		String SQL = "SELECT * FROM " + Config.sqlPrefix + "Orders WHERE `type` = 2 AND `player` LIKE ? AND `exchanged` > 0 ORDER BY `exchanged` DESC";
