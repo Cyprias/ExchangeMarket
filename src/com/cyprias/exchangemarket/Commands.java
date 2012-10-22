@@ -309,15 +309,15 @@ class Commands implements CommandExecutor {
 				plugin.versionChecker.retreiveVersionInfo(sender, false, false);
 
 				return true;
-			/*} else if (args[0].equalsIgnoreCase("whatsnew") && args.length == 1) {
+			} else if (args[0].equalsIgnoreCase("whatsnew") && args.length == 1) {
 				if (!hasCommandPermission(sender, "exchangemarket.whatsnew")) {
 					return true;
 				}
 
 				// plugin.queueVersionRSS();
 
-				plugin.queueVersionCheck(sender, true, false);
-				return true;*/
+				plugin.versionChecker.retreiveVersionInfo(sender, false, true);
+				return true;
 
 			} else if (args[0].equalsIgnoreCase("remove")) {
 				if (!hasCommandPermission(sender, "exchangemarket.remove")) {

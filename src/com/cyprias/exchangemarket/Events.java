@@ -68,7 +68,7 @@ public class Events implements Listener {
 			// }
 
 			// plugin.queueVersionCheck(player, false, true);
-			plugin.versionChecker.retreiveVersionInfo(player);
+			plugin.versionChecker.retreiveVersionInfo(player, true);
 
 		}
 	}
@@ -76,50 +76,67 @@ public class Events implements Listener {
 	/**/
 	@EventHandler(priority = EventPriority.NORMAL)
 	public void onVersionCheckerEvent(VersionCheckerEvent event) {
-		plugin.info("onVersionCheckerEvent: " + event.getPluginName());
 
 		if (event.getPluginName() == plugin.getName()) {
 			versionInfo info = event.getVersionInfo(0);
-			
-			if (info == null){
-				
-				
-				
+			Object[] args = event.getArgs();
+
+			String curVersion = plugin.getDescription().getVersion();
+
+			if (args.length == 0) {
+				if (info != null && !info.getTitle().equalsIgnoreCase(curVersion)) {
+					plugin.info(F("versionAvailable", curVersion, info.getTitle()));
+				} else {
+					plugin.info(F("version", curVersion));
+				}
 				return;
 			}
-			
-			
-			
-			Object[] args = event.getArgs();
-			if (args.length > 0){
-				if (args[0] instanceof CommandSender) {
-					
-					String curVersion = plugin.getDescription().getVersion();
-					
-					
 
-					
-					
-					
+			if (args.length >= 1) {
+				CommandSender sender = (CommandSender) args[0];
+
+				Boolean silentNewestVersion = false, showChangelog = false;
+				if (args.length >= 2)
+					silentNewestVersion = (Boolean) args[1];
+				if (args.length >= 3)
+					showChangelog = (Boolean) args[2];
+
+				if (info.getTitle().equalsIgnoreCase(curVersion)) {
+					if (silentNewestVersion == true)
+						return;
+
+					plugin.sendMessage(sender, F("version", curVersion));
+
+				} else {
+
+					plugin.sendMessage(sender, F("versionAvailable", curVersion, info.getTitle()));
+
 				}
-			}
-			
-			for (int l = 0; l < args.length; l++) {
-				plugin.info("onVersionCheckerEvent arg " + l + ": " + args[l]);
+
+				if (showChangelog == true) {
+
+					String[] changes;
+					for (int v = 0; v < event.getVersionCount() && v < 3; v++) {
+
+						info = event.getVersionInfo(v);
+						plugin.sendMessage(sender, F("versionChanges", info.getTitle()));
+
+						changes = info.getDescription();
+
+						for (int l = 0; l < changes.length; l++) {
+							plugin.sendMessage(sender, (l + 1) + ChatColor.GRAY.toString() + ": " + ChatColor.WHITE.toString() + changes[l]);
+
+						}
+
+					}
+
+				}
+				return;
+
 			}
 
-			//
 
-			plugin.info("onVersionCheckerEvent title: " + info.getTitle());
-			plugin.info("onVersionCheckerEvent link: " + info.getLink());
-			plugin.info("onVersionCheckerEvent pubDate: " + info.getPubDate());
-			String[] desc = info.getDescription();
-
-			for (int l = 0; l < desc.length; l++) {
-				plugin.info("onVersionCheckerEvent description " + l + ": " + desc[l]);
-			}
 		}
-
 	}
 
 }
