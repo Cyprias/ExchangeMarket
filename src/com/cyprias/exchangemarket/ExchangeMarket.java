@@ -8,6 +8,10 @@ import net.milkbowl.vault.economy.Economy;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -24,6 +28,8 @@ public class ExchangeMarket extends JavaPlugin {
 	public ItemDb itemdb;
 	public Events events;
 
+	public VersionChecker versionChecker;
+	
 	public YML yml;
 	public Localization localization;
 
@@ -41,7 +47,8 @@ public class ExchangeMarket extends JavaPlugin {
 
 		this.commands = new Commands(this);
 		this.itemdb = new ItemDb(this);
-
+		this.versionChecker = new VersionChecker(this, "http://dev.bukkit.org/server-mods/exchangemarket/files.rss");
+		
 		this.yml = new YML(this);
 		this.localization = new Localization(this);
 
@@ -60,7 +67,7 @@ public class ExchangeMarket extends JavaPlugin {
 		} catch (IOException e) {
 		}
 	}
-
+	
 	public boolean hasPermission(CommandSender sender, String node) {
 		if (!(sender instanceof Player)) {
 			return true;
@@ -229,6 +236,7 @@ public class ExchangeMarket extends JavaPlugin {
 		return (double) tmp / p;
 	}
 
+	/*
 	public class versionTask implements Runnable {
 		private int id = 0;
 		CommandSender sender;
@@ -312,10 +320,10 @@ public class ExchangeMarket extends JavaPlugin {
 		versionTask task = new versionTask(sender, includeDesc, versionCheck);
 		int taskID = getServer().getScheduler().scheduleAsyncDelayedTask(this, task, 0L);
 		task.setId(taskID);
-
 	}
-
-	/**/
+*/
+	
+	/*
 	public void queueVersionRSS() {
 		try {
 			URL url = new URL("http://dev.bukkit.org/server-mods/exchangemarket/files.rss");
@@ -354,7 +362,9 @@ public class ExchangeMarket extends JavaPlugin {
 		} catch (Exception localException) {
 		}
 	}
-
+*/
+	
+	
 	public void announceNewOrder(int type, CommandSender sender, int itemID, int itemDur, String itemEnchants, int amount, double price) {
 
 		Player player = (Player) sender;

@@ -291,6 +291,12 @@ class Commands implements CommandExecutor {
 
 				return true;
 
+				
+			} else if (args[0].equalsIgnoreCase("test") && args.length == 1) {
+				
+				plugin.versionChecker.retreiveVersionInfo(sender);
+				
+				return true;
 			} else if (args[0].equalsIgnoreCase("version") && args.length == 1) {
 				if (!hasCommandPermission(sender, "exchangemarket.version")) {
 					return true;
@@ -298,9 +304,12 @@ class Commands implements CommandExecutor {
 
 				// plugin.queueVersionRSS();
 
-				plugin.queueVersionCheck(sender, false, false);
+				//plugin.queueVersionCheck(sender, false, false);
+				
+				plugin.versionChecker.retreiveVersionInfo(sender, false, false);
+
 				return true;
-			} else if (args[0].equalsIgnoreCase("whatsnew") && args.length == 1) {
+			/*} else if (args[0].equalsIgnoreCase("whatsnew") && args.length == 1) {
 				if (!hasCommandPermission(sender, "exchangemarket.whatsnew")) {
 					return true;
 				}
@@ -308,7 +317,7 @@ class Commands implements CommandExecutor {
 				// plugin.queueVersionRSS();
 
 				plugin.queueVersionCheck(sender, true, false);
-				return true;
+				return true;*/
 
 			} else if (args[0].equalsIgnoreCase("remove")) {
 				if (!hasCommandPermission(sender, "exchangemarket.remove")) {

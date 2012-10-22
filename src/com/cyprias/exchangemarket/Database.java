@@ -274,18 +274,7 @@ public class Database {
 	}
 
 	public void setPassword(CommandSender sender, String password){
-		
-		//plugin.info("password: " + password);
-		String salt = BCrypt.gensalt();
-		//plugin.info("salt: " + salt);
-		
-		String hash = BCrypt.hashpw(password, salt);
-		//plugin.info("hash: " + hash);
-
-		
-		//boolean check = BCrypt.checkpw(password, hash);
-		//plugin.info("check: " + check);
-		
+		String hash = BCrypt.hashpw(password, BCrypt.gensalt());
 		String table = Config.sqlPrefix + "Passwords";
 
 		Connection con = getSQLConnection();
