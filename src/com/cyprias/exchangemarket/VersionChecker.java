@@ -40,6 +40,33 @@ public class VersionChecker {
 		return null;
 	}
 
+	public int compareVersions(String a, String b){
+		
+		String[] aParts = a.split("\\.");
+		String[] bParts = b.split("\\.");
+		
+		//plugin.getLogger().info("compareVersions: " + aParts.length + " " + bParts.length);
+		
+		int aInt, bInt;
+		
+		int i=0;
+		while (aParts.length > i && bParts.length > i) {
+			aInt = Integer.parseInt(aParts[i]);
+			bInt = Integer.parseInt(bParts[i]);
+			
+			if (aInt != bInt){
+				
+				return aInt - bInt;
+				
+			}
+			
+			
+			i+=1;
+		}
+		
+		return 0;
+	}
+	
 	List<versionInfo> versions = new ArrayList<versionInfo>();
 
 	public static class versionInfo {

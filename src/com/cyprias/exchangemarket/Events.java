@@ -72,11 +72,22 @@ public class Events implements Listener {
 			String curVersion = plugin.getDescription().getVersion();
 
 			if (args.length == 0) {
-				if (info != null && !info.getTitle().equalsIgnoreCase(curVersion)) {
+				
+				int compare = plugin.versionChecker.compareVersions(curVersion, info.getTitle());
+				//plugin.info("curVersion: " + curVersion +", title: " + info.getTitle() + ", compare: " + compare);
+				if (compare < 0){
 					plugin.info(F("versionAvailable", curVersion, info.getTitle()));
-				} else {
+				}else{
 					plugin.info(F("version", curVersion));
 				}
+					
+				
+				
+				//if (info != null && !info.getTitle().equalsIgnoreCase(curVersion)) {
+				//	plugin.info(F("versionAvailable", curVersion, info.getTitle()));
+				//} else {
+				//	plugin.info(F("version", curVersion));
+				//}
 				return;
 			}
 
@@ -89,26 +100,34 @@ public class Events implements Listener {
 				if (args.length >= 3)
 					showChangelog = (Boolean) args[2];
 
-				if (info.getTitle().equalsIgnoreCase(curVersion)) {
+				int compare = plugin.versionChecker.compareVersions(curVersion, info.getTitle());
+				//plugin.info("curVersion: " + curVersion +", title: " + info.getTitle() + ", compare: " + compare);
+				if (compare < 0){
+					plugin.sendMessage(sender, F("versionAvailable", curVersion, info.getTitle()));
+				}else{
 					if (silentNewestVersion == true)
 						return;
-
+					
 					plugin.sendMessage(sender, F("version", curVersion));
-
-				} else {
-
-					plugin.sendMessage(sender, F("versionAvailable", curVersion, info.getTitle()));
-
 				}
-
+				
 				if (showChangelog == true) {
 
 					String[] changes;
-					for (int v = 0; v < event.getVersionCount() && v < 3; v++) {
-
+					for (int v = 0; v < event.getVersionCount(); v++) { // && v < 3
 						info = event.getVersionInfo(v);
+						
+						compare = plugin.versionChecker.compareVersions(curVersion, info.getTitle());
+						//plugin.info("curVersion: " + curVersion +", title: " + info.getTitle() + ", compare: " + compare);
+						if (compare > 0)
+							break;
+						
 						plugin.sendMessage(sender, F("versionChanges", info.getTitle()));
 
+
+						
+
+						
 						changes = info.getDescription();
 
 						for (int l = 0; l < changes.length; l++) {
