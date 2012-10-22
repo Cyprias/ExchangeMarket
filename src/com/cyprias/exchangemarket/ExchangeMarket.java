@@ -212,6 +212,7 @@ public class ExchangeMarket extends JavaPlugin {
 		return false;
 	}
 
+	
 	public boolean debtPlayer(String pName, double amount) {
 		pName = pName.toLowerCase();
 		if (setupEconomy()) {
