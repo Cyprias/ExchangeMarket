@@ -140,14 +140,14 @@ class Commands implements CommandExecutor {
 			}
 		}
 
-		if (Config.allowMultipleQueuedCommands == false) {
+		//if (Config.allowMultipleQueuedCommands == false) {
 			for (int i = 0; i < cmdTasks.size(); i++) {
 				if (cmdTasks.get(i).sender.equals(sender)) {
 					plugin.sendMessage(sender, F("processingPreviousCMD"));
 					return true;
 				}
 			}
-		}
+		//}
 
 		// for (int x = 0; x < 5; x++) {
 

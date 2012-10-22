@@ -57,19 +57,7 @@ public class Events implements Listener {
 		Player player = event.getPlayer();
 
 		if (player.hasPermission("exchangemarket.loginNewVersion")) {
-			// if (plugin.latestVersion == null) {
-			// plugin.latestVersion = plugin.getLatestVersion();
-			// }
-			// String curVersion = plugin.getDescription().getVersion();
-
-			// if (curVersion.compareTo(plugin.latestVersion) < 0) {
-			// plugin.sendMessage(player, F("versionAvailable", ChatColor.RED +
-			// curVersion, ChatColor.GREEN + plugin.latestVersion));
-			// }
-
-			// plugin.queueVersionCheck(player, false, true);
 			plugin.versionChecker.retreiveVersionInfo(player, true);
-
 		}
 	}
 

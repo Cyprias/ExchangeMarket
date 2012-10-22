@@ -475,7 +475,9 @@ public class Database {
 						}
 
 						plugin.notifyBuyerOfExchange(trader, itemID, itemDur, amount, price, sender.getName(), dryrun);
-						insertTransaction(2, sender.getName(), itemID, itemDur, enchants, amount, price, trader);
+						
+						if (Config.logTransactionsToDB == true)
+							insertTransaction(2, sender.getName(), itemID, itemDur, enchants, amount, price, trader);
 
 					}
 
@@ -776,7 +778,8 @@ public class Database {
 
 						plugin.notifySellerOfExchange(trader, itemID, itemDur, canBuy, price, sender.getName(), dryrun);// buy
 
-						insertTransaction(1, sender.getName(), itemID, itemDur, enchants, canBuy, price, trader);
+						if (Config.logTransactionsToDB == true)
+							insertTransaction(1, sender.getName(), itemID, itemDur, enchants, canBuy, price, trader);
 
 					}
 
@@ -1946,7 +1949,7 @@ public class Database {
 
 		int updateSuccessful = 0;
 
-		String SQL = "SELECT * FROM " + Config.sqlPrefix + "Orders WHERE `amount` > 0 ORDER BY " + Config.listSortOrder + " LIMIT "
+		String SQL = "SELECT * FROM " + Config.sqlPrefix + "Orders WHERE `amount` > 0 ORDER BY id ASC LIMIT "
 			+ (Config.transactionsPerPage * page) + ", " + Config.transactionsPerPage;
 
 		if (getType > 0) {
@@ -1954,7 +1957,7 @@ public class Database {
 			// +
 			// "Orders WHERE `itemID` = ? AND `itemDur` = ? AND `itemEnchants` IS NULL AND `amount` > 0 AND `type` = ?;";
 
-			SQL = "SELECT * FROM " + Config.sqlPrefix + "Orders WHERE `amount` > 0 AND `type` = ? ORDER BY " + Config.listSortOrder + " LIMIT "
+			SQL = "SELECT * FROM " + Config.sqlPrefix + "Orders WHERE `amount` > 0 AND `type` = ? ORDER BY id ASC LIMIT "
 				+ (Config.transactionsPerPage * page) + ", " + Config.transactionsPerPage;
 		}
 

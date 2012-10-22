@@ -24,8 +24,8 @@ public class Config {
 	
 	public static String sqlUsername, sqlPassword, sqlURL, sqlPrefix, sqlDatabase, sqlHost, sqlPort;
 	//public static int sqlPort;
-	public static String locale, listSortOrder;
-	public static Boolean blockUsageInCreativeMode,  allowMultipleQueuedCommands, announceNewOrders, logTransactions, convertCreatePriceToPerItem, cancelSelfSalesWhenBuying, autoPricePerUnit, clearRequestAfterConfirm, confirmAllOrders, autoPriceConfirm;
+	public static String locale;
+	public static Boolean blockUsageInCreativeMode,  logBalanceChangesToConsole, announceNewOrders, logTransactionsToDB, convertCreatePriceToPerItem, cancelSelfSalesWhenBuying, autoPricePerUnit, clearRequestAfterConfirm, confirmAllOrders, autoPriceConfirm;
 	public static int priceRounding, transactionsPerPage;
 	public static Double autoBuyPrice, autoSellPrice;
 	
@@ -50,14 +50,12 @@ public class Config {
 		announceNewOrders = config.getBoolean("announceNewOrders");
 		blockUsageInCreativeMode = config.getBoolean("blockUsageInCreativeMode");
 		
-		allowMultipleQueuedCommands = config.getBoolean("allowMultipleQueuedCommands");
-		
 		clearRequestAfterConfirm = config.getBoolean("clearRequestAfterConfirm");
 		autoPriceConfirm = config.getBoolean("autoPriceConfirm");
 		confirmAllOrders = config.getBoolean("confirmAllOrders");
-		logTransactions = config.getBoolean("logTransactions");
+		logTransactionsToDB = config.getBoolean("logTransactionsToDB");
 		
-		
+		logBalanceChangesToConsole = config.getBoolean("logBalanceChangesToConsole");
 		
 		locale = config.getString("locale");
 		
@@ -71,7 +69,6 @@ public class Config {
 		autoSellPrice = config.getDouble("autoSellPrice");
 		autoPricePerUnit = config.getBoolean("autoPricePerUnit");
 		
-		listSortOrder = config.getString("listSortOrder");
 		
 	}
 }

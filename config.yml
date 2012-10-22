@@ -11,9 +11,8 @@ priceRounding: 4
 clearRequestAfterConfirm: false
 autoPriceConfirm: true
 confirmAllOrders: false
-listSortOrder: "id ASC"
-logTransactions: true
+logTransactionsToDB: true
 announceNewOrders: true
-allowMultipleQueuedCommands: false
 transactionsPerPage: 10
 blockUsageInCreativeMode: true
+logBalanceChangesToConsole: true
