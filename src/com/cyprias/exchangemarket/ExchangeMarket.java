@@ -49,6 +49,9 @@ public class ExchangeMarket extends JavaPlugin {
 		this.itemdb = new ItemDb(this);
 		this.versionChecker = new VersionChecker(this, "http://dev.bukkit.org/server-mods/exchangemarket/files.rss");
 		
+		if (Config.checkNewVersionOnStartup == true)
+			this.versionChecker.retreiveVersionInfo();
+		
 		this.yml = new YML(this);
 		this.localization = new Localization(this);
 

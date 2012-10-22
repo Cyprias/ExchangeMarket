@@ -23,13 +23,13 @@ public class VersionChecker {
 		this.plugin = plugin;
 		this.curseRSS = curseRSS;
 		this.pluginName = plugin.getName();
-		retreiveVersionInfo();
 	}
 
 	public void retreiveVersionInfo(Object... args) {
-		getVersionInfoTask task = new getVersionInfoTask(this, args);
+		getVersionInfoTask task = new getVersionInfoTask(this);
 		int taskID = plugin.getServer().getScheduler().scheduleAsyncDelayedTask(plugin, task, 0L);
 		task.setId(taskID);
+		task.setArgs(args);
 	}
 	public String getLatestVersion() {
 		// return this.latestVersion;
@@ -105,11 +105,14 @@ public class VersionChecker {
 		private Object[] args;
 
 
-		public getVersionInfoTask(VersionChecker me2, Object... args) {
+		public getVersionInfoTask(VersionChecker me2) {
 			this.me = me2;
+		}
+		public void setArgs(Object... args) {
 			this.args = args;
 		}
 
+		
 		private int taskID;
 		public void setId(int n) {
 			this.taskID = n;
@@ -162,10 +165,9 @@ public class VersionChecker {
 	}
 
 	public static class VersionCheckerEvent extends Event {
-		 private static final HandlerList handlers = new HandlerList(); 
-		 public HandlerList getHandlers() { return handlers; }
-		 
-		 public static HandlerList getHandlerList() { return handlers; }
+		private static final HandlerList handlers = new HandlerList(); 
+		public HandlerList getHandlers() { return handlers; }
+		public static HandlerList getHandlerList() { return handlers; }
 		 
 		private List<versionInfo> versions;
 
