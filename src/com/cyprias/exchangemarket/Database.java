@@ -398,7 +398,7 @@ public class Database {
 		return giveItemToPlayer(player, itemID, itemDur, amount, null);
 	}
 
-	public int checkBuyOrders(CommandSender sender, int itemID, short itemDur, int sellAmount, double sellPrice, Boolean dryrun, Connection con, Boolean silent) {
+	public int checkBuyOrders(CommandSender sender, int itemID, short itemDur, int sellAmount, double sellPrice, Boolean dryrun, Connection con, Boolean silentFail) {
 		String query = "SELECT * FROM " + Config.sqlPrefix
 			+ "Orders WHERE `type` = 2 AND `itemID` = ? AND `itemDur` = ? AND `price` >= ? AND `amount` > 0 AND `player` NOT LIKE ? ORDER BY `price` DESC";
 		// AND `player` NOT LIKE ?
@@ -494,7 +494,7 @@ public class Database {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		if (silent == false) {
+		if (silentFail == false) {
 			if (found == 0) {
 				// String itemName = plugin.itemdb.getItemName(itemID, itemDur);
 				plugin.sendMessage(sender, F("noBuyersForSell", itemName));
@@ -673,7 +673,7 @@ public class Database {
 		return 0;
 	}
 
-	public int checkSellOrders(CommandSender sender, int itemID, short itemDur, int buyAmount, double buyPrice, Boolean dryrun, Connection con, Boolean silent) {
+	public int checkSellOrders(CommandSender sender, int itemID, short itemDur, int buyAmount, double buyPrice, Boolean dryrun, Connection con, Boolean silentFail) {
 
 		String query = "SELECT * FROM " + Config.sqlPrefix
 			+ "Orders WHERE `type` = 1 AND `itemID` = ? AND `itemDur` = ? AND `price` <= ? AND `amount` > 0 AND `player` NOT LIKE ? ORDER BY `price` ASC";
@@ -819,7 +819,7 @@ public class Database {
 						+ F("buyingItemsTotal", itemName, tAmount, plugin.Round(tPrice, Config.priceRounding),
 							plugin.Round(tPrice / tAmount, Config.priceRounding)));
 
-		} else if (silent == false) {
+		} else if (silentFail == false) {
 
 			if (found == 0) {
 				// String itemName = plugin.itemdb.getItemName(itemID, itemDur);

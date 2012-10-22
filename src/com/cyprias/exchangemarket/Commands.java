@@ -292,11 +292,6 @@ class Commands implements CommandExecutor {
 				return true;
 
 				
-			} else if (args[0].equalsIgnoreCase("test") && args.length == 1) {
-				
-				plugin.versionChecker.retreiveVersionInfo(sender);
-				
-				return true;
 			} else if (args[0].equalsIgnoreCase("version") && args.length == 1) {
 				if (!hasCommandPermission(sender, "exchangemarket.version")) {
 					return true;
