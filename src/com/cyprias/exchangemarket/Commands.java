@@ -493,7 +493,7 @@ class Commands implements CommandExecutor {
 					return true;
 				}
 				if (args.length < 2) {
-					plugin.sendMessage(sender, "§a/" + commandLabel + " sellorder <itemName> <amount> [price[e]] §7- " + L("cmdSellOrderDesc"));
+					plugin.sendMessage(sender, "§a/" + commandLabel + " sellorder <itemName> <amount> [price] §7- " + L("cmdSellOrderDesc"));
 					return true;
 				}
 
@@ -561,7 +561,7 @@ class Commands implements CommandExecutor {
 					return true;
 				}
 				if (args.length < 3) {
-					plugin.sendMessage(sender, "§a/" + commandLabel + " buyorder <itemName> <amount> [price[e]] §7- " + L("cmdBuyOrderDesc"));
+					plugin.sendMessage(sender, "§a/" + commandLabel + " buyorder <itemName> <amount> [price] §7- " + L("cmdBuyOrderDesc"));
 					return true;
 				}
 
@@ -636,7 +636,7 @@ class Commands implements CommandExecutor {
 					return true;
 				}
 				if (args.length < 2) {
-					plugin.sendMessage(sender, "§a/" + commandLabel + " buy <itemName> <amount> [price[e]] §7- " + L("cmdBuyDesc"));
+					plugin.sendMessage(sender, "§a/" + commandLabel + " buy <itemName> <amount> [price] §7- " + L("cmdBuyDesc"));
 					return true;
 				}
 
