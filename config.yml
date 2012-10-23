@@ -16,3 +16,4 @@ announceNewOrders: true
 transactionsPerPage: 10
 blockUsageInCreativeMode: true
 logBalanceChangesToConsole: true
+checkNewVersionOnStartup: true

@@ -77,8 +77,7 @@ public class Events implements Listener {
 				//plugin.info("curVersion: " + curVersion +", title: " + info.getTitle() + ", compare: " + compare);
 				if (compare < 0){
 					plugin.info(F("versionAvailable", curVersion, info.getTitle()));
-				}else{
-					plugin.info(F("version", curVersion));
+					plugin.info(info.getLink());
 				}
 					
 				
