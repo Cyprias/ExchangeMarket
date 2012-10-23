@@ -80,9 +80,12 @@ public class ExchangeMarket extends JavaPlugin {
 		// return true;
 		// }
 
-		if (player.isPermissionSet(node))
+		if (player.isPermissionSet(node)) //in case admin purposely set the node to false. 
 			return player.hasPermission(node);
 
+		if (player.isPermissionSet(pluginName.toLowerCase() + ".*")) 
+			return player.hasPermission(pluginName.toLowerCase() + ".*");
+		
 		String[] temp = node.split("\\.");
 		String wildNode = temp[0];
 		for (int i = 1; i < (temp.length); i++) {
@@ -91,15 +94,9 @@ public class ExchangeMarket extends JavaPlugin {
 			if (player.isPermissionSet(wildNode + ".*"))
 				// plugin.info("wildNode1 " + wildNode+".*");
 				return player.hasPermission(wildNode + ".*");
-
 		}
-		if (player.isPermissionSet(wildNode))
-			return player.hasPermission(wildNode);
 
-		if (player.isPermissionSet(wildNode))
-			return player.hasPermission(wildNode);
-
-		return player.hasPermission(pluginName.toLowerCase() + ".*");
+		return player.hasPermission(node);
 	}
 
 	public void info(String msg) {

@@ -8,39 +8,37 @@ commands:
     usage: /<command>
 
 permissions:
-  exchangemarket.sell:
-    default: false
-  exchangemarket.buy:
-    default: false
-  exchangemarket.sellorder:
-    default: false
-  exchangemarket.buyorder:
-    default: false
-  exchangemarket.price:
-    default: false
-  exchangemarket.infbuy:
-    default: false
-  exchangemarket.infsell:
-    default: false
-  exchangemarket.orders:
-    default: false
-  exchangemarket.collect:
-    default: false
-  exchangemarket.list:
-    default: false
-  exchangemarket.sellhand:
-    default: false
-  exchangemarket.cancel:
-    default: false
-  exchangemarket.reload:
-    default: false
-  exchangemarket.version:
-    default: false
-  exchangemarket.search:
-    default: false
-  exchangemarket.remove:
-    default: false
-  exchangemarket.transactions:
-    default: false
-  exchangemarket.loginNewVersion:
-    default: op
+    exchangemarket.*:
+        description: Gives access to all ExchangeMarket commands
+        default: false
+        children:
+            exchangemarket.user: true
+            exchangemarket.admin: true
+    exchangemarket.user:
+        description: Gives access to general user commands.
+        default: false
+        children:
+            exchangemarket.search: true
+            exchangemarket.sell: true
+            exchangemarket.buy: true
+            exchangemarket.sellorder: true
+            exchangemarket.buyorder: true
+            exchangemarket.price: true
+            exchangemarket.orders: true
+            exchangemarket.collect: true
+            exchangemarket.list: true
+            exchangemarket.sellhand: true
+            exchangemarket.cancel: true
+            exchangemarket.transactions: true
+            exchangemarket.password: true
+    exchangemarket.admin:
+        description: Gives access to admin commands.
+        default: false
+        children:
+            exchangemarket.infbuy: true
+            exchangemarket.infsell: true
+            exchangemarket.reload: true
+            exchangemarket.version: true
+            exchangemarket.whatsnew: true
+            exchangemarket.remove: true
+            exchangemarket.loginNewVersion: true
