@@ -17,3 +17,4 @@ transactionsPerPage: 10
 blockUsageInCreativeMode: true
 logBalanceChangesToConsole: true
 checkNewVersionOnStartup: true
+grantOpsAllPermissions: false

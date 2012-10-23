@@ -25,7 +25,7 @@ public class Config {
 	public static String sqlUsername, sqlPassword, sqlURL, sqlPrefix, sqlDatabase, sqlHost, sqlPort;
 	//public static int sqlPort;
 	public static String locale;
-	public static Boolean checkNewVersionOnStartup, blockUsageInCreativeMode,  logBalanceChangesToConsole, announceNewOrders, logTransactionsToDB, convertCreatePriceToPerItem, cancelSelfSalesWhenBuying, autoPricePerUnit, clearRequestAfterConfirm, confirmAllOrders, autoPriceConfirm;
+	public static Boolean grantOpsAllPermissions, checkNewVersionOnStartup, blockUsageInCreativeMode,  logBalanceChangesToConsole, announceNewOrders, logTransactionsToDB, convertCreatePriceToPerItem, cancelSelfSalesWhenBuying, autoPricePerUnit, clearRequestAfterConfirm, confirmAllOrders, autoPriceConfirm;
 	public static int priceRounding, transactionsPerPage;
 	public static Double autoBuyPrice, autoSellPrice;
 	
@@ -47,7 +47,8 @@ public class Config {
 			sqlURL = "jdbc:mysql://" + sqlHost + ":" + sqlPort + "/" + sqlDatabase;
 		//}
 			
-			checkNewVersionOnStartup = config.getBoolean("checkNewVersionOnStartup");
+		grantOpsAllPermissions	= config.getBoolean("grantOpsAllPermissions");
+		checkNewVersionOnStartup = config.getBoolean("checkNewVersionOnStartup");
 			
 		announceNewOrders = config.getBoolean("announceNewOrders");
 		blockUsageInCreativeMode = config.getBoolean("blockUsageInCreativeMode");

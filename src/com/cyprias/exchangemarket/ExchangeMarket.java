@@ -29,7 +29,7 @@ public class ExchangeMarket extends JavaPlugin {
 	public Events events;
 
 	public VersionChecker versionChecker;
-	
+
 	public YML yml;
 	public Localization localization;
 
@@ -48,10 +48,10 @@ public class ExchangeMarket extends JavaPlugin {
 		this.commands = new Commands(this);
 		this.itemdb = new ItemDb(this);
 		this.versionChecker = new VersionChecker(this, "http://dev.bukkit.org/server-mods/exchangemarket/files.rss");
-		
+
 		if (Config.checkNewVersionOnStartup == true)
 			this.versionChecker.retreiveVersionInfo();
-		
+
 		this.yml = new YML(this);
 		this.localization = new Localization(this);
 
@@ -70,22 +70,23 @@ public class ExchangeMarket extends JavaPlugin {
 		} catch (IOException e) {
 		}
 	}
-	
+
 	public boolean hasPermission(CommandSender sender, String node) {
 		if (!(sender instanceof Player)) {
 			return true;
 		}
 		Player player = (Player) sender;
-		// if (player.isOp()) {
-		// return true;
-		// }
+		if (Config.grantOpsAllPermissions == true && player.isOp()) {
+			return true;
+		}
 
-		if (player.isPermissionSet(node)) //in case admin purposely set the node to false. 
+		if (player.isPermissionSet(node)) // in case admin purposely set the
+											// node to false.
 			return player.hasPermission(node);
 
-		if (player.isPermissionSet(pluginName.toLowerCase() + ".*")) 
+		if (player.isPermissionSet(pluginName.toLowerCase() + ".*"))
 			return player.hasPermission(pluginName.toLowerCase() + ".*");
-		
+
 		String[] temp = node.split("\\.");
 		String wildNode = temp[0];
 		for (int i = 1; i < (temp.length); i++) {
@@ -203,7 +204,7 @@ public class ExchangeMarket extends JavaPlugin {
 				econ.createPlayerAccount(pName);
 			double balance = econ.getBalance(pName.toLowerCase());
 			econ.depositPlayer(pName, amount);
-			
+
 			if (Config.logBalanceChangesToConsole == true)
 				info("§aCrediting §f" + pName + "'s account. " + Round(balance, 2) + "+§a" + Round(amount, 2) + "§f=" + Round(econ.getBalance(pName), 2));
 
@@ -212,7 +213,6 @@ public class ExchangeMarket extends JavaPlugin {
 		return false;
 	}
 
-	
 	public boolean debtPlayer(String pName, double amount) {
 		pName = pName.toLowerCase();
 		if (setupEconomy()) {
@@ -240,7 +240,6 @@ public class ExchangeMarket extends JavaPlugin {
 		return (double) tmp / p;
 	}
 
-	
 	public void announceNewOrder(int type, CommandSender sender, int itemID, int itemDur, String itemEnchants, int amount, double price) {
 
 		Player player = (Player) sender;
