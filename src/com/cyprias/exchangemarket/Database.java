@@ -1,6 +1,5 @@
 package com.cyprias.exchangemarket;
 
-import jBCrypt.BCrypt;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -24,6 +23,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.mindrot.jbcrypt.BCrypt;
 
 import com.Acrobot.Breeze.Utils.InventoryUtil;
 import com.Acrobot.Breeze.Utils.MaterialUtil;
