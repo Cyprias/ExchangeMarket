@@ -31,39 +31,22 @@ public class VersionChecker {
 		task.setId(taskID);
 		task.setArgs(args);
 	}
-	public String getLatestVersion() {
-		// return this.latestVersion;
 
-		if (versions.size() > 0)
-			return versions.get(0).title;
-
-		return null;
-	}
-
-	public int compareVersions(String a, String b){
-		
+	public static int compareVersions(String a, String b){
 		String[] aParts = a.split("\\.");
 		String[] bParts = b.split("\\.");
-		
-		//plugin.getLogger().info("compareVersions: " + aParts.length + " " + bParts.length);
-		
+
 		int aInt, bInt;
 		
 		int i=0;
 		while (aParts.length > i && bParts.length > i) {
 			aInt = Integer.parseInt(aParts[i]);
 			bInt = Integer.parseInt(bParts[i]);
-			
 			if (aInt != bInt){
-				
 				return aInt - bInt;
-				
 			}
-			
-			
 			i+=1;
 		}
-		
 		return 0;
 	}
 	

@@ -275,4 +275,5 @@ public class ExchangeMarket extends JavaPlugin {
 	public void permMessage(String permissionNode, String message) {
 		permMessage(permissionNode, message, "");
 	}
+
 }
