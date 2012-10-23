@@ -16,8 +16,8 @@ public class YML {
 	HashMap<String, FileConfiguration> FileConfigs = new HashMap<String, FileConfiguration>();
 	private ExchangeMarket plugin;
 	
-	public YML(ExchangeMarket monarchy) {
-		this.plugin = monarchy;
+	public YML(ExchangeMarket plugin2) {
+		this.plugin = plugin2;
 	}
 	public boolean reloadYMLConfig(String file) {
 		if (!FileConfigs.containsKey(file)){
