@@ -30,7 +30,6 @@ permissions:
             exchangemarket.sellhand: true
             exchangemarket.cancel: true
             exchangemarket.transactions: true
-            exchangemarket.password: true
     exchangemarket.admin:
         description: Gives access to admin commands.
         default: false

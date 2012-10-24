@@ -3,6 +3,7 @@ package com.cyprias.exchangemarket;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -10,6 +11,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.block.SignChangeEvent;
@@ -931,6 +933,13 @@ class Commands implements CommandExecutor {
 				}
 
 				ItemStack stock = player.getItemInHand();
+				Map<Enchantment, Integer> e = stock.getEnchantments();
+				
+				if (e.size() > 0){
+					plugin.sendMessage(sender, F("cantSellEnchants"));
+					return true;
+				}
+				
 				int type = 1;
 				String playerName = sender.getName();
 				int itemID = stock.getTypeId();
