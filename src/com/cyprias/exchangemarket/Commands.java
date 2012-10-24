@@ -912,6 +912,66 @@ class Commands implements CommandExecutor {
 				}
 
 				return true;
+				
+			} else if (args[0].equalsIgnoreCase("sellhand")) {
+				if (!hasCommandPermission(sender, "exchangemarket.sellhand")) {
+					return true;
+				}
+
+				ItemStack stock = player.getItemInHand();
+				int type = 1;
+				String playerName = sender.getName();
+				int itemID = stock.getTypeId();
+				int itemDur = stock.getDurability();
+				String itemEnchants = MaterialUtil.Enchantment.encodeEnchantment(stock);
+				
+				int amount = stock.getAmount();
+				
+				double price = -1;
+				// plugin.sendMessage(sender, "amount: " + amount);
+
+				if (args.length > 1) {
+
+					// if (args.length > 2) {
+
+					Boolean priceEach = false;
+
+					if (args[1].substring(args[1].length() - 1, args[1].length()).equalsIgnoreCase("e")) {
+						priceEach = true;
+						args[1] = args[1].substring(0, args[1].length() - 1);
+					}
+
+					if (isDouble(args[1])) {
+						price = Math.abs(Double.parseDouble(args[1]));
+					} else {
+						plugin.sendMessage(sender, F("invalidPrice", args[1]));
+						return true;
+					}
+					if (price == 0) {
+						plugin.sendMessage(sender, F("invalidPrice", 0));
+						return true;
+					}
+					if (priceEach == false && Config.convertCreatePriceToPerItem == true)
+						price = price / amount;
+
+					// price = plugin.Round(price, Config.priceRounding);
+
+					if (price == 0) {
+						plugin.sendMessage(sender, F("invalidPrice", price));
+						return true;
+					}
+				}
+				
+				
+				
+				plugin.database.postSellOrder(sender, stock.getTypeId(), stock.getDurability(), amount, price, false);
+				
+				
+				
+				return true;
+				
+				
+				
 			} else if (args[0].equalsIgnoreCase("transactions")) {
 				if (!hasCommandPermission(sender, "exchangemarket.transactions")) {
 					return true;
@@ -949,52 +1009,7 @@ class Commands implements CommandExecutor {
 					lastRequest.remove(sender.getName());
 
 				return true;
-			} else if (args[0].equalsIgnoreCase("sellhand")) {
-				if (!hasCommandPermission(sender, "exchangemarket.sellhand")) {
-					return true;
-				}
 
-				ItemStack item = player.getItemInHand();
-
-				int type = 1;
-				String playerName = sender.getName();
-				int itemID = item.getTypeId();
-				int itemDur = item.getDurability();
-				String itemEnchants = MaterialUtil.Enchantment.encodeEnchantment(item);
-
-				double price = 0;
-				if (args.length > 1) {
-					if (isDouble(args[1])) {
-						price = Double.parseDouble(args[1]);
-					} else {
-						plugin.sendMessage(sender, F("invalidPrice", args[1]));
-						return true;
-					}
-				}
-				price = Math.abs(price);
-				if (price == 0) {
-					plugin.sendMessage(sender, F("invalidPrice", 0));
-					return true;
-				}
-
-				int stock = item.getAmount();
-
-				int success = plugin.database.insertOrder(type, false, playerName, itemID, itemDur, itemEnchants, price, stock, dryrun);
-
-				plugin.sendMessage(sender, "success: " + success);
-
-				if (success > 0 && dryrun == false) {
-					InventoryUtil.remove(item, player.getInventory());
-				}
-
-				if (dryrun == true) {
-					lastRequest.put(sender.getName(), args);
-					plugin.sendMessage(sender, "Type /em confirm to commit this order.");
-				}
-
-				return true;
-				
-				
 				
 			} else if (args[0].equalsIgnoreCase("password")) {
 				if (!hasCommandPermission(sender, "exchangemarket.password")) {
