@@ -182,52 +182,64 @@ class Commands implements CommandExecutor {
 
 				plugin.sendMessage(sender, F("pluginsCommands", plugin.pluginName));
 
-				if (plugin.hasPermission(sender, "exchangemarket.sell"))
-					plugin.sendMessage(sender, "§a/" + commandLabel + " sell §7- " + L("cmdSellDesc"));
-
 				if (plugin.hasPermission(sender, "exchangemarket.buy"))
-					plugin.sendMessage(sender, "§a/" + commandLabel + " buy §7- " + L("cmdBuyDesc"));
+					plugin.sendMessage(sender, "§a/" + commandLabel + " buy §7- " + L("cmdBuyDesc"), true, false);
+				
+				if (plugin.hasPermission(sender, "exchangemarket.buyorder"))
+					plugin.sendMessage(sender, "§a/" + commandLabel + " buyorder §7- " + L("cmdBuyOrderDesc"), true, false);
+				
+				if (plugin.hasPermission(sender, "exchangemarket.cancel"))
+					plugin.sendMessage(sender, "§a/" + commandLabel + " cancel §7- " + L("cmdCancelDesc"), true, false);
+				
+				if (plugin.hasPermission(sender, "exchangemarket.collect"))
+					plugin.sendMessage(sender, "§a/" + commandLabel + " collect §7- " + L("cmdCollectDesc"), true, false);
+				
+				if (plugin.hasPermission(sender, "exchangemarket.infbuy"))
+					plugin.sendMessage(sender, "§a/" + commandLabel + " infbuy §7- " + L("cmdInfBuyDesc"), true, false);
+				if (plugin.hasPermission(sender, "exchangemarket.infsell"))
+					plugin.sendMessage(sender, "§a/" + commandLabel + " infsell §7- " + L("cmdInfSellDesc"), true, false);
+				
+				if (plugin.hasPermission(sender, "exchangemarket.list"))
+					plugin.sendMessage(sender, "§a/" + commandLabel + " list [Buy/Sell] [page]§7- " + L("cmdListDesc"), true, false);
+				
+				if (plugin.hasPermission(sender, "exchangemarket.orders"))
+					plugin.sendMessage(sender, "§a/" + commandLabel + " orders [page] §7- " + L("cmdOrdersDesc"), true, false);
+				
+				if (plugin.hasPermission(sender, "exchangemarket.password"))
+					plugin.sendMessage(sender, "§a/" + commandLabel + " password §7- " + L("cmdPasswordDesc"), true, false);
+				
+				if (plugin.hasPermission(sender, "exchangemarket.price"))
+					plugin.sendMessage(sender, "§a/" + commandLabel + " price §7- " + L("cmdPriceDesc"), true, false);
+				
+				if (plugin.hasPermission(sender, "exchangemarket.reload"))
+					plugin.sendMessage(sender, "§a/" + commandLabel + " reload §7- " + L("cmdReloadDesc"), true, false);
+				
+				if (plugin.hasPermission(sender, "exchangemarket.remove"))
+					plugin.sendMessage(sender, "§a/" + commandLabel + " remove §7- " + L("cmdRemoveDesc"), true, false);
+				
+				if (plugin.hasPermission(sender, "exchangemarket.search"))
+					plugin.sendMessage(sender, "§a/" + commandLabel + " search §7- " + L("cmdSearchDesc"), true, false);
+				
+
+				if (plugin.hasPermission(sender, "exchangemarket.sell"))
+					plugin.sendMessage(sender, "§a/" + commandLabel + " sell §7- " + L("cmdSellDesc"), true, false);
+
+				if (plugin.hasPermission(sender, "exchangemarket.sellhand"))
+					plugin.sendMessage(sender, "§a/" + commandLabel + " sellhand [price] §7- " + L("cmdSellHandDesc"), true, false);
 
 				if (plugin.hasPermission(sender, "exchangemarket.sellorder"))
-					plugin.sendMessage(sender, "§a/" + commandLabel + " sellorder §7- " + L("cmdSellOrderDesc"));
-				if (plugin.hasPermission(sender, "exchangemarket.buyorder"))
-					plugin.sendMessage(sender, "§a/" + commandLabel + " buyorder §7- " + L("cmdBuyOrderDesc"));
+					plugin.sendMessage(sender, "§a/" + commandLabel + " sellorder §7- " + L("cmdSellOrderDesc"), true, false);
 
-				if (plugin.hasPermission(sender, "exchangemarket.price"))
-					plugin.sendMessage(sender, "§a/" + commandLabel + " price §7- " + L("cmdPriceDesc"));
-
-				if (plugin.hasPermission(sender, "exchangemarket.infbuy"))
-					plugin.sendMessage(sender, "§a/" + commandLabel + " infbuy §7- " + L("cmdInfBuyDesc"));
-				if (plugin.hasPermission(sender, "exchangemarket.infsell"))
-					plugin.sendMessage(sender, "§a/" + commandLabel + " infsell §7- " + L("cmdInfSellDesc"));
-
-				if (plugin.hasPermission(sender, "exchangemarket.search"))
-					plugin.sendMessage(sender, "§a/" + commandLabel + " search §7- " + L("cmdSearchDesc"));
-				if (plugin.hasPermission(sender, "exchangemarket.list"))
-					plugin.sendMessage(sender, "§a/" + commandLabel + " list [Buy/Sell] [page]§7- " + L("cmdListDesc"));
-				if (plugin.hasPermission(sender, "exchangemarket.orders"))
-					plugin.sendMessage(sender, "§a/" + commandLabel + " orders [page] §7- " + L("cmdOrdersDesc"));
-				if (plugin.hasPermission(sender, "exchangemarket.collect"))
-					plugin.sendMessage(sender, "§a/" + commandLabel + " collect §7- " + L("cmdCollectDesc"));
-				if (plugin.hasPermission(sender, "exchangemarket.cancel"))
-					plugin.sendMessage(sender, "§a/" + commandLabel + " cancel §7- " + L("cmdCancelDesc"));
 
 				if (plugin.hasPermission(sender, "exchangemarket.transactions"))
-					plugin.sendMessage(sender, "§a/" + commandLabel + " transactions [page] §7- " + L("cmdTransactionsDesc"));
+					plugin.sendMessage(sender, "§a/" + commandLabel + " transactions [page] §7- " + L("cmdTransactionsDesc"), true, false);
 
-				if (plugin.hasPermission(sender, "exchangemarket.remove"))
-					plugin.sendMessage(sender, "§a/" + commandLabel + " remove §7- " + L("cmdRemoveDesc"));
-
-				if (plugin.hasPermission(sender, "exchangemarket.password"))
-					plugin.sendMessage(sender, "§a/" + commandLabel + " password §7- " + L("cmdPasswordDesc"));
-				
 				if (plugin.hasPermission(sender, "exchangemarket.version"))
-					plugin.sendMessage(sender, "§a/" + commandLabel + " version §7- " + L("cmdVersionDesc"));
+					plugin.sendMessage(sender, "§a/" + commandLabel + " version §7- " + L("cmdVersionDesc"), true, false);
 				if (plugin.hasPermission(sender, "exchangemarket.whatsnew"))
-					plugin.sendMessage(sender, "§a/" + commandLabel + " whatsnew §7- " + L("cmdWhatsnewDesc"));
+					plugin.sendMessage(sender, "§a/" + commandLabel + " whatsnew §7- " + L("cmdWhatsnewDesc"), true, false);
 
-				if (plugin.hasPermission(sender, "exchangemarket.reload"))
-					plugin.sendMessage(sender, "§a/" + commandLabel + " reload §7- " + L("cmdReloadDesc"));
+
 
 				return true;
 			}

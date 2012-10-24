@@ -42,3 +42,6 @@ permissions:
             exchangemarket.whatsnew: true
             exchangemarket.remove: true
             exchangemarket.loginNewVersion: true
+    exchangemarket.password:
+        description: Sets password for webUI.
+        default: false

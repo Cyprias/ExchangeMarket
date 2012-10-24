@@ -104,11 +104,19 @@ public class ExchangeMarket extends JavaPlugin {
 		getServer().getConsoleSender().sendMessage(chatPrefix + msg);
 	}
 
-	public void sendMessage(CommandSender sender, String message, Boolean showConsole) {
+	public void sendMessage(CommandSender sender, String message, Boolean showConsole, Boolean sendPrefix) {
 		if (sender instanceof Player && showConsole == true) {
 			info("§e" + sender.getName() + "->§f" + message);
 		}
-		sender.sendMessage(chatPrefix + message);
+		if (sendPrefix == true){
+			sender.sendMessage(chatPrefix + message);
+		}else{
+			sender.sendMessage(message);
+		}
+	}
+	
+	public void sendMessage(CommandSender sender, String message, Boolean showConsole) {
+		sendMessage(sender, message, showConsole, true);
 	}
 
 	public void sendMessage(CommandSender sender, String message) {
