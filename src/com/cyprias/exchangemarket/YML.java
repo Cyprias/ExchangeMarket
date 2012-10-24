@@ -6,17 +6,19 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.HashMap;
+import java.util.logging.Logger;
 
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.plugin.java.JavaPlugin;
 
 public class YML {
 	HashMap<String, File> Files = new HashMap<String, File>();
 	HashMap<String, FileConfiguration> FileConfigs = new HashMap<String, FileConfiguration>();
-	private ExchangeMarket plugin;
+	private JavaPlugin plugin;
 	
-	public YML(ExchangeMarket plugin2) {
+	public YML(JavaPlugin plugin2) {
 		this.plugin = plugin2;
 	}
 	public boolean reloadYMLConfig(String file) {
@@ -84,6 +86,7 @@ public class YML {
 		}
 	}
 	
+	private Logger log = Logger.getLogger("Minecraft");
 	public void copyNewKeysToDisk(String fileName){
 		InputStream in = plugin.getResource(fileName);
 
@@ -99,7 +102,7 @@ public class YML {
 		}
 		
 		//Load the file from disk.
-		FileConfiguration targetConfig = plugin.yml.FileConfigs.get(fileName);
+		FileConfiguration targetConfig = FileConfigs.get(fileName);
 		Boolean save = false;
 		String value;
 		for (String key : locales.getKeys(false)) {
@@ -108,7 +111,8 @@ public class YML {
 			if (targetConfig.getString(key) == null){
 				//Our stream has a key the file on disk doesn't have, copy the new key to file. 
 				
-				plugin.info("Copying new locale key [" + key + "]=[" + value + "] to " + fileName+".");
+				
+				log.info(plugin.getName() + ": Copying new locale key [" + key + "]=[" + value + "] to " + fileName+".");
 				
 				targetConfig.set(key, value);
 				save = true; //Only save if we make changes.
@@ -119,7 +123,7 @@ public class YML {
 		if (save == true){
 			//Save changes to disk.
 			try {
-				targetConfig.save(plugin.yml.Files.get(fileName));
+				targetConfig.save(Files.get(fileName));
 			} catch (IOException e) {e.printStackTrace();
 			}
 		}
