@@ -1096,8 +1096,17 @@ public class Database {
 
 	public int insertOrder(int type, Boolean infinite, String player, int itemID, int itemDur, String itemEnchants, double price, int amount, Boolean dryrun,
 		Connection con) {
+		
+		if (increaseOrderAmount(type, infinite, player, itemID, itemDur, itemEnchants, price, amount) == true)
+			return 2;
+		
+		
 		int updateSuccessful = 0;
 		// price = plugin.Round(price, Config.priceRounding);
+		
+		
+		
+		/*
 		String query = "SELECT *  FROM " + Config.sqlPrefix
 			+ "Orders WHERE `type` = ? AND `infinite` = ? AND `player` LIKE ? AND `itemID` = ? AND `itemDur` = ? AND `itemEnchants` IS NULL  AND `price` = ?;";
 		int id = 0;
@@ -1136,11 +1145,16 @@ public class Database {
 		if (id > 0) {
 			return 2;
 		}
+*/
 
+		
+		
+		
 		if (dryrun == true)
 			return 1;
-
-		query = "INSERT INTO "
+		PreparedStatement statement;
+		
+		String query = "INSERT INTO "
 			+ Config.sqlPrefix
 			+ "Orders (`id`, `type`, `infinite`, `player`, `itemID`, `itemDur`, `itemEnchants`, `price`, `amount`, `exchanged`) VALUES (NULL, ?, ?, ?, ?, ?, ?, ?, ?, 0);";
 		try {
@@ -1277,6 +1291,7 @@ public class Database {
 		return sucessful;
 	}
 
+	
 	public int increaseInt(String table, int rowID, String column, int amount, Connection con) {
 		int sucessful = 0;
 
@@ -1297,6 +1312,7 @@ public class Database {
 		return sucessful;
 	}
 
+	
 	public int increaseInt(String table, int rowID, String column, int amount) {
 		Connection con = getSQLConnection();
 		int sucessful = increaseInt(table, rowID, column, amount, con);
@@ -1304,6 +1320,7 @@ public class Database {
 		return sucessful;
 	}
 
+	/**/
 	public int decreaseInt(String table, int rowID, String column, int amount, Connection con) {
 		int sucessful = 0;
 
@@ -1331,6 +1348,7 @@ public class Database {
 		return sucessful;
 	}
 
+	
 	public int setInt(String table, int rowID, String column, int value, Connection con) {
 		int sucessful = 0;
 
