@@ -30,6 +30,7 @@ permissions:
             exchangemarket.sellhand: true
             exchangemarket.cancel: true
             exchangemarket.transactions: true
+            exchangemarket.confirm: true
     exchangemarket.admin:
         description: Gives access to admin commands.
         default: false
@@ -43,4 +44,10 @@ permissions:
             exchangemarket.loginNewVersion: true
     exchangemarket.password:
         description: Sets password for webUI.
+        default: false
+    exchangemarket.announceneworder.sell:
+        description: Notify user of a new sell order.
+        default: false
+    exchangemarket.announceneworder.buy:
+        description: notify user of a new buy order.
         default: false

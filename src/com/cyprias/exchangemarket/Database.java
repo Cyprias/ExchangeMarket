@@ -1,6 +1,5 @@
 package com.cyprias.exchangemarket;
 
-
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.Date;
@@ -139,21 +138,20 @@ public class Database {
 			}
 
 			if (tableExists(Config.sqlPrefix + "Passwords") == false) {
-				
-				
-				query = "CREATE TABLE `"+Config.sqlPrefix+"Passwords` (`id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY, `username` VARCHAR(32) NOT NULL, `hash` VARCHAR(64) NOT NULL, `timestamp` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, UNIQUE (`username`))";
+
+				query = "CREATE TABLE `"
+					+ Config.sqlPrefix
+					+ "Passwords` (`id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY, `username` VARCHAR(32) NOT NULL, `hash` VARCHAR(64) NOT NULL, `timestamp` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, UNIQUE (`username`))";
 				statement = con.prepareStatement(query);
 				statement.executeUpdate();
-			}else if (tableFieldExists(Config.sqlPrefix + "Passwords", "salt", con) == true){
+			} else if (tableFieldExists(Config.sqlPrefix + "Passwords", "salt", con) == true) {
 				//
-				
-				query = "ALTER TABLE `"+Config.sqlPrefix + "Passwords` DROP `salt`";
+
+				query = "ALTER TABLE `" + Config.sqlPrefix + "Passwords` DROP `salt`";
 				statement = con.prepareStatement(query);
 				statement.executeUpdate();
 			}
-			
-			
-			
+
 			// statement.close();
 			con.close();
 		} catch (SQLException e) {
@@ -162,13 +160,13 @@ public class Database {
 
 	}
 
-	public boolean tableFieldExists(String table, String field, Connection con){
+	public boolean tableFieldExists(String table, String field, Connection con) {
 		boolean found = false;
 		String query = "SELECT * FROM " + table + ";";
 
 		try {
 			PreparedStatement statement = con.prepareStatement(query);
-			
+
 			ResultSet result = statement.executeQuery();
 			ResultSetMetaData rsMetaData = result.getMetaData();
 			int numberOfColumns = rsMetaData.getColumnCount();
@@ -182,7 +180,7 @@ public class Database {
 					break;
 				}
 			}
-			
+
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -190,7 +188,7 @@ public class Database {
 
 		return found;
 	}
-	
+
 	public void listPlayerTransactions(CommandSender sender, int page) {
 		String query = "SELECT COUNT(*) FROM " + Config.sqlPrefix + "Transactions" + " WHERE `seller` LIKE ?";
 
@@ -273,35 +271,35 @@ public class Database {
 
 	}
 
-	public void setPassword(CommandSender sender, String password){
+	public void setPassword(CommandSender sender, String password) {
 		String hash = BCrypt.hashpw(password, BCrypt.gensalt());
 		String table = Config.sqlPrefix + "Passwords";
 
 		Connection con = getSQLConnection();
 		PreparedStatement statement = null;
 		int success = 0;
-		
+
 		String query = "UPDATE `" + table + "` SET `hash` = ?, `timestamp` = CURRENT_TIMESTAMP WHERE `username` = ? ;";
 
 		try {
 			statement = con.prepareStatement(query);
 			statement.setString(1, hash);
 			statement.setString(2, sender.getName());
-			
+
 			success = statement.executeUpdate();
 			statement.close();
-			
+
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		
-		if (success == 0){
-			query = "INSERT INTO `"+table+"` (`id`, `username`, `hash`, `timestamp`) VALUES (NULL, ?, ?, CURRENT_TIMESTAMP);";
+
+		if (success == 0) {
+			query = "INSERT INTO `" + table + "` (`id`, `username`, `hash`, `timestamp`) VALUES (NULL, ?, ?, CURRENT_TIMESTAMP);";
 			try {
 				statement = con.prepareStatement(query);
 				statement.setString(1, sender.getName());
 				statement.setString(2, hash);
-				
+
 				success = statement.executeUpdate();
 				statement.close();
 				con.close();
@@ -309,20 +307,21 @@ public class Database {
 				e.printStackTrace();
 			}
 		}
-		
 
-		if (success > 0){
+		if (success > 0) {
 			plugin.sendMessage(sender, L("savePassSuccessful"));
-		}else{
+		} else {
 			plugin.sendMessage(sender, L("savePassFailed"));
 		}
-		
+
 		try {
 			con.close();
-		} catch (SQLException e) {e.printStackTrace();}
-		
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
 	}
-	
+
 	public int insertTransaction(int type, String buyer, int itemID, int itemDur, String itemEnchants, int amount, double price, String seller) {
 		int reply = 0;
 		String query = "INSERT INTO "
@@ -398,7 +397,8 @@ public class Database {
 		return giveItemToPlayer(player, itemID, itemDur, amount, null);
 	}
 
-	public int checkBuyOrders(CommandSender sender, int itemID, short itemDur, int sellAmount, double sellPrice, Boolean dryrun, Connection con, Boolean silentFail) {
+	public int checkBuyOrders(CommandSender sender, int itemID, short itemDur, int sellAmount, double sellPrice, Boolean dryrun, Connection con,
+		Boolean silentFail) {
 		String query = "SELECT * FROM " + Config.sqlPrefix
 			+ "Orders WHERE `type` = 2 AND `itemID` = ? AND `itemDur` = ? AND `price` >= ? AND `amount` > 0 AND `player` NOT LIKE ? ORDER BY `price` DESC";
 		// AND `player` NOT LIKE ?
@@ -435,7 +435,7 @@ public class Database {
 				amount = result.getInt(9);
 				if (amount <= 0)
 					continue;
-				
+
 				// patron = result.getString(1);
 				found += 1;
 
@@ -475,7 +475,7 @@ public class Database {
 						}
 
 						plugin.notifyBuyerOfExchange(trader, itemID, itemDur, amount, price, sender.getName(), dryrun);
-						
+
 						if (Config.logTransactionsToDB == true)
 							insertTransaction(2, sender.getName(), itemID, itemDur, enchants, amount, price, trader);
 
@@ -572,7 +572,7 @@ public class Database {
 				if (dryrun == false) {
 					InventoryUtil.remove(itemStack, player.getInventory());
 
-					if (Config.announceNewOrders == true)
+					if (Config.announceNewOrders == true && success == 1)
 						plugin.announceNewOrder(1, sender, itemID, itemDur, null, sellAmount, sellPrice);
 				}
 			}
@@ -673,7 +673,8 @@ public class Database {
 		return 0;
 	}
 
-	public int checkSellOrders(CommandSender sender, int itemID, short itemDur, int buyAmount, double buyPrice, Boolean dryrun, Connection con, Boolean silentFail) {
+	public int checkSellOrders(CommandSender sender, int itemID, short itemDur, int buyAmount, double buyPrice, Boolean dryrun, Connection con,
+		Boolean silentFail) {
 
 		String query = "SELECT * FROM " + Config.sqlPrefix
 			+ "Orders WHERE `type` = 1 AND `itemID` = ? AND `itemDur` = ? AND `price` <= ? AND `amount` > 0 AND `player` NOT LIKE ? ORDER BY `price` ASC";
@@ -718,7 +719,7 @@ public class Database {
 				amount = result.getInt(9);
 				if (amount <= 0)
 					continue;
-				
+
 				found += 1;
 				// patron = result.getString(1);
 
@@ -1008,7 +1009,7 @@ public class Database {
 					plugin.sendMessage(sender, preview + F("withdrewMoney", plugin.Round(buyPrice * buyAmount, Config.priceRounding)));
 					plugin.debtPlayer(sender.getName(), buyAmount * buyPrice);
 
-					if (Config.announceNewOrders == true)
+					if (Config.announceNewOrders == true && success == 1)
 						plugin.announceNewOrder(2, sender, itemID, itemDur, null, buyAmount, buyPrice);
 				}
 
@@ -1050,6 +1051,46 @@ public class Database {
 		Connection con = getSQLConnection();
 		int value = processBuyOrder(sender, itemID, itemDur, buyAmount, buyPrice, dryrun, con);
 		closeSQLConnection(con);
+		return value;
+	}
+
+
+	public boolean increaseOrderAmount(int type, Boolean infinite, String player, int itemID, int itemDur, String itemEnchants, double price, int amount) {
+		boolean value = false;
+		if (itemEnchants == null) {
+			Connection con = getSQLConnection();
+
+			// String query = "UPDATE " + table + " SET " + column + "=" +
+			// column + " + ? WHERE `id` = ?;";
+			String query = "UPDATE "
+				+ Config.sqlPrefix
+				+ "Orders"
+				+ " SET `amount` = `amount` + ? WHERE `type` = ? AND `infinite` = ? AND `player` LIKE ? AND `itemID` = ? AND `itemDur` = ? AND `itemEnchants` IS NULL  AND `price` = ?;";
+
+			PreparedStatement statement;
+			try {
+				statement = con.prepareStatement(query);
+				statement.setInt(1, amount);
+
+				statement.setInt(2, type);
+				statement.setBoolean(3, infinite);
+				statement.setString(4, player);
+				statement.setInt(5, itemID);
+				statement.setInt(6, itemDur);
+				statement.setDouble(7, price);
+
+				int sucessful = statement.executeUpdate();
+
+				if (sucessful > 0)
+					value = true;
+
+				statement.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+
+			closeSQLConnection(con);
+		}
 		return value;
 	}
 
@@ -1949,16 +1990,16 @@ public class Database {
 
 		int updateSuccessful = 0;
 
-		String SQL = "SELECT * FROM " + Config.sqlPrefix + "Orders WHERE `amount` > 0 ORDER BY id ASC LIMIT "
-			+ (Config.transactionsPerPage * page) + ", " + Config.transactionsPerPage;
+		String SQL = "SELECT * FROM " + Config.sqlPrefix + "Orders WHERE `amount` > 0 ORDER BY id ASC LIMIT " + (Config.transactionsPerPage * page) + ", "
+			+ Config.transactionsPerPage;
 
 		if (getType > 0) {
 			// query = "SELECT * FROM " + Config.sqlPrefix
 			// +
 			// "Orders WHERE `itemID` = ? AND `itemDur` = ? AND `itemEnchants` IS NULL AND `amount` > 0 AND `type` = ?;";
 
-			SQL = "SELECT * FROM " + Config.sqlPrefix + "Orders WHERE `amount` > 0 AND `type` = ? ORDER BY id ASC LIMIT "
-				+ (Config.transactionsPerPage * page) + ", " + Config.transactionsPerPage;
+			SQL = "SELECT * FROM " + Config.sqlPrefix + "Orders WHERE `amount` > 0 AND `type` = ? ORDER BY id ASC LIMIT " + (Config.transactionsPerPage * page)
+				+ ", " + Config.transactionsPerPage;
 		}
 
 		int count = 0;
