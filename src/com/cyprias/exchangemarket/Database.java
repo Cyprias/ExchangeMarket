@@ -470,8 +470,8 @@ public class Database {
 
 					if (dryrun == false) {
 						if (infinite == false) {
-							decreaseInt(Config.sqlPrefix + "Orders", id, "amount", amount, con);
-							increaseInt(Config.sqlPrefix + "Orders", id, "exchanged", amount, con);
+							decreaseInt(Config.sqlPrefix + "Orders", id, "amount", amount);
+							increaseInt(Config.sqlPrefix + "Orders", id, "exchanged", amount);
 						}
 
 						plugin.notifyBuyerOfExchange(trader, itemID, itemDur, amount, price, sender.getName(), dryrun);
@@ -554,8 +554,10 @@ public class Database {
 			if (sellAmount == 0)
 				return;
 
-			success = insertOrder(1, false, sender.getName(), itemID, itemDur, null, sellPrice, sellAmount, dryrun, con);
-			if (success > 0) {
+			if (dryrun == false)
+				success = insertOrder(1, false, sender.getName(), itemID, itemDur, null, sellPrice, sellAmount);
+			
+			if (success > 0 || dryrun == true) {
 				String preview = "";
 				if (dryrun == true)
 					preview = L("preview");
@@ -994,7 +996,9 @@ public class Database {
 			if (buyAmount == 0)
 				return;
 
-			success = insertOrder(2, false, sender.getName(), itemID, itemDur, null, buyPrice, buyAmount, dryrun, con);
+			if (dryrun == false)
+				success = insertOrder(2, false, sender.getName(), itemID, itemDur, null, buyPrice, buyAmount);
+			
 			if (dryrun == true || success > 0) {
 				String preview = "";
 				if (dryrun == true)
@@ -1094,7 +1098,7 @@ public class Database {
 		return value;
 	}
 
-	public int insertOrder(int type, Boolean infinite, String player, int itemID, int itemDur, String itemEnchants, double price, int amount, Boolean dryrun,
+	public int insertOrder(int type, Boolean infinite, String player, int itemID, int itemDur, String itemEnchants, double price, int amount,
 		Connection con) {
 		
 		if (increaseOrderAmount(type, infinite, player, itemID, itemDur, itemEnchants, price, amount) == true)
@@ -1103,55 +1107,7 @@ public class Database {
 		
 		int updateSuccessful = 0;
 		// price = plugin.Round(price, Config.priceRounding);
-		
-		
-		
-		/*
-		String query = "SELECT *  FROM " + Config.sqlPrefix
-			+ "Orders WHERE `type` = ? AND `infinite` = ? AND `player` LIKE ? AND `itemID` = ? AND `itemDur` = ? AND `itemEnchants` IS NULL  AND `price` = ?;";
-		int id = 0;
-		PreparedStatement statement;
-		if (itemEnchants == null) {
 
-			try {
-				statement = con.prepareStatement(query);
-				statement.setInt(1, type);
-				statement.setBoolean(2, infinite);
-				statement.setString(3, player);
-				statement.setInt(4, itemID);
-				statement.setInt(5, itemDur);
-				statement.setDouble(6, price); // plugin.Round(
-
-				ResultSet result = statement.executeQuery();
-
-				while (result.next()) {
-					id = result.getInt(1);
-					break;
-				}
-				if (id > 0) {
-					// plugin.info("Order already in table, changing amount...");
-
-					if (dryrun == false)
-						increaseInt(Config.sqlPrefix + "Orders", id, "amount", amount, con);
-
-				}
-				statement.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-
-		}
-
-		if (id > 0) {
-			return 2;
-		}
-*/
-
-		
-		
-		
-		if (dryrun == true)
-			return 1;
 		PreparedStatement statement;
 		
 		String query = "INSERT INTO "
@@ -1176,9 +1132,9 @@ public class Database {
 		return updateSuccessful;
 	}
 
-	public int insertOrder(int type, Boolean infinite, String player, int itemID, int itemDur, String itemEnchants, double price, int amount, Boolean dryrun) {
+	public int insertOrder(int type, Boolean infinite, String player, int itemID, int itemDur, String itemEnchants, double price, int amount) {
 		Connection con = getSQLConnection();
-		int value = insertOrder(type, infinite, player, itemID, itemDur, itemEnchants, price, amount, dryrun, con);
+		int value = insertOrder(type, infinite, player, itemID, itemDur, itemEnchants, price, amount, con);
 		closeSQLConnection(con);
 		return value;
 	}
@@ -1292,7 +1248,8 @@ public class Database {
 	}
 
 	
-	public int increaseInt(String table, int rowID, String column, int amount, Connection con) {
+	public int increaseInt(String table, int rowID, String column, int amount) {
+		Connection con = getSQLConnection();
 		int sucessful = 0;
 
 		String query = "UPDATE " + table + " SET " + column + "=" + column + " + ? WHERE `id` = ?;";
@@ -1308,22 +1265,15 @@ public class Database {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-
-		return sucessful;
-	}
-
-	
-	public int increaseInt(String table, int rowID, String column, int amount) {
-		Connection con = getSQLConnection();
-		int sucessful = increaseInt(table, rowID, column, amount, con);
 		closeSQLConnection(con);
 		return sucessful;
 	}
 
-	/**/
-	public int decreaseInt(String table, int rowID, String column, int amount, Connection con) {
-		int sucessful = 0;
 
+	/**/
+	public int decreaseInt(String table, int rowID, String column, int amount) {
+		int sucessful = 0;
+		Connection con = getSQLConnection();
 		String query = "UPDATE " + table + " SET " + column + "=" + column + " - ? WHERE `id` = ?;";
 
 		try {
@@ -1337,18 +1287,11 @@ public class Database {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-
-		return sucessful;
-	}
-
-	public int decreaseInt(String table, int rowID, String column, int amount) {
-		Connection con = getSQLConnection();
-		int sucessful = decreaseInt(table, rowID, column, amount, con);
 		closeSQLConnection(con);
 		return sucessful;
 	}
 
-	
+
 	public int setInt(String table, int rowID, String column, int value, Connection con) {
 		int sucessful = 0;
 
