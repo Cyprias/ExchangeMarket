@@ -18,8 +18,8 @@ import java.util.regex.Pattern;
 * @author Acrobot
 */
 public class MaterialUtil {
-    private static final Pattern DURABILITY = Pattern.compile(":(\\d)*");
-    private static final Pattern ENCHANTMENT = Pattern.compile("-([0-9a-zA-Z])*");
+    public static final Pattern DURABILITY = Pattern.compile(":(\\d)*");
+    public static final Pattern ENCHANTMENT = Pattern.compile("-([0-9a-zA-Z])*");
 
     /**
 * Checks if the itemStack is empty or null
@@ -63,14 +63,14 @@ public class MaterialUtil {
             return material;
         }
 
-        name = name.toUpperCase().replace(" ", "_");
+        name = name.replace(" ", "").toUpperCase();
 
         short length = Short.MAX_VALUE;
 
         for (Material currentMaterial : Material.values()) {
             String matName = currentMaterial.name();
 
-            if (matName.startsWith(name) && matName.length() < length) {
+            if (matName.replace("_", "").startsWith(name) && matName.length() < length) {
                 length = (short) matName.length();
                 material = currentMaterial;
             }
@@ -182,7 +182,11 @@ public class MaterialUtil {
         Map<org.bukkit.enchantments.Enchantment, Integer> enchantments = getEnchantments(itemName);
 
         if (!enchantments.isEmpty()) {
-            itemStack.addEnchantments(enchantments);
+            try {
+                itemStack.addEnchantments(enchantments);
+            } catch (IllegalArgumentException exception) {
+                //Do nothing, because the enchantment can't be applied
+            }
         }
 
         return itemStack;
@@ -209,7 +213,7 @@ public class MaterialUtil {
 
         data = data.substring(1);
 
-        return NumberUtil.isInteger(data) ? Short.valueOf(data) : 0;
+        return NumberUtil.isShort(data) ? Short.valueOf(data) : 0;
     }
 
     /**
@@ -237,20 +241,20 @@ public class MaterialUtil {
 * @return Enchantments found
 */
         public static Map<org.bukkit.enchantments.Enchantment, Integer> getEnchantments(String base32) {
-            if (base32 == null) {
+            if (base32 == null || base32.isEmpty() || !NumberUtil.isLong(base32)) {
                 return new HashMap<org.bukkit.enchantments.Enchantment, Integer>();
             }
 
             Map<org.bukkit.enchantments.Enchantment, Integer> map = new HashMap<org.bukkit.enchantments.Enchantment, Integer>();
 
-            StringBuilder integer = new StringBuilder(String.valueOf(Integer.parseInt(base32, 32)));
+            StringBuilder number = new StringBuilder(Long.toString(Long.parseLong(base32, 32)));
 
-            while (integer.length() % 3 != 0) {
-                integer.insert(0, '0');
+            while (number.length() % 3 != 0) {
+                number.insert(0, '0');
             }
 
-            for (int i = 0; i < integer.length() / 3; i++) {
-                String item = integer.substring(i * 3, i * 3 + 3);
+            for (int i = 0; i < number.length() / 3; i++) {
+                String item = number.substring(i * 3, i * 3 + 3);
 
                 org.bukkit.enchantments.Enchantment enchantment = org.bukkit.enchantments.Enchantment.getById(Integer.parseInt(item.substring(0, 2)));
 
@@ -279,13 +283,13 @@ public class MaterialUtil {
 * @return Encoded enchantments
 */
         public static String encodeEnchantment(Map<org.bukkit.enchantments.Enchantment, Integer> enchantments) {
-            int integer = 0;
+            long number = 0;
 
             for (Map.Entry<org.bukkit.enchantments.Enchantment, Integer> entry : enchantments.entrySet()) {
-                integer = integer * 1000 + (entry.getKey().getId()) * 10 + entry.getValue();
+                number = number * 1000 + (entry.getKey().getId()) * 10 + entry.getValue();
             }
 
-            return integer != 0 ? Integer.toString(integer, 32) : null;
+            return number != 0 ? Long.toString(number, 32) : null;
         }
 
         /**
