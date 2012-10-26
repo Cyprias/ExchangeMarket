@@ -59,7 +59,7 @@ public class ItemDb {
 		return null;
 	}
 
-	public String getItemName(int itemID, int itemDur) {
+	public static String getItemName(int itemID, int itemDur) {
 		if (idToName.containsKey(itemID + ":" + itemDur))
 			return idToName.get(itemID + ":" + itemDur);
 
@@ -79,7 +79,7 @@ public class ItemDb {
 	}
 
 	static HashMap<String, itemData> nameToID = new HashMap<String, itemData>();
-	HashMap<String, String> idToName = new HashMap<String, String>();
+	static HashMap<String, String> idToName = new HashMap<String, String>();
 
 	public static ItemStack getItemStack(int itemID, short itemDur) {
 		ItemStack is = new ItemStack(itemID, 1);

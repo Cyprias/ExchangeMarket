@@ -1,6 +1,6 @@
 name: ExchangeMarket
 main: com.cyprias.exchangemarket.ExchangeMarket
-version: 0.16.0
+version: 0.17.0
 
 commands:
   em:
@@ -31,6 +31,7 @@ permissions:
             exchangemarket.cancel: true
             exchangemarket.transactions: true
             exchangemarket.confirm: true
+            exchangemarket.loginPendingCollection: true
     exchangemarket.admin:
         description: Gives access to admin commands.
         default: false
@@ -49,5 +50,5 @@ permissions:
         description: Notify user of a new sell order.
         default: false
     exchangemarket.announceneworder.buy:
-        description: notify user of a new buy order.
+        description: Notify user of a new buy order.
         default: false

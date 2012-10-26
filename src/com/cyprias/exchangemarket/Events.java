@@ -56,9 +56,15 @@ public class Events implements Listener {
 	public void onPlayerJoinEvent(PlayerJoinEvent event) {
 		Player player = event.getPlayer();
 
-		if (player.hasPermission("exchangemarket.loginNewVersion")) {
+		if (player.hasPermission("exchangemarket.loginNewVersion")) 
 			plugin.versionChecker.retreiveVersionInfo(player, true);
-		}
+		
+		
+		if (player.hasPermission("exchangemarket.loginPendingCollection")) 
+			plugin.getServer().getScheduler().scheduleAsyncDelayedTask(plugin, new Database.checkPendingBuysTask(player));
+
+		//, 
+		
 	}
 
 	/**/

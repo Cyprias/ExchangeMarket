@@ -1,6 +1,5 @@
 package com.cyprias.exchangemarket;
 
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -142,14 +141,14 @@ class Commands implements CommandExecutor {
 			}
 		}
 
-		//if (Config.allowMultipleQueuedCommands == false) {
-			for (int i = 0; i < cmdTasks.size(); i++) {
-				if (cmdTasks.get(i).sender.equals(sender)) {
-					plugin.sendMessage(sender, F("processingPreviousCMD"));
-					return true;
-				}
+		// if (Config.allowMultipleQueuedCommands == false) {
+		for (int i = 0; i < cmdTasks.size(); i++) {
+			if (cmdTasks.get(i).sender.equals(sender)) {
+				plugin.sendMessage(sender, F("processingPreviousCMD"));
+				return true;
 			}
-		//}
+		}
+		// }
 
 		// for (int x = 0; x < 5; x++) {
 
@@ -186,42 +185,41 @@ class Commands implements CommandExecutor {
 
 				if (plugin.hasPermission(sender, "exchangemarket.buy"))
 					plugin.sendMessage(sender, "§a/" + commandLabel + " buy §7- " + L("cmdBuyDesc"), true, false);
-				
+
 				if (plugin.hasPermission(sender, "exchangemarket.buyorder"))
 					plugin.sendMessage(sender, "§a/" + commandLabel + " buyorder §7- " + L("cmdBuyOrderDesc"), true, false);
-				
+
 				if (plugin.hasPermission(sender, "exchangemarket.cancel"))
 					plugin.sendMessage(sender, "§a/" + commandLabel + " cancel §7- " + L("cmdCancelDesc"), true, false);
-				
+
 				if (plugin.hasPermission(sender, "exchangemarket.collect"))
 					plugin.sendMessage(sender, "§a/" + commandLabel + " collect §7- " + L("cmdCollectDesc"), true, false);
-				
+
 				if (plugin.hasPermission(sender, "exchangemarket.infbuy"))
 					plugin.sendMessage(sender, "§a/" + commandLabel + " infbuy §7- " + L("cmdInfBuyDesc"), true, false);
 				if (plugin.hasPermission(sender, "exchangemarket.infsell"))
 					plugin.sendMessage(sender, "§a/" + commandLabel + " infsell §7- " + L("cmdInfSellDesc"), true, false);
-				
+
 				if (plugin.hasPermission(sender, "exchangemarket.list"))
 					plugin.sendMessage(sender, "§a/" + commandLabel + " list [Buy/Sell] [page]§7- " + L("cmdListDesc"), true, false);
-				
+
 				if (plugin.hasPermission(sender, "exchangemarket.orders"))
 					plugin.sendMessage(sender, "§a/" + commandLabel + " orders [page] §7- " + L("cmdOrdersDesc"), true, false);
-				
+
 				if (plugin.hasPermission(sender, "exchangemarket.password"))
 					plugin.sendMessage(sender, "§a/" + commandLabel + " password §7- " + L("cmdPasswordDesc"), true, false);
-				
+
 				if (plugin.hasPermission(sender, "exchangemarket.price"))
 					plugin.sendMessage(sender, "§a/" + commandLabel + " price §7- " + L("cmdPriceDesc"), true, false);
-				
+
 				if (plugin.hasPermission(sender, "exchangemarket.reload"))
 					plugin.sendMessage(sender, "§a/" + commandLabel + " reload §7- " + L("cmdReloadDesc"), true, false);
-				
+
 				if (plugin.hasPermission(sender, "exchangemarket.remove"))
 					plugin.sendMessage(sender, "§a/" + commandLabel + " remove §7- " + L("cmdRemoveDesc"), true, false);
-				
+
 				if (plugin.hasPermission(sender, "exchangemarket.search"))
 					plugin.sendMessage(sender, "§a/" + commandLabel + " search §7- " + L("cmdSearchDesc"), true, false);
-				
 
 				if (plugin.hasPermission(sender, "exchangemarket.sell"))
 					plugin.sendMessage(sender, "§a/" + commandLabel + " sell §7- " + L("cmdSellDesc"), true, false);
@@ -232,7 +230,6 @@ class Commands implements CommandExecutor {
 				if (plugin.hasPermission(sender, "exchangemarket.sellorder"))
 					plugin.sendMessage(sender, "§a/" + commandLabel + " sellorder §7- " + L("cmdSellOrderDesc"), true, false);
 
-
 				if (plugin.hasPermission(sender, "exchangemarket.transactions"))
 					plugin.sendMessage(sender, "§a/" + commandLabel + " transactions [page] §7- " + L("cmdTransactionsDesc"), true, false);
 
@@ -241,12 +238,154 @@ class Commands implements CommandExecutor {
 				if (plugin.hasPermission(sender, "exchangemarket.whatsnew"))
 					plugin.sendMessage(sender, "§a/" + commandLabel + " whatsnew §7- " + L("cmdWhatsnewDesc"), true, false);
 
-
-
 				return true;
 			}
 
+			//
+
+			if (args[0].equalsIgnoreCase("version") && args.length == 1) {
+				if (!hasCommandPermission(sender, "exchangemarket.version")) {
+					return true;
+				}
+
+				// plugin.queueVersionRSS();
+
+				// plugin.queueVersionCheck(sender, false, false);
+
+				plugin.versionChecker.retreiveVersionInfo(sender, false, false);
+
+				return true;
+			} else if (args[0].equalsIgnoreCase("whatsnew") && args.length == 1) {
+				if (!hasCommandPermission(sender, "exchangemarket.whatsnew")) {
+					return true;
+				}
+
+				// plugin.queueVersionRSS();
+
+				plugin.versionChecker.retreiveVersionInfo(sender, false, true);
+				return true;
+			} else if (args[0].equalsIgnoreCase("reload")) {
+				if (!hasCommandPermission(sender, "exchangemarket.reload")) {
+					return true;
+				}
+
+				plugin.config.reloadOurConfig();
+				plugin.localization.loadLocales();
+				plugin.sendMessage(sender, L("reloadedOurConfigs"));
+
+				return true;
+			} else if (args[0].equalsIgnoreCase("infbuy")) {
+				if (!hasCommandPermission(sender, "exchangemarket.infbuy")) {
+					return true;
+				}
+				if (args.length < 3) {
+					plugin.sendMessage(sender, "§a/" + commandLabel + " infbuy <itemName> <price> §7- " + L("cmdInfBuyDesc"));
+					return true;
+				}
+
+				ItemStack stock = ItemDb.getItemStack(args[1]);
+
+				if (stock == null || stock.getType() == null) {
+					plugin.sendMessage(sender, F("invalidItem", args[1]));
+					return true;
+				}
+				double price = 0;
+				if (args.length > 1) {
+					if (isDouble(args[2])) {
+						price = Double.parseDouble(args[2]);
+					} else {
+						plugin.sendMessage(sender, F("invalidPrice", args[2]));
+						return true;
+					}
+				}
+				if (price == 0) {
+					plugin.sendMessage(sender, F("invalidPrice", 0));
+					return true;
+				}
+				// plugin.sendMessage(sender, "price: " + price);
+
+				String itemName = plugin.itemdb.getItemName(stock.getTypeId(), stock.getDurability());
+
+				int success = 0;
+				if (dryrun == false)
+					success = plugin.database.insertOrder(2, true, plugin.pluginName, stock.getTypeId(), stock.getDurability(), null, price, 1);
+
+				if (success > 0) {
+					plugin.sendMessage(sender, F("infiniteBuyCreated", itemName, price));
+				}
+				return true;
+			} else if (args[0].equalsIgnoreCase("infsell")) {
+				if (!hasCommandPermission(sender, "exchangemarket.infsell")) {
+					return true;
+				}
+
+				if (args.length < 3) {
+					plugin.sendMessage(sender, "§a/" + commandLabel + " infsell <itemName> <price> §7- " + L("cmdInfSellDesc"));
+					return true;
+				}
+				ItemStack stock = ItemDb.getItemStack(args[1]);
+
+				if (stock == null || stock.getType() == null) {
+					plugin.sendMessage(sender, F("invalidItem", args[1]));
+					return true;
+				}
+				double price = 0;
+				if (args.length > 1) {
+					if (isDouble(args[2])) {
+						price = Double.parseDouble(args[2]);
+					} else {
+						plugin.sendMessage(sender, F("invalidPrice", args[2]));
+						return true;
+					}
+				}
+				if (price == 0) {
+					plugin.sendMessage(sender, F("invalidPrice", 0));
+					return true;
+				}
+				// plugin.sendMessage(sender, "price: " + price);
+
+				String itemName = plugin.itemdb.getItemName(stock.getTypeId(), stock.getDurability());
+
+				int success = 0;
+				if (dryrun == false)
+					success = plugin.database.insertOrder(1, true, plugin.pluginName, stock.getTypeId(), stock.getDurability(), null, price, 1);
+
+				if (success > 0) {
+					plugin.sendMessage(sender, F("infiniteSellCreated", itemName, price));
+				}
+
+				return true;
+			} else if (args[0].equalsIgnoreCase("remove")) {
+				if (!hasCommandPermission(sender, "exchangemarket.remove")) {
+					return true;
+				}
+
+				if (args.length < 2) {
+					plugin.sendMessage(sender, "§a/" + commandLabel + " remove <ID> §7- " + L("cmdCancelDesc"));
+					return true;
+				}
+
+				if (isInt(args[1])) {
+					int success = plugin.database.removeOrder(sender, Integer.parseInt(args[1]));
+					if (success > 0) {
+						plugin.sendMessage(sender, L("removeSuccessful"));
+					} else {
+						plugin.sendMessage(sender, L("removeFailed"));
+					}
+
+				} else {
+					plugin.sendMessage(sender, F("invalidOrderNumber", args[1]));
+				}
+				return true;
+			}
+
+			if (!(sender instanceof Player)){
+				sender.sendMessage("You must be a player to issue that command.");
+				return true;
+			}
+			
 			Player player = (Player) sender;
+			
 			if (args[0].equalsIgnoreCase("price")) {
 				if (!hasCommandPermission(sender, "exchangemarket.price")) {
 					return true;
@@ -305,53 +444,7 @@ class Commands implements CommandExecutor {
 
 				return true;
 
-				
-			} else if (args[0].equalsIgnoreCase("version") && args.length == 1) {
-				if (!hasCommandPermission(sender, "exchangemarket.version")) {
-					return true;
-				}
 
-				// plugin.queueVersionRSS();
-
-				//plugin.queueVersionCheck(sender, false, false);
-				
-				plugin.versionChecker.retreiveVersionInfo(sender, false, false);
-
-				return true;
-			} else if (args[0].equalsIgnoreCase("whatsnew") && args.length == 1) {
-				if (!hasCommandPermission(sender, "exchangemarket.whatsnew")) {
-					return true;
-				}
-
-				// plugin.queueVersionRSS();
-
-				plugin.versionChecker.retreiveVersionInfo(sender, false, true);
-				return true;
-
-			} else if (args[0].equalsIgnoreCase("remove")) {
-				if (!hasCommandPermission(sender, "exchangemarket.remove")) {
-					return true;
-				}
-
-				if (args.length < 2) {
-					plugin.sendMessage(sender, "§a/" + commandLabel + " remove <ID> §7- " + L("cmdCancelDesc"));
-					return true;
-				}
-
-				if (isInt(args[1])) {
-					int success = plugin.database.removeOrder(sender, Integer.parseInt(args[1]));
-					if (success > 0) {
-						plugin.sendMessage(sender, L("removeSuccessful"));
-					} else {
-						plugin.sendMessage(sender, L("removeFailed"));
-					}
-
-				} else {
-					plugin.sendMessage(sender, F("invalidOrderNumber", args[1]));
-				}
-				return true;
-
-				// searchOrders
 			} else if (args[0].equalsIgnoreCase("search")) {
 				if (!hasCommandPermission(sender, "exchangemarket.search")) {
 					return true;
@@ -702,24 +795,6 @@ class Commands implements CommandExecutor {
 
 					price = -1;
 
-					/*
-					 * Database.itemStats stats =
-					 * plugin.database.getItemStats(item.getTypeId(),
-					 * item.getDurability(), 0);//1
-					 * 
-					 * //if (stats.total <= 0) { // stats =
-					 * plugin.database.getItemStats(item.getTypeId(),
-					 * item.getDurability(), 0);//2 //}
-					 * 
-					 * if (stats.total <= 0) { plugin.sendMessage(sender,
-					 * L("mustSupplyAPrice"));
-					 * 
-					 * return true; }
-					 * 
-					 * if (Config.autoPricePerUnit == true){ price =
-					 * stats.avgPrice + (Config.autoSellPrice*amount); }else{
-					 * price = stats.avgPrice + Config.autoBuyPrice; }
-					 */
 
 				}
 				// }
@@ -736,87 +811,7 @@ class Commands implements CommandExecutor {
 
 				return true;
 
-			} else if (args[0].equalsIgnoreCase("infbuy")) {
-				if (!hasCommandPermission(sender, "exchangemarket.infbuy")) {
-					return true;
-				}
-				if (args.length < 3) {
-					plugin.sendMessage(sender, "§a/" + commandLabel + " infbuy <itemName> <price> §7- " + L("cmdInfBuyDesc"));
-					return true;
-				}
 
-				ItemStack stock = ItemDb.getItemStack(args[1]);
-
-				if (stock == null || stock.getType() == null) {
-					plugin.sendMessage(sender, F("invalidItem", args[1]));
-					return true;
-				}
-				double price = 0;
-				if (args.length > 1) {
-					if (isDouble(args[2])) {
-						price = Double.parseDouble(args[2]);
-					} else {
-						plugin.sendMessage(sender, F("invalidPrice", args[2]));
-						return true;
-					}
-				}
-				if (price == 0) {
-					plugin.sendMessage(sender, F("invalidPrice", 0));
-					return true;
-				}
-				// plugin.sendMessage(sender, "price: " + price);
-
-				String itemName = plugin.itemdb.getItemName(stock.getTypeId(), stock.getDurability());
-
-				int success = 0;
-				if (dryrun == false)
-					success = plugin.database.insertOrder(2, true, plugin.pluginName, stock.getTypeId(), stock.getDurability(), null, price, 1);
-
-				if (success > 0) {
-					plugin.sendMessage(sender, F("infiniteBuyCreated", itemName, price));
-				}
-				return true;
-			} else if (args[0].equalsIgnoreCase("infsell")) {
-				if (!hasCommandPermission(sender, "exchangemarket.infsell")) {
-					return true;
-				}
-
-				if (args.length < 3) {
-					plugin.sendMessage(sender, "§a/" + commandLabel + " infsell <itemName> <price> §7- " + L("cmdInfSellDesc"));
-					return true;
-				}
-				ItemStack stock = ItemDb.getItemStack(args[1]);
-
-				if (stock == null || stock.getType() == null) {
-					plugin.sendMessage(sender, F("invalidItem", args[1]));
-					return true;
-				}
-				double price = 0;
-				if (args.length > 1) {
-					if (isDouble(args[2])) {
-						price = Double.parseDouble(args[2]);
-					} else {
-						plugin.sendMessage(sender, F("invalidPrice", args[2]));
-						return true;
-					}
-				}
-				if (price == 0) {
-					plugin.sendMessage(sender, F("invalidPrice", 0));
-					return true;
-				}
-				// plugin.sendMessage(sender, "price: " + price);
-
-				String itemName = plugin.itemdb.getItemName(stock.getTypeId(), stock.getDurability());
-
-				int success = 0;
-				if (dryrun == false)
-					success = plugin.database.insertOrder(1, true, plugin.pluginName, stock.getTypeId(), stock.getDurability(), null, price, 1);
-
-				if (success > 0) {
-					plugin.sendMessage(sender, F("infiniteSellCreated", itemName, price));
-				}
-
-				return true;
 			} else if (args[0].equalsIgnoreCase("collect")) {
 				if (!hasCommandPermission(sender, "exchangemarket.collect")) {
 					return true;
@@ -825,16 +820,7 @@ class Commands implements CommandExecutor {
 				plugin.database.collectPendingBuys(sender);
 
 				return true;
-			} else if (args[0].equalsIgnoreCase("reload")) {
-				if (!hasCommandPermission(sender, "exchangemarket.reload")) {
-					return true;
-				}
 
-				plugin.config.reloadOurConfig();
-				plugin.localization.loadLocales();
-				plugin.sendMessage(sender, L("reloadedOurConfigs"));
-
-				return true;
 			} else if (args[0].equalsIgnoreCase("sell")) {
 				if (!hasCommandPermission(sender, "exchangemarket.sell")) {
 					return true;
@@ -930,7 +916,7 @@ class Commands implements CommandExecutor {
 				}
 
 				return true;
-				
+
 			} else if (args[0].equalsIgnoreCase("sellhand")) {
 				if (!hasCommandPermission(sender, "exchangemarket.sellhand")) {
 					return true;
@@ -938,20 +924,20 @@ class Commands implements CommandExecutor {
 
 				ItemStack stock = player.getItemInHand();
 				Map<Enchantment, Integer> e = stock.getEnchantments();
-				
-				if (e.size() > 0){
+
+				if (e.size() > 0) {
 					plugin.sendMessage(sender, F("cantSellEnchants"));
 					return true;
 				}
-				
+
 				int type = 1;
 				String playerName = sender.getName();
 				int itemID = stock.getTypeId();
 				int itemDur = stock.getDurability();
 				String itemEnchants = MaterialUtil.Enchantment.encodeEnchantment(stock);
-				
+
 				int amount = stock.getAmount();
-				
+
 				double price = -1;
 				// plugin.sendMessage(sender, "amount: " + amount);
 
@@ -986,17 +972,11 @@ class Commands implements CommandExecutor {
 						return true;
 					}
 				}
-				
-				
-				
+
 				plugin.database.postSellOrder(sender, stock.getTypeId(), stock.getDurability(), amount, price, false);
-				
-				
-				
+
 				return true;
-				
-				
-				
+
 			} else if (args[0].equalsIgnoreCase("transactions")) {
 				if (!hasCommandPermission(sender, "exchangemarket.transactions")) {
 					return true;
@@ -1035,19 +1015,18 @@ class Commands implements CommandExecutor {
 
 				return true;
 
-				
 			} else if (args[0].equalsIgnoreCase("password")) {
 				if (!hasCommandPermission(sender, "exchangemarket.password")) {
 					return true;
 				}
-				
+
 				if (args.length < 2) {
 					plugin.sendMessage(sender, "§a/" + commandLabel + " password <password>");
 					return true;
 				}
-				
+
 				String password = args[1].toString();
-				
+
 				plugin.database.setPassword(sender, password);
 
 				return true;

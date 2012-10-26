@@ -63,7 +63,7 @@ public class Database {
 		return false;
 	}
 
-	public Connection getSQLConnection() {
+	public static Connection getSQLConnection() {
 		try {
 			Connection con;
 			if (Config.sqlURL.contains("mysql")) {
@@ -574,7 +574,7 @@ public class Database {
 				if (dryrun == false) {
 					InventoryUtil.remove(itemStack, player.getInventory());
 
-					if (Config.announceNewOrders == true && success == 1)
+					if (success == 1)
 						plugin.announceNewOrder(1, sender, itemID, itemDur, null, sellAmount, sellPrice);
 				}
 			}
@@ -836,7 +836,7 @@ public class Database {
 		return buyAmount;
 	}
 
-	private String F(String string, Object... args) {
+	private static String F(String string, Object... args) {
 		return Localization.F(string, args);
 	}
 
@@ -1013,7 +1013,7 @@ public class Database {
 					plugin.sendMessage(sender, preview + F("withdrewMoney", plugin.Round(buyPrice * buyAmount, Config.priceRounding)));
 					plugin.debtPlayer(sender.getName(), buyAmount * buyPrice);
 
-					if (Config.announceNewOrders == true && success == 1)
+					if (success == 1)
 						plugin.announceNewOrder(2, sender, itemID, itemDur, null, buyAmount, buyPrice);
 				}
 
@@ -1139,7 +1139,7 @@ public class Database {
 		return value;
 	}
 
-	public void closeSQLConnection(Connection con) {
+	public static void closeSQLConnection(Connection con) {
 		try {
 			con.close();
 		} catch (SQLException e) {
@@ -1421,6 +1421,59 @@ public class Database {
 		return myReturn;
 	}
 
+	public static class checkPendingBuysTask implements Runnable {
+		private CommandSender sender;
+		public checkPendingBuysTask(CommandSender sender) {
+			this.sender = sender;
+		}
+		@Override
+		public void run() {
+			checkPendingBuys(this.sender);
+		}
+	}
+	
+	public static void checkPendingBuys(CommandSender sender){
+		
+		Connection con = getSQLConnection();
+		String SQL = "SELECT * FROM " + Config.sqlPrefix + "Orders WHERE `type` = 2 AND `player` LIKE ? AND `exchanged` > 0 ORDER BY `exchanged` DESC";
+		
+		int count = 0;
+		try {
+			PreparedStatement statement = con.prepareStatement(SQL);
+			statement.setString(1, sender.getName());
+
+			ResultSet result = statement.executeQuery();
+
+			int itemID, exchanged;
+			short itemDur;
+			String itemName;
+			while (result.next()) {
+				count += 1;
+
+				itemID = result.getInt(5);
+				itemDur = result.getShort(6);
+				// amount = result.getInt(9);
+				exchanged = result.getInt(10);
+				itemName = ItemDb.getItemName(itemID, itemDur);
+
+				// plugin.sendMessage(sender, id + ": "+itemName+"x"+exchanged);
+				if (exchanged > 0) 
+					sender.sendMessage(ExchangeMarket.chatPrefix+F("collectPending", itemName, exchanged));
+
+			}
+
+			result.close();
+			statement.close();
+
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
+		closeSQLConnection(con);
+	}
+	
 	public int collectPendingBuys(CommandSender sender) {
 		Connection con = getSQLConnection();
 		int value = collectPendingBuys(sender, con);
@@ -1491,6 +1544,8 @@ public class Database {
 		return success;
 	}
 
+
+	
 	public int getResultCount(String query, Object... args) {
 		// String query = "SELECT COUNT(*) FROM " + Config.sqlPrefix +
 		// "Orders WHERE `player` LIKE ? ";

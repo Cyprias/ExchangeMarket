@@ -12,7 +12,6 @@ clearRequestAfterConfirm: false
 autoPriceConfirm: true
 confirmAllOrders: false
 logTransactionsToDB: true
-announceNewOrders: true
 transactionsPerPage: 10
 blockUsageInCreativeMode: true
 logBalanceChangesToConsole: true
