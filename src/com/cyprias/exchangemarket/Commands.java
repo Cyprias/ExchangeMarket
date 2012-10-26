@@ -183,16 +183,16 @@ class Commands implements CommandExecutor {
 
 				plugin.sendMessage(sender, F("pluginsCommands", plugin.pluginName));
 
-				if (plugin.hasPermission(sender, "exchangemarket.buy"))
+				if (plugin.hasPermission(sender, "exchangemarket.buy") && (sender instanceof Player))
 					plugin.sendMessage(sender, "§a/" + commandLabel + " buy §7- " + L("cmdBuyDesc"), true, false);
 
-				if (plugin.hasPermission(sender, "exchangemarket.buyorder"))
+				if (plugin.hasPermission(sender, "exchangemarket.buyorder") && (sender instanceof Player))
 					plugin.sendMessage(sender, "§a/" + commandLabel + " buyorder §7- " + L("cmdBuyOrderDesc"), true, false);
 
-				if (plugin.hasPermission(sender, "exchangemarket.cancel"))
+				if (plugin.hasPermission(sender, "exchangemarket.cancel") && (sender instanceof Player))
 					plugin.sendMessage(sender, "§a/" + commandLabel + " cancel §7- " + L("cmdCancelDesc"), true, false);
 
-				if (plugin.hasPermission(sender, "exchangemarket.collect"))
+				if (plugin.hasPermission(sender, "exchangemarket.collect") && (sender instanceof Player))
 					plugin.sendMessage(sender, "§a/" + commandLabel + " collect §7- " + L("cmdCollectDesc"), true, false);
 
 				if (plugin.hasPermission(sender, "exchangemarket.infbuy"))
@@ -200,16 +200,16 @@ class Commands implements CommandExecutor {
 				if (plugin.hasPermission(sender, "exchangemarket.infsell"))
 					plugin.sendMessage(sender, "§a/" + commandLabel + " infsell §7- " + L("cmdInfSellDesc"), true, false);
 
-				if (plugin.hasPermission(sender, "exchangemarket.list"))
+				if (plugin.hasPermission(sender, "exchangemarket.list") && (sender instanceof Player))
 					plugin.sendMessage(sender, "§a/" + commandLabel + " list [Buy/Sell] [page]§7- " + L("cmdListDesc"), true, false);
 
-				if (plugin.hasPermission(sender, "exchangemarket.orders"))
+				if (plugin.hasPermission(sender, "exchangemarket.orders") && (sender instanceof Player))
 					plugin.sendMessage(sender, "§a/" + commandLabel + " orders [page] §7- " + L("cmdOrdersDesc"), true, false);
 
-				if (plugin.hasPermission(sender, "exchangemarket.password"))
+				if (plugin.hasPermission(sender, "exchangemarket.password") && (sender instanceof Player))
 					plugin.sendMessage(sender, "§a/" + commandLabel + " password §7- " + L("cmdPasswordDesc"), true, false);
 
-				if (plugin.hasPermission(sender, "exchangemarket.price"))
+				if (plugin.hasPermission(sender, "exchangemarket.price") && (sender instanceof Player))
 					plugin.sendMessage(sender, "§a/" + commandLabel + " price §7- " + L("cmdPriceDesc"), true, false);
 
 				if (plugin.hasPermission(sender, "exchangemarket.reload"))
@@ -218,19 +218,19 @@ class Commands implements CommandExecutor {
 				if (plugin.hasPermission(sender, "exchangemarket.remove"))
 					plugin.sendMessage(sender, "§a/" + commandLabel + " remove §7- " + L("cmdRemoveDesc"), true, false);
 
-				if (plugin.hasPermission(sender, "exchangemarket.search"))
+				if (plugin.hasPermission(sender, "exchangemarket.search") && (sender instanceof Player))
 					plugin.sendMessage(sender, "§a/" + commandLabel + " search §7- " + L("cmdSearchDesc"), true, false);
 
-				if (plugin.hasPermission(sender, "exchangemarket.sell"))
+				if (plugin.hasPermission(sender, "exchangemarket.sell") && (sender instanceof Player))
 					plugin.sendMessage(sender, "§a/" + commandLabel + " sell §7- " + L("cmdSellDesc"), true, false);
 
-				if (plugin.hasPermission(sender, "exchangemarket.sellhand"))
+				if (plugin.hasPermission(sender, "exchangemarket.sellhand") && (sender instanceof Player))
 					plugin.sendMessage(sender, "§a/" + commandLabel + " sellhand [price] §7- " + L("cmdSellHandDesc"), true, false);
 
-				if (plugin.hasPermission(sender, "exchangemarket.sellorder"))
+				if (plugin.hasPermission(sender, "exchangemarket.sellorder") && (sender instanceof Player))
 					plugin.sendMessage(sender, "§a/" + commandLabel + " sellorder §7- " + L("cmdSellOrderDesc"), true, false);
 
-				if (plugin.hasPermission(sender, "exchangemarket.transactions"))
+				if (plugin.hasPermission(sender, "exchangemarket.transactions") && (sender instanceof Player))
 					plugin.sendMessage(sender, "§a/" + commandLabel + " transactions [page] §7- " + L("cmdTransactionsDesc"), true, false);
 
 				if (plugin.hasPermission(sender, "exchangemarket.version"))
