@@ -244,7 +244,7 @@ public class MaterialUtil {
     	public static Logger log = Logger.getLogger("Minecraft"); 
     	
         public static Map<org.bukkit.enchantments.Enchantment, Integer> getEnchantments(String base32) {
-            if (base32 == null || base32.isEmpty() || NumberUtil.isLong(base32)) {
+            if (base32 == null || base32.isEmpty()) {
                 return new HashMap<org.bukkit.enchantments.Enchantment, Integer>();
             }
 
