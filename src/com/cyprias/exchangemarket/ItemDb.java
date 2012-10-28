@@ -112,9 +112,11 @@ public class ItemDb {
 		short metaData = 0;
 		
 		String[] split = id.trim().split("-");
-		if (split.length > 0)
+		String enchant = null;
+		if (split.length > 1){
 			id = split[0];
-		
+			enchant = split[1];
+		}
 		if (id.matches("^\\d+[:+',;.]\\d+$")) {
 			itemid = Integer.parseInt(id.split("[:+',;.]")[0]);
 			metaData = Short.parseShort(id.split("[:+',;.]")[1]);
@@ -127,22 +129,17 @@ public class ItemDb {
 			itemname = id.toLowerCase(Locale.ENGLISH);
 		}
 
-		log.info("id: " + id);
-		log.info("itemid: " + itemid);
-		log.info("metaData: " + metaData);
-		log.info("split: " + split[1]);
-		
-		
+
 		
 		if (itemid > 0){
-			return getItemStack(itemid, metaData, split[1]);
+			return getItemStack(itemid, metaData, enchant);
 		}
 		if (itemname != null){
 			if (!nameToID.containsKey(itemname)) {
 				return null;
 			}
 			itemData iD = nameToID.get(itemname);
-			return getItemStack(iD.itemID, iD.itemDur, split[1]);
+			return getItemStack(iD.itemID, iD.itemDur, enchant);
 		}
 		
 		return null;

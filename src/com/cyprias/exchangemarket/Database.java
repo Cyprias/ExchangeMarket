@@ -1912,32 +1912,48 @@ public class Database {
 		return false;
 	}
 
-	public void searchOrders(CommandSender sender, int itemID, short itemDur, String itemEnchants) {
-
-		int rows = getResultCount("SELECT COUNT(*) FROM " + Config.sqlPrefix + "Orders WHERE `itemID` = ? AND `itemEnchants` = ? AND `itemDur` = ? AND amount > 0", itemID, itemDur, itemEnchants);
-
+	public void searchOrders(CommandSender sender, int itemID, short itemDur, String sEnchants) {
+		int rows = 0;
+		
+		if (sEnchants != null){
+		rows = getResultCount("SELECT COUNT(*) FROM " + Config.sqlPrefix + "Orders WHERE `itemID` = ? AND `itemEnchants` = ? AND `itemDur` = ? AND amount > 0", itemID, itemDur, sEnchants);
+			}else{
+			rows = getResultCount("SELECT COUNT(*) FROM " + Config.sqlPrefix + "Orders WHERE `itemID` = ? AND `itemDur` = ? AND amount > 0", itemID, itemDur);
+		}
+		
 		String itemName = plugin.itemdb.getItemName(itemID, itemDur);
 		plugin.sendMessage(sender, F("resultsForItem", rows, itemName));
 		if (rows <= 0)
 			return;
-
-		String query = "SELECT * FROM " + Config.sqlPrefix + "Orders WHERE `itemID` = ? AND `itemDur` = ? AND `itemEnchants` = ? AND amount > 0 ORDER BY `price` ASC;";
-
+		queryReturn qReturn;
+		
+		String query;
+		
+		if (sEnchants != null){
+			query = "SELECT * FROM " + Config.sqlPrefix + "Orders WHERE `itemID` = ? AND `itemDur` = ? AND `itemEnchants` = ? AND amount > 0 ORDER BY `price` ASC;";
+			qReturn = executeQuery(query, itemID, itemDur, sEnchants);
+		}else{
+			query = "SELECT * FROM " + Config.sqlPrefix + "Orders WHERE `itemID` = ? AND `itemDur` = ? AND amount > 0 ORDER BY `price` ASC;";
+			qReturn = executeQuery(query, itemID, itemDur);
+		}
+		
 		/**/
-		queryReturn qReturn = executeQuery(query, itemID, itemDur, itemEnchants);
+		
 		int results = 0;
 		try {
 			int id, type, amount, exchanged;
 			Boolean infinite;
 			String trader;
 			Double price;
-
+			String itemEnchants;
+			
 			while (qReturn.result.next()) {
 				results += 1;
 				id = qReturn.result.getInt(1);
 				type = qReturn.result.getInt(2);
 				infinite = qReturn.result.getBoolean(3);
 				trader = qReturn.result.getString(4);
+				itemEnchants = qReturn.result.getString(7);
 				price = qReturn.result.getDouble(8);
 				amount = qReturn.result.getInt(9);
 				
@@ -1953,17 +1969,7 @@ public class Database {
 					sender.sendMessage(F("playerOrder", typeString, id, itemName, amount,
 						plugin.Round(amount * price, Config.priceRounding), plugin.Round(price, Config.priceRounding), ColourName(sender, trader)));
 				}
-				
-				/*
-				if (type == 1) {
 
-					sender.sendMessage(F("playerOrder", ChatColor.RED + TypeToString(type, infinite), id, itemName, amount,
-						plugin.Round(amount * price, Config.priceRounding), plugin.Round(price, Config.priceRounding), ColourName(sender, trader)));
-				} else {
-					sender.sendMessage(F("playerOrder", ChatColor.GREEN + TypeToString(type, infinite), id, itemName, amount,
-						plugin.Round(amount * price, Config.priceRounding), plugin.Round(price, Config.priceRounding), ColourName(sender, trader)));
-				}
-*/
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -2205,7 +2211,7 @@ public class Database {
 			int type, itemID, itemDur, amount, id;
 			Boolean infinite;
 			double price;
-			String itemName, trader;
+			String itemName, trader,itemEnchants;
 			while (result.next()) {
 				count += 1;
 				// patron = result.getString(1);
@@ -2215,6 +2221,7 @@ public class Database {
 				trader = result.getString(4);
 				itemID = result.getInt(5);
 				itemDur = result.getInt(6);
+				itemEnchants = result.getString(7);
 				price = result.getDouble(8);
 				amount = result.getInt(9);
 				itemName = plugin.itemdb.getItemName(itemID, itemDur);
@@ -2223,6 +2230,20 @@ public class Database {
 				// + infinite + ", itemName: " + itemName + ", amount: " +
 				// amount + ", price: " + price);
 
+				
+				String typeString = ChatColor.RED + TypeToString(type, infinite);
+				if (type == 2) 
+					typeString = ChatColor.GREEN + TypeToString(type, infinite);
+				
+				if (itemEnchants != null){
+					sender.sendMessage(F("playerOrderEnchant", typeString, id, itemName, itemEnchants, amount,
+						plugin.Round(amount * price, Config.priceRounding), plugin.Round(price, Config.priceRounding), ColourName(sender, trader)));
+				}else{
+					sender.sendMessage(F("playerOrder", typeString, id, itemName, amount,
+						plugin.Round(amount * price, Config.priceRounding), plugin.Round(price, Config.priceRounding), ColourName(sender, trader)));
+				}
+				
+				/*
 				if (type == 1) {
 
 					sender.sendMessage(F("playerOrder", ChatColor.RED + TypeToString(type, infinite), id, itemName, amount,
@@ -2230,7 +2251,7 @@ public class Database {
 				} else {
 					sender.sendMessage(F("playerOrder", ChatColor.GREEN + TypeToString(type, infinite), id, itemName, amount,
 						plugin.Round(amount * price, Config.priceRounding), plugin.Round(price, Config.priceRounding), ColourName(sender, trader)));
-				}
+				}*/
 				// plugin.sendMessage(sender, );
 
 			}
