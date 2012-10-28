@@ -109,13 +109,13 @@ public class ExchangeMarket extends JavaPlugin {
 		if (sender instanceof Player && showConsole == true) {
 			info("§e" + sender.getName() + "->§f" + message);
 		}
-		if (sendPrefix == true){
+		if (sendPrefix == true) {
 			sender.sendMessage(chatPrefix + message);
-		}else{
+		} else {
 			sender.sendMessage(message);
 		}
 	}
-	
+
 	public void sendMessage(CommandSender sender, String message, Boolean showConsole) {
 		sendMessage(sender, message, showConsole, true);
 	}
@@ -261,10 +261,12 @@ public class ExchangeMarket extends JavaPlugin {
 			sType = L("buy").toLowerCase();
 
 		// info("announceNewOrder: " + type + ", " + sType);
-
 		String msg = F("newOrder", player.getDisplayName(), sType, itemName, amount, Round(price * amount, Config.priceRounding),
 			Round(price, Config.priceRounding));
-
+		if (itemEnchants != null) {
+			msg = F("newOrderEnchant", player.getDisplayName(), sType, itemName, itemEnchants, amount, Round(price * amount, Config.priceRounding),
+				Round(price, Config.priceRounding));
+		}
 		if (type == 1) {
 			permMessage("exchangemarket.announceneworder.sell", msg, sender.getName());
 		} else if (type == 2) {
@@ -294,8 +296,8 @@ public class ExchangeMarket extends JavaPlugin {
 
 		return false;
 	}
-	
-	public boolean isGear(Material mat){
+
+	public boolean isGear(Material mat) {
 		if (mat.toString().contains("SWORD"))
 			return true;
 		if (mat.toString().contains("PICKAXE"))
@@ -314,8 +316,8 @@ public class ExchangeMarket extends JavaPlugin {
 			return true;
 		if (mat.toString().contains("BOOTS"))
 			return true;
-		
+
 		return false;
 	}
-	
+
 }

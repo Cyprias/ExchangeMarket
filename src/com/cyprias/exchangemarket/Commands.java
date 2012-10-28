@@ -480,7 +480,8 @@ public class Commands implements CommandExecutor {
 					// plugin.info("amount: " +amount);
 
 					dryrun = false;
-					int success = plugin.database.cancelOrders(sender, type, item.getTypeId(), item.getDurability(), amount, dryrun);
+					String itemEnchants = MaterialUtil.Enchantment.encodeEnchantment(item);
+					int success = plugin.database.cancelOrders(sender, type, item.getTypeId(), item.getDurability(), itemEnchants, amount, dryrun);
 					// plugin.info("success: " +success);
 
 					if (success > 0 && dryrun == true) {

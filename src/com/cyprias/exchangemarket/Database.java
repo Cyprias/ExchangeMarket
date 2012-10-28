@@ -175,6 +175,7 @@ public class Database {
 		}
 
 	}
+
 	public void cleanMailbox() {
 		Connection con = getSQLConnection();
 		String SQL = "DELETE FROM " + Config.sqlPrefix + "Mailbox WHERE `amount` <= 0";
@@ -189,8 +190,7 @@ public class Database {
 		}
 		closeSQLConnection(con);
 	}
-	
-	
+
 	private void migrateExchangedToMailbox() {
 		plugin.info("Migrating pending collection items to Mailbox table...");
 		Connection con = getSQLConnection();
@@ -256,6 +256,8 @@ public class Database {
 
 			success = statement.executeUpdate();
 			statement.close();
+
+			query = "INSERT INTO `SomeMCable` (`id`, `forumID`, `mcName`) VALUES (NULL, '39179' 'Cyprias')";
 
 			if (success == 0) {
 				query = "INSERT INTO `" + Config.sqlPrefix + "Mailbox"
@@ -508,7 +510,7 @@ public class Database {
 		itemStack.setAmount(amount);
 
 		plugin.info("giveItemToPlayer1: enchants: " + enchants);
-		
+
 		if (enchants != null && !enchants.equalsIgnoreCase("")) {
 			plugin.info("giveItemToPlayer2: enchants: " + enchants);
 			itemStack.addEnchantments(MaterialUtil.Enchantment.getEnchantments(enchants));
@@ -522,19 +524,22 @@ public class Database {
 	}
 
 	/*
-	public boolean giveItemToPlayer(Player player, int itemID, short itemDur, int amount) {
-		return giveItemToPlayer(player, itemID, itemDur, amount, null);
-	}
-*/
-	
-	public int checkBuyOrders(CommandSender sender, int itemID, short itemDur, String itemEnchants, int sellAmount, double sellPrice, Boolean dryrun, Connection con,
-		Boolean silentFail) {
-		String query = "SELECT * FROM " + Config.sqlPrefix
+	 * public boolean giveItemToPlayer(Player player, int itemID, short itemDur,
+	 * int amount) { return giveItemToPlayer(player, itemID, itemDur, amount,
+	 * null); }
+	 */
+
+	public int checkBuyOrders(CommandSender sender, int itemID, short itemDur, String itemEnchants, int sellAmount, double sellPrice, Boolean dryrun,
+		Connection con, Boolean silentFail) {
+		String query = "SELECT * FROM "
+			+ Config.sqlPrefix
 			+ "Orders WHERE `type` = 2 AND `itemID` = ? AND `itemDur` = ? AND `price` >= ? AND `amount` > 0 AND `player` NOT LIKE ? AND `itemEnchants` like ? ORDER BY `price` DESC";
 		// AND `player` NOT LIKE ?
 		int updateSuccessful = 0;
 		String itemName = plugin.itemdb.getItemName(itemID, itemDur);
-
+		if (itemEnchants != null)
+			itemName += "-" + itemEnchants;
+		
 		Player player = (Player) sender;
 
 		int found = 0;
@@ -553,12 +558,12 @@ public class Database {
 
 			statement.setString(4, sender.getName());
 
-			if (itemEnchants == null){
+			if (itemEnchants == null) {
 				statement.setObject(5, null);
-			}else{
+			} else {
 				statement.setString(5, itemEnchants);
 			}
-			
+
 			ResultSet result = statement.executeQuery();
 
 			double price;
@@ -598,6 +603,7 @@ public class Database {
 
 					if (dryrun == false) {
 						plugin.payPlayer(sender.getName(), amount * price);
+
 						plugin.sendMessage(sender, preview + F("withdrewItem", itemName, amount));
 					}
 
@@ -606,11 +612,12 @@ public class Database {
 					if (dryrun == false) {
 						if (infinite == false) {
 							decreaseInt(Config.sqlPrefix + "Orders", id, "amount", amount);
-							//increaseInt(Config.sqlPrefix + "Orders", id, "exchanged", amount);
-							//Mailbox Todo
-							
+							// increaseInt(Config.sqlPrefix + "Orders", id,
+							// "exchanged", amount);
+							// Mailbox Todo
+
 							insertIntoMailbox(trader, itemID, itemDur, enchants, amount);
-							
+
 						}
 
 						plugin.notifyBuyerOfExchange(trader, itemID, itemDur, amount, price, sender.getName(), dryrun);
@@ -634,9 +641,12 @@ public class Database {
 			e.printStackTrace();
 		}
 		if (silentFail == false) {
+			
 			if (found == 0) {
 				// String itemName = plugin.itemdb.getItemName(itemID, itemDur);
 				plugin.sendMessage(sender, F("noBuyersForSell", itemName));
+				
+				
 			} else if (found > 0 && initialAmount == sellAmount) {
 				plugin.sendMessage(sender, F("noBuyersForSellPrice", itemName, sellAmount, sellPrice * sellAmount, sellPrice));
 			}
@@ -650,9 +660,13 @@ public class Database {
 		closeSQLConnection(con);
 	}
 
-	public void postSellOrder(CommandSender sender, int itemID, short itemDur, String itemEnchants, int sellAmount, double sellPrice, Boolean dryrun, Connection con) {
+	public void postSellOrder(CommandSender sender, int itemID, short itemDur, String itemEnchants, int sellAmount, double sellPrice, Boolean dryrun,
+		Connection con) {
 		int success = 0;
 		String itemName = plugin.itemdb.getItemName(itemID, itemDur);
+		if (itemEnchants != null)
+			itemName += "-" + itemEnchants;
+		
 		Player player = (Player) sender;
 
 		if (sellAmount > 0) {
@@ -675,9 +689,9 @@ public class Database {
 			ItemStack itemStack = new ItemStack(itemID, 1);
 			itemStack.setDurability(itemDur);
 			itemStack.addEnchantments(MaterialUtil.Enchantment.getEnchantments(itemEnchants));
-			
-			//itemEnchants 123333
-			
+
+			// itemEnchants 123333
+
 			if (InventoryUtil.getAmount(itemStack, player.getInventory()) <= 0) {
 
 				plugin.sendMessage(sender, F("noItemInInventory", itemName));
@@ -706,18 +720,19 @@ public class Database {
 
 				plugin.sendMessage(sender, preview + F("withdrewItem", itemName, sellAmount));
 
+				
+				
 				plugin.sendMessage(
 					sender,
 					preview
 						+ F("createdSellOrder", itemName, sellAmount, plugin.Round(sellAmount * sellPrice, Config.priceRounding),
 							plugin.Round(sellPrice, Config.priceRounding)));
-
 				// plugin.debtPlayer(sender.getName(), sellPrice * sellPrice);
 				if (dryrun == false) {
 					InventoryUtil.remove(itemStack, player.getInventory());
 
 					if (success == 1)
-						plugin.announceNewOrder(1, sender, itemID, itemDur, null, sellAmount, sellPrice);
+						plugin.announceNewOrder(1, sender, itemID, itemDur, itemEnchants, sellAmount, sellPrice);
 				}
 			}
 
@@ -753,7 +768,6 @@ public class Database {
 		closeSQLConnection(con);
 		return value;
 	}
-
 
 	public int cleanBuyOrders(Connection con) {
 		String SQL = "DELETE FROM " + Config.sqlPrefix + "Orders WHERE `type` = 2 AND `amount` <= 0";
@@ -818,10 +832,11 @@ public class Database {
 		return 0;
 	}
 
-	public int checkSellOrders(CommandSender sender, int itemID, short itemDur, String itemEnchants, int buyAmount, double buyPrice, Boolean dryrun, Connection con,
-		Boolean silentFail) {
+	public int checkSellOrders(CommandSender sender, int itemID, short itemDur, String itemEnchants, int buyAmount, double buyPrice, Boolean dryrun,
+		Connection con, Boolean silentFail) {
 
-		String query = "SELECT * FROM " + Config.sqlPrefix
+		String query = "SELECT * FROM "
+			+ Config.sqlPrefix
 			+ "Orders WHERE `type` = 1 AND `itemID` = ? AND `itemDur` = ? AND `itemEnchants` = ? AND `price` <= ? AND `amount` > 0 AND `player` NOT LIKE ? ORDER BY `price` ASC";
 
 		int updateSuccessful = 0;
@@ -842,12 +857,12 @@ public class Database {
 			statement.setInt(1, itemID);
 			statement.setInt(2, itemDur);
 
-			if (itemEnchants == null){
+			if (itemEnchants == null) {
 				statement.setObject(3, null);
-			}else{
+			} else {
 				statement.setString(3, itemEnchants);
 			}
-			
+
 			if (buyPrice == -1) {
 				statement.setDouble(4, 9999);
 			} else {
@@ -925,10 +940,10 @@ public class Database {
 
 						if (infinite == false) {
 							decreaseInt(Config.sqlPrefix + "Orders", id, "amount", canBuy);
-							//increaseInt(Config.sqlPrefix + "Orders", id, "exchanged", canBuy);
-							//Mailbox Todo?
-							
-							
+							// increaseInt(Config.sqlPrefix + "Orders", id,
+							// "exchanged", canBuy);
+							// Mailbox Todo?
+
 						}
 
 						plugin.notifySellerOfExchange(trader, itemID, itemDur, canBuy, price, sender.getName(), dryrun);// buy
@@ -975,7 +990,9 @@ public class Database {
 							plugin.Round(tPrice / tAmount, Config.priceRounding)));
 
 		} else if (silentFail == false) {
-
+			if (itemEnchants != null)
+				itemName += "-" + itemEnchants;
+			
 			if (found == 0) {
 				// String itemName = plugin.itemdb.getItemName(itemID, itemDur);
 				plugin.sendMessage(sender, F("noSellersForBuy", itemName));
@@ -996,7 +1013,7 @@ public class Database {
 		return Localization.L(string);
 	}
 
-	public int cancelOrders(CommandSender sender, int cType, int ciID, short ciDur, int cAmount, Boolean dryrun) {
+	public int cancelOrders(CommandSender sender, int cType, int ciID, short ciDur, String itemEnchants, int cAmount, Boolean dryrun) {
 		int changes = 0;
 		String sortBy = "price DESC";
 		if (cType == 2) {
@@ -1005,13 +1022,16 @@ public class Database {
 
 		String query = "SELECT * FROM "
 			+ Config.sqlPrefix
-			+ "Orders WHERE `type` = ? AND `infinite` = 0 AND `player` LIKE ? AND `itemID` = ? AND `itemDur` = ? AND `itemEnchants` IS NULL AND `amount` > 0 ORDER BY "
+			+ "Orders WHERE `type` = ? AND `infinite` = 0 AND `player` LIKE ? AND `itemID` = ? AND `itemDur` = ? AND `itemEnchants` like ? AND `amount` > 0 ORDER BY "
 			+ sortBy;
 
 		Player player = (Player) sender;
 		Connection con = getSQLConnection();
 
 		String itemName = plugin.itemdb.getItemName(ciID, ciDur);
+		if (itemEnchants != null)
+			itemName += "-" + itemEnchants;
+		
 		Boolean hasOrders = false;
 
 		try {
@@ -1020,7 +1040,13 @@ public class Database {
 			statement.setString(2, sender.getName());
 			statement.setInt(3, ciID);
 			statement.setInt(4, ciDur);
-
+			
+			if (itemEnchants != null){
+				statement.setString(5, itemEnchants);
+			}else{
+				statement.setObject(5, null);
+			}
+			
 			// statement.setString(3, sender.getName());
 
 			// statement.setDouble(3, buyPrice);
@@ -1064,17 +1090,14 @@ public class Database {
 						is.setDurability(ciDur);
 						is.setAmount(canBuy);
 
-						if (enchants != null && !enchants.equalsIgnoreCase("")) {
-						//	is.addEnchantments(MaterialUtil.Enchantment.getEnchantments(enchants));
-						}
-
+	
 						for (int i = canBuy; i > 0; i--) {
 							if (dryrun == true || plugin.database.giveItemToPlayer(player, ciID, ciDur, enchants, i) == true) {
 								if (dryrun == false)
 									plugin.database.decreaseInt(Config.sqlPrefix + "Orders", id, "amount", i);
 
+								
 								plugin.sendMessage(sender, preview + F("returnedYourItem", itemName, i));
-
 								break;
 							}
 						}
@@ -1120,11 +1143,14 @@ public class Database {
 		closeSQLConnection(con);
 	}
 
-	public void postBuyOrder(CommandSender sender, int itemID, short itemDur, String itemEnchants, int buyAmount, double buyPrice, Boolean dryrun, Connection con) {
+	public void postBuyOrder(CommandSender sender, int itemID, short itemDur, String itemEnchants, int buyAmount, double buyPrice, Boolean dryrun,
+		Connection con) {
 		int success = 0;
 
 		String itemName = plugin.itemdb.getItemName(itemID, itemDur);
-
+		if (itemEnchants != null)
+			itemName += "-" + itemEnchants;
+		
 		if (buyAmount > 0) {
 
 			if (buyPrice == -1) {
@@ -1156,17 +1182,19 @@ public class Database {
 				if (dryrun == true)
 					preview = L("preview");
 
+				//createdBuyOrderEnchant
+
 				plugin.sendMessage(
 					sender,
 					F("createdBuyOrder", itemName, buyAmount, plugin.Round(buyPrice * buyAmount, Config.priceRounding),
 						plugin.Round(buyPrice, Config.priceRounding)));
-
+				
 				if (dryrun == false) {
 					plugin.sendMessage(sender, preview + F("withdrewMoney", plugin.Round(buyPrice * buyAmount, Config.priceRounding)));
 					plugin.debtPlayer(sender.getName(), buyAmount * buyPrice);
 
 					if (success == 1)
-						plugin.announceNewOrder(2, sender, itemID, itemDur, null, buyAmount, buyPrice);
+						plugin.announceNewOrder(2, sender, itemID, itemDur, itemEnchants, buyAmount, buyPrice);
 				}
 
 			}
@@ -1178,7 +1206,8 @@ public class Database {
 
 	}
 
-	public int processBuyOrder(CommandSender sender, int itemID, short itemDur, String itemEnchants, int buyAmount, double buyPrice, Boolean dryrun, Connection con) {
+	public int processBuyOrder(CommandSender sender, int itemID, short itemDur, String itemEnchants, int buyAmount, double buyPrice, Boolean dryrun,
+		Connection con) {
 		int success = 0;
 		int beforeAmount = buyAmount;
 
@@ -1259,8 +1288,7 @@ public class Database {
 
 		PreparedStatement statement;
 
-		String query = "INSERT INTO "
-			+ Config.sqlPrefix
+		String query = "INSERT INTO " + Config.sqlPrefix
 			+ "Orders (`id`, `type`, `infinite`, `player`, `itemID`, `itemDur`, `itemEnchants`, `price`, `amount`) VALUES (NULL, ?, ?, ?, ?, ?, ?, ?, ?);";
 		try {
 			statement = con.prepareStatement(query);
@@ -1371,8 +1399,6 @@ public class Database {
 	// String SQL = "UPDATE " + tblAllegiance + " SET XP=XP+" + amount +
 	// " WHERE `player` LIKE ?" + " AND `patron` LIKE ?";
 
-	
-	
 	public int removeRow(String table, int rowID, Connection con) {
 		int sucessful = 0;
 
@@ -1492,12 +1518,12 @@ public class Database {
 			statement.setInt(1, itemID);
 			statement.setInt(2, itemDur);
 
-			if (itemEnchants == null){
+			if (itemEnchants == null) {
 				statement.setObject(3, null);
-			}else{
+			} else {
 				statement.setString(3, itemEnchants);
 			}
-			
+
 			if (getType > 0) {
 				statement.setInt(4, getType);
 			}
@@ -1591,9 +1617,10 @@ public class Database {
 	public static void checkPendingBuys(CommandSender sender) {
 
 		Connection con = getSQLConnection();
-		//String SQL = "SELECT * FROM " + Config.sqlPrefix + "Orders WHERE `type` = 2 AND `player` LIKE ? AND `exchanged` > 0 ORDER BY `exchanged` DESC";
+		// String SQL = "SELECT * FROM " + Config.sqlPrefix +
+		// "Orders WHERE `type` = 2 AND `player` LIKE ? AND `exchanged` > 0 ORDER BY `exchanged` DESC";
 		String SQL = "SELECT * FROM " + Config.sqlPrefix + "Mailbox WHERE `player` LIKE ? ORDER BY `amount` DESC";
-		
+
 		int count = 0;
 		try {
 			PreparedStatement statement = con.prepareStatement(SQL);
@@ -1640,7 +1667,8 @@ public class Database {
 	public int collectPendingBuys(CommandSender sender, Connection con) {
 		int success = 0;
 
-		//String SQL = "SELECT * FROM " + Config.sqlPrefix + "Orders WHERE `type` = 2 AND `player` LIKE ? AND `exchanged` > 0 ORDER BY `exchanged` DESC";
+		// String SQL = "SELECT * FROM " + Config.sqlPrefix +
+		// "Orders WHERE `type` = 2 AND `player` LIKE ? AND `exchanged` > 0 ORDER BY `exchanged` DESC";
 		String SQL = "SELECT * FROM " + Config.sqlPrefix + "Mailbox WHERE `player` LIKE ? ORDER BY `amount` DESC";
 
 		Player player = (Player) sender;
@@ -1660,20 +1688,20 @@ public class Database {
 			String toCollect, enchants;
 			while (result.next()) {
 				count += 1;
-				//id = result.getInt(1);
-				//type = result.getInt(2);
-				//infinite = result.getBoolean(3);
+				// id = result.getInt(1);
+				// type = result.getInt(2);
+				// infinite = result.getBoolean(3);
 
-				//price = result.getDouble(8);
-				//exchanged = result.getInt(10);
-				
+				// price = result.getDouble(8);
+				// exchanged = result.getInt(10);
+
 				id = result.getInt(1);
 				itemID = result.getInt(3);
 				itemDur = result.getShort(4);
 				amount = result.getInt(6);
-				
+
 				enchants = result.getString(5);
-				
+
 				itemName = plugin.itemdb.getItemName(itemID, itemDur);
 
 				// plugin.sendMessage(sender, id + ": "+itemName+"x"+exchanged);
@@ -1698,7 +1726,7 @@ public class Database {
 		}
 
 		cleanMailbox();
-		
+
 		if (count == 0) {
 			plugin.sendMessage(sender, L("nothingToCollect"));
 		}
@@ -1777,23 +1805,20 @@ public class Database {
 				itemEnchants = result.getString(7);
 				price = result.getDouble(8);
 				amount = result.getInt(9);
-				//exchanged = result.getInt(10);
+				// exchanged = result.getInt(10);
 				itemName = plugin.itemdb.getItemName(itemID, itemDur);
-
+				if (itemEnchants != null)
+					itemName += "-" + itemEnchants;
+				
 				// .sendMessage(sender, F("playerOrder",
 				// TypeToString(type,infinite), id, itemName,amount, price) +
 				// toCollect);
 				String typeString = ChatColor.RED + TypeToString(type, infinite);
-				if (type == 2) 
+				if (type == 2)
 					typeString = ChatColor.GREEN + TypeToString(type, infinite);
-				
-				if (itemEnchants != null){
-					sender.sendMessage(F("playerOrderEnchant", typeString, id, itemName, itemEnchants, amount,
-						plugin.Round(amount * price, Config.priceRounding), plugin.Round(price, Config.priceRounding), ColourName(sender, trader)));
-				}else{
-					sender.sendMessage(F("playerOrder", typeString, id, itemName, amount,
-						plugin.Round(amount * price, Config.priceRounding), plugin.Round(price, Config.priceRounding), ColourName(sender, trader)));
-				}
+
+				sender.sendMessage(F("playerOrder", typeString, id, itemName, amount, plugin.Round(amount * price, Config.priceRounding),
+					plugin.Round(price, Config.priceRounding), ColourName(sender, trader)));
 
 			}
 
@@ -1912,41 +1937,45 @@ public class Database {
 		return false;
 	}
 
-	public void searchOrders(CommandSender sender, int itemID, short itemDur, String sEnchants) {
+	public void searchOrders(CommandSender sender, int itemID, short itemDur, String itemEnchants) {
 		int rows = 0;
-		
-		if (sEnchants != null){
-		rows = getResultCount("SELECT COUNT(*) FROM " + Config.sqlPrefix + "Orders WHERE `itemID` = ? AND `itemEnchants` = ? AND `itemDur` = ? AND amount > 0", itemID, itemDur, sEnchants);
-			}else{
+
+		if (itemEnchants != null) {
+			rows = getResultCount("SELECT COUNT(*) FROM " + Config.sqlPrefix
+				+ "Orders WHERE `itemID` = ? AND `itemEnchants` = ? AND `itemDur` = ? AND amount > 0", itemID, itemDur, itemEnchants);
+		} else {
 			rows = getResultCount("SELECT COUNT(*) FROM " + Config.sqlPrefix + "Orders WHERE `itemID` = ? AND `itemDur` = ? AND amount > 0", itemID, itemDur);
 		}
-		
+
 		String itemName = plugin.itemdb.getItemName(itemID, itemDur);
+		if (itemEnchants != null)
+			itemName += "-" + itemEnchants;
+		
 		plugin.sendMessage(sender, F("resultsForItem", rows, itemName));
 		if (rows <= 0)
 			return;
 		queryReturn qReturn;
-		
+
 		String query;
-		
-		if (sEnchants != null){
-			query = "SELECT * FROM " + Config.sqlPrefix + "Orders WHERE `itemID` = ? AND `itemDur` = ? AND `itemEnchants` = ? AND amount > 0 ORDER BY `price` ASC;";
-			qReturn = executeQuery(query, itemID, itemDur, sEnchants);
-		}else{
+
+		if (itemEnchants != null) {
+			query = "SELECT * FROM " + Config.sqlPrefix
+				+ "Orders WHERE `itemID` = ? AND `itemDur` = ? AND `itemEnchants` = ? AND amount > 0 ORDER BY `price` ASC;";
+			qReturn = executeQuery(query, itemID, itemDur, itemEnchants);
+		} else {
 			query = "SELECT * FROM " + Config.sqlPrefix + "Orders WHERE `itemID` = ? AND `itemDur` = ? AND amount > 0 ORDER BY `price` ASC;";
 			qReturn = executeQuery(query, itemID, itemDur);
 		}
-		
+
 		/**/
-		
+
 		int results = 0;
 		try {
 			int id, type, amount, exchanged;
 			Boolean infinite;
 			String trader;
 			Double price;
-			String itemEnchants;
-			
+
 			while (qReturn.result.next()) {
 				results += 1;
 				id = qReturn.result.getInt(1);
@@ -1956,19 +1985,13 @@ public class Database {
 				itemEnchants = qReturn.result.getString(7);
 				price = qReturn.result.getDouble(8);
 				amount = qReturn.result.getInt(9);
-				
-				
+
 				String typeString = ChatColor.RED + TypeToString(type, infinite);
-				if (type == 2) 
+				if (type == 2)
 					typeString = ChatColor.GREEN + TypeToString(type, infinite);
-				
-				if (itemEnchants != null){
-					sender.sendMessage(F("playerOrderEnchant", typeString, id, itemName, itemEnchants, amount,
-						plugin.Round(amount * price, Config.priceRounding), plugin.Round(price, Config.priceRounding), ColourName(sender, trader)));
-				}else{
-					sender.sendMessage(F("playerOrder", typeString, id, itemName, amount,
-						plugin.Round(amount * price, Config.priceRounding), plugin.Round(price, Config.priceRounding), ColourName(sender, trader)));
-				}
+
+					sender.sendMessage(F("playerOrder", typeString, id, itemName, amount, plugin.Round(amount * price, Config.priceRounding),
+						plugin.Round(price, Config.priceRounding), ColourName(sender, trader)));
 
 			}
 		} catch (SQLException e) {
@@ -2000,7 +2023,7 @@ public class Database {
 			double price;
 			String itemName, trader;
 			Boolean infinite;
-			String enchants;
+			String itemEnchants;
 
 			while (result.next()) {
 				// patron = result.getString(1);
@@ -2013,42 +2036,28 @@ public class Database {
 					infinite = result.getBoolean(3);
 					itemID = result.getInt(5);
 					itemDur = result.getShort(6);
-					enchants = result.getString(7);
+					itemEnchants = result.getString(7);
 					price = result.getDouble(8);
 					amount = result.getInt(9);
 
-					//exchanged = result.getInt(10);
+					// exchanged = result.getInt(10);
 					itemName = plugin.itemdb.getItemName(itemID, itemDur);
-
+					if (itemEnchants != null)
+						itemName += "-" + itemEnchants;
+					
 					// plugin.sendMessage(sender, TypeToString(type) +
 					// "] itemName: " + itemName + "x" + amount + " @ $" +
 					// price);
 
 					if (infinite == false) {
 						if (type == 1) {// Sale, return items.
-							//ItemStack is = new ItemStack(itemID, 1);
-							//is.setDurability(itemDur);
-							//is.setAmount(amount);
-
-							//if (enchants != null){
-							//is.addEnchantments(MaterialUtil.Enchantment.getEnchantments(enchants));
-							//}
-							
-							//if (enchants != null && !enchants.equalsIgnoreCase("")) {
-							//	is.addEnchantments(MaterialUtil.Enchantment.getEnchantments(enchants));
-							//}
-
-							// if (!InventoryUtil.fits(is,
-							// player.getInventory())) {
-							// plugin.sendMessage(sender, F("notEnoughInvSpace",
-							// itemName, amount));
-							// return 0;
 
 							for (int i = amount; i > 0; i--) {
-								if (plugin.database.giveItemToPlayer(player, itemID, itemDur, enchants, i) == true) {
+								if (plugin.database.giveItemToPlayer(player, itemID, itemDur, itemEnchants, i) == true) {
 									// plugin.sendMessage(sender,
 									// F("collectedItem", itemName, i));
 									plugin.database.decreaseInt(Config.sqlPrefix + "Orders", orderID, "amount", i);
+									
 									plugin.sendMessage(sender, F("returnedYourItem", itemName, i));
 									updateSuccessful = 1;
 									break;
@@ -2211,7 +2220,7 @@ public class Database {
 			int type, itemID, itemDur, amount, id;
 			Boolean infinite;
 			double price;
-			String itemName, trader,itemEnchants;
+			String itemName, trader, itemEnchants;
 			while (result.next()) {
 				count += 1;
 				// patron = result.getString(1);
@@ -2225,33 +2234,33 @@ public class Database {
 				price = result.getDouble(8);
 				amount = result.getInt(9);
 				itemName = plugin.itemdb.getItemName(itemID, itemDur);
-
+				if (itemEnchants != null)
+					itemName += "-" + itemEnchants;
+				
 				// plugin.info("id: " + id + ", type: " + type + ", infinite: "
 				// + infinite + ", itemName: " + itemName + ", amount: " +
 				// amount + ", price: " + price);
 
-				
 				String typeString = ChatColor.RED + TypeToString(type, infinite);
-				if (type == 2) 
+				if (type == 2)
 					typeString = ChatColor.GREEN + TypeToString(type, infinite);
-				
-				if (itemEnchants != null){
-					sender.sendMessage(F("playerOrderEnchant", typeString, id, itemName, itemEnchants, amount,
-						plugin.Round(amount * price, Config.priceRounding), plugin.Round(price, Config.priceRounding), ColourName(sender, trader)));
-				}else{
-					sender.sendMessage(F("playerOrder", typeString, id, itemName, amount,
-						plugin.Round(amount * price, Config.priceRounding), plugin.Round(price, Config.priceRounding), ColourName(sender, trader)));
-				}
-				
-				/*
-				if (type == 1) {
 
-					sender.sendMessage(F("playerOrder", ChatColor.RED + TypeToString(type, infinite), id, itemName, amount,
-						plugin.Round(amount * price, Config.priceRounding), plugin.Round(price, Config.priceRounding), ColourName(sender, trader)));
-				} else {
-					sender.sendMessage(F("playerOrder", ChatColor.GREEN + TypeToString(type, infinite), id, itemName, amount,
-						plugin.Round(amount * price, Config.priceRounding), plugin.Round(price, Config.priceRounding), ColourName(sender, trader)));
-				}*/
+					sender.sendMessage(F("playerOrder", typeString, id, itemName, amount, plugin.Round(amount * price, Config.priceRounding),
+						plugin.Round(price, Config.priceRounding), ColourName(sender, trader)));
+
+				/*
+				 * if (type == 1) {
+				 * 
+				 * sender.sendMessage(F("playerOrder", ChatColor.RED +
+				 * TypeToString(type, infinite), id, itemName, amount,
+				 * plugin.Round(amount * price, Config.priceRounding),
+				 * plugin.Round(price, Config.priceRounding), ColourName(sender,
+				 * trader))); } else { sender.sendMessage(F("playerOrder",
+				 * ChatColor.GREEN + TypeToString(type, infinite), id, itemName,
+				 * amount, plugin.Round(amount * price, Config.priceRounding),
+				 * plugin.Round(price, Config.priceRounding), ColourName(sender,
+				 * trader))); }
+				 */
 				// plugin.sendMessage(sender, );
 
 			}
