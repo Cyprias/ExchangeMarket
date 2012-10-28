@@ -20,16 +20,27 @@ import org.mindrot.jbcrypt.BCrypt;
 
 import com.Acrobot.Breeze.Utils.InventoryUtil;
 import com.Acrobot.Breeze.Utils.MaterialUtil;
+import com.cyprias.exchangemarket.Utilis.Utils;
+import com.cyprias.exchangemarket.commands.Info;
+import com.cyprias.exchangemarket.commands.Price;
+import com.cyprias.exchangemarket.commands.SellOrder;
 
-class Commands implements CommandExecutor {
-	private ExchangeMarket plugin;
+public class Commands implements CommandExecutor {
+	protected ExchangeMarket plugin;
 
+	private Info info;
+	private Price price;
+	private SellOrder sellOrder;
+	
+	//CommandExecutor info = null;
 	public Commands(ExchangeMarket plugin) {
 		this.plugin = plugin;
-
+		this.info = new Info(plugin);
+		this.price = new Price(plugin);
+		this.sellOrder = new SellOrder(plugin);
 	}
 
-	private String getItemStatsMsg(Database.itemStats stats, int stackCount) {
+	public String getItemStatsMsg(Database.itemStats stats, int stackCount) {
 		int roundTo = Config.priceRounding;
 		if (stats.total == 0)
 			return "§7items: §f0";
@@ -46,13 +57,7 @@ class Commands implements CommandExecutor {
 	}
 
 	public boolean hasCommandPermission(CommandSender player, String permission) {
-		if (plugin.hasPermission(player, permission)) {
-			return true;
-		}
-		// sendMessage(player, F("stNoPermission", permission));
-		plugin.sendMessage(player, F("noPermission", permission));
-
-		return false;
+		return plugin.hasCommandPermission(player, permission);
 	}
 
 	private String F(String string, Object... args) {
@@ -291,7 +296,7 @@ class Commands implements CommandExecutor {
 				}
 				double price = 0;
 				if (args.length > 1) {
-					if (isDouble(args[2])) {
+					if (Utils.isDouble(args[2])) {
 						price = Double.parseDouble(args[2]);
 					} else {
 						plugin.sendMessage(sender, F("invalidPrice", args[2]));
@@ -331,7 +336,7 @@ class Commands implements CommandExecutor {
 				}
 				double price = 0;
 				if (args.length > 1) {
-					if (isDouble(args[2])) {
+					if (Utils.isDouble(args[2])) {
 						price = Double.parseDouble(args[2]);
 					} else {
 						plugin.sendMessage(sender, F("invalidPrice", args[2]));
@@ -365,7 +370,7 @@ class Commands implements CommandExecutor {
 					return true;
 				}
 
-				if (isInt(args[1])) {
+				if (Utils.isInt(args[1])) {
 					int success = plugin.database.removeOrder(sender, Integer.parseInt(args[1]));
 					if (success > 0) {
 						plugin.sendMessage(sender, L("removeSuccessful"));
@@ -387,81 +392,10 @@ class Commands implements CommandExecutor {
 			Player player = (Player) sender;
 			
 			if (args[0].equalsIgnoreCase("price")) {
-				if (!hasCommandPermission(sender, "exchangemarket.price")) {
-					return true;
-				}
-				if (args.length < 2 && player.getItemInHand().getTypeId() == 0) {
-					plugin.sendMessage(sender, " §a/" + commandLabel + " price [itemName] [amount] [sale/buy] §7- " + L("cmdPriceDesc"));
-					return true;
-				}
-
-				ItemStack item = null;
-				int amount = 1;
-				if (args.length > 1) {
-					item = ItemDb.getItemStack(args[1]);
-				} else {
-					item = player.getItemInHand();
-					amount = item.getAmount();
-				}
-
-				String itemEnchants = MaterialUtil.Enchantment.encodeEnchantment(item);
-				
-				if (item == null) {
-					plugin.sendMessage(sender, F("invalidItem", args[1]));
-					return true;
-				}
-
-				if (args.length > 2) {
-
-					if (isInt(args[2])) {
-						amount = Integer.parseInt(args[2]);
-					} else {
-						plugin.sendMessage(sender, F("invalidAmount", args[2]));
-
-						return true;
-					}
-				}
-
-				item.setAmount(amount);
-				// plugin.sendMessage(sender, "amount: " + amount);
-
-				int type = 0;
-				if (args.length > 3) {
-					if (args[3].equalsIgnoreCase("sell")) {
-						type = 1;
-					} else if (args[3].equalsIgnoreCase("buy")) {
-						type = 2;
-
-					} else {
-						plugin.sendMessage(sender, F("invalidType", args[3]));
-						return true;
-					}
-				}
-
-				Database.itemStats stats = plugin.database.getItemStats(item.getTypeId(), item.getDurability(), itemEnchants, type);
-				String itemName = plugin.itemdb.getItemName(item.getTypeId(), item.getDurability());
-
-				plugin.sendMessage(sender, F("itemShort", itemName, amount));
-				plugin.sendMessage(sender, getItemStatsMsg(stats, amount));
-
-				return true;
-
+				return price.onCommand(sender, cmd, commandLabel, args);
 			}else if (args[0].equalsIgnoreCase("info")) {
-					
-				ItemStack item = player.getItemInHand();
-				int amount = item.getAmount();
-				String itemEnchants = MaterialUtil.Enchantment.encodeEnchantment(item);
-				String itemName = plugin.itemdb.getItemName(item.getTypeId(), item.getDurability());
 				
-				if (itemEnchants != null){
-					sender.sendMessage(itemName + "-" + itemEnchants + " x " + amount);
-				}else{
-					sender.sendMessage(itemName + " x " + amount);
-				}
-				
-				
-				
-				return true;
+				return info.onCommand(sender, cmd, commandLabel, args);
 			} else if (args[0].equalsIgnoreCase("search")) {
 				if (!hasCommandPermission(sender, "exchangemarket.search")) {
 					return true;
@@ -480,8 +414,9 @@ class Commands implements CommandExecutor {
 					plugin.sendMessage(sender, F("invalidItem", args[1]));
 					return true;
 				}
-
-				plugin.database.searchOrders(sender, item.getTypeId(), item.getDurability());
+				String itemEnchants = MaterialUtil.Enchantment.encodeEnchantment(item);
+				
+				plugin.database.searchOrders(sender, item.getTypeId(), item.getDurability(), itemEnchants);
 
 				return true;
 
@@ -495,7 +430,7 @@ class Commands implements CommandExecutor {
 					return true;
 				}
 
-				if (isInt(args[1])) {
+				if (Utils.isInt(args[1])) {
 					plugin.database.cancelOrder(sender, Integer.parseInt(args[1]));
 				} else {
 					if (confirmed == null)
@@ -530,7 +465,7 @@ class Commands implements CommandExecutor {
 
 					if (args.length > 3) {
 
-						if (isInt(args[3])) {
+						if (Utils.isInt(args[3])) {
 							amount = Integer.parseInt(args[3]);
 						} else {
 							plugin.sendMessage(sender, F("invalidAmount", args[3]));
@@ -564,7 +499,7 @@ class Commands implements CommandExecutor {
 
 				int page = -1;
 				if (args.length > 1) {// && args[1].equalsIgnoreCase("compact"))
-					if (isInt(args[1])) {
+					if (Utils.isInt(args[1])) {
 						page = Math.abs(Integer.parseInt(args[1]));
 					} else {
 						plugin.sendMessage(sender, F("invalidPageNumber", args[1]));
@@ -595,7 +530,7 @@ class Commands implements CommandExecutor {
 
 				int page = -1;
 				if (args.length > 2) {// && args[1].equalsIgnoreCase("compact"))
-					if (isInt(args[2])) {
+					if (Utils.isInt(args[2])) {
 						page = Math.abs(Integer.parseInt(args[2]));
 					} else {
 						plugin.sendMessage(sender, F("invalidPageNumber", args[2]));
@@ -608,75 +543,8 @@ class Commands implements CommandExecutor {
 				return true;
 
 			} else if (args[0].equalsIgnoreCase("sellorder")) {
-				if (!hasCommandPermission(sender, "exchangemarket.sellorder")) {
-					return true;
-				}
-				if (args.length < 2) {
-					plugin.sendMessage(sender, "§a/" + commandLabel + " sellorder <itemName> <amount> [price] §7- " + L("cmdSellOrderDesc"));
-					return true;
-				}
-
-				ItemStack item = ItemDb.getItemStack(args[1]);
-
-				if (item == null) {
-					plugin.sendMessage(sender, F("invalidItem", args[1]));
-					return true;
-				}
-
-				int amount = InventoryUtil.getAmount(item, player.getInventory());
-				if (args.length > 2) {
-
-					if (isInt(args[2])) {
-						amount = Integer.parseInt(args[2]);
-					} else {
-						plugin.sendMessage(sender, F("invalidAmount", args[2]));
-						return true;
-					}
-				}
-				int rawAmount = amount;
-				item.setAmount(amount);
-				double price = -1;
-				// plugin.sendMessage(sender, "amount: " + amount);
-
-				if (args.length > 3) {
-
-					// if (args.length > 2) {
-
-					Boolean priceEach = false;
-
-					if (args[3].substring(args[3].length() - 1, args[3].length()).equalsIgnoreCase("e")) {
-						priceEach = true;
-						args[3] = args[3].substring(0, args[3].length() - 1);
-					}
-
-					if (isDouble(args[3])) {
-						price = Math.abs(Double.parseDouble(args[3]));
-					} else {
-						plugin.sendMessage(sender, F("invalidPrice", args[3]));
-						return true;
-					}
-					if (price == 0) {
-						plugin.sendMessage(sender, F("invalidPrice", 0));
-						return true;
-					}
-					if (priceEach == false && Config.convertCreatePriceToPerItem == true)
-						price = price / rawAmount;
-
-					// price = plugin.Round(price, Config.priceRounding);
-
-					if (price == 0) {
-						plugin.sendMessage(sender, F("invalidPrice", price));
-						return true;
-					}
-				}
-
-				// postBuyOrder
-
+				return sellOrder.onCommand(sender, cmd, commandLabel, args);
 				
-				
-				plugin.database.postSellOrder(sender, item.getTypeId(), item.getDurability(), null, amount, price, false);
-
-				return true;
 			} else if (args[0].equalsIgnoreCase("buyorder")) {
 				if (!hasCommandPermission(sender, "exchangemarket.buyorder")) {
 					return true;
@@ -698,7 +566,7 @@ class Commands implements CommandExecutor {
 				int amount = 1;
 				if (args.length > 2) {
 
-					if (isInt(args[2])) {
+					if (Utils.isInt(args[2])) {
 						amount = Integer.parseInt(args[2]);
 					} else {
 						plugin.sendMessage(sender, F("invalidAmount", args[2]));
@@ -721,7 +589,7 @@ class Commands implements CommandExecutor {
 						args[3] = args[3].substring(0, args[3].length() - 1);
 					}
 
-					if (isDouble(args[3])) {
+					if (Utils.isDouble(args[3])) {
 						price = Math.abs(Double.parseDouble(args[3]));
 					} else {
 						plugin.sendMessage(sender, F("invalidPrice", args[3]));
@@ -746,6 +614,11 @@ class Commands implements CommandExecutor {
 					return true;
 				}
 
+				if (Config.allowDamangedGear == false && plugin.isGear(item.getType()) && item.getDurability() > 0){
+					plugin.sendMessage(sender, F("cannotPostDamagedOrder"));
+					return true;
+				}
+				
 				// postBuyOrder
 				String itemEnchants = MaterialUtil.Enchantment.encodeEnchantment(item);
 				
@@ -772,7 +645,7 @@ class Commands implements CommandExecutor {
 				int amount = 1;
 				if (args.length > 2) {
 
-					if (isInt(args[2])) {
+					if (Utils.isInt(args[2])) {
 						amount = Integer.parseInt(args[2]);
 					} else {
 						plugin.sendMessage(sender, F("invalidAmount", args[2]));
@@ -794,7 +667,7 @@ class Commands implements CommandExecutor {
 						args[3] = args[3].substring(0, args[3].length() - 1);
 					}
 
-					if (isDouble(args[3])) {
+					if (Utils.isDouble(args[3])) {
 						price = Math.abs(Double.parseDouble(args[3]));
 					} else {
 						plugin.sendMessage(sender, F("invalidPrice", args[3]));
@@ -867,7 +740,7 @@ class Commands implements CommandExecutor {
 				int amount = invAmount;
 				if (args.length > 2) {
 
-					if (isInt(args[2])) {
+					if (Utils.isInt(args[2])) {
 						amount = Integer.parseInt(args[2]);
 					} else {
 						plugin.sendMessage(sender, F("invalidAmount", args[2]));
@@ -902,7 +775,7 @@ class Commands implements CommandExecutor {
 						args[3] = args[3].substring(0, args[3].length() - 1);
 					}
 
-					if (isDouble(args[3])) {
+					if (Utils.isDouble(args[3])) {
 						price = Math.abs(Double.parseDouble(args[3]));
 					} else {
 						plugin.sendMessage(sender, F("invalidPrice", args[3]));
@@ -946,11 +819,6 @@ class Commands implements CommandExecutor {
 				ItemStack stock = player.getItemInHand();
 				Map<Enchantment, Integer> e = stock.getEnchantments();
 
-				//if (e.size() > 0) {
-				//	plugin.sendMessage(sender, F("cantSellEnchants"));
-				//	return true;
-				//}
-
 				int type = 1;
 				String playerName = sender.getName();
 				int itemID = stock.getTypeId();
@@ -973,7 +841,7 @@ class Commands implements CommandExecutor {
 						args[1] = args[1].substring(0, args[1].length() - 1);
 					}
 
-					if (isDouble(args[1])) {
+					if (Utils.isDouble(args[1])) {
 						price = Math.abs(Double.parseDouble(args[1]));
 					} else {
 						plugin.sendMessage(sender, F("invalidPrice", args[1]));
@@ -994,6 +862,11 @@ class Commands implements CommandExecutor {
 					}
 				}
 
+				if (Config.allowDamangedGear == false && plugin.isGear(stock.getType()) && stock.getDurability() > 0){
+					plugin.sendMessage(sender, F("cannotPostDamagedOrder"));
+					return true;
+				}
+				
 				plugin.database.postSellOrder(sender, stock.getTypeId(), stock.getDurability(), itemEnchants, amount, price, false);
 
 				return true;
@@ -1008,7 +881,7 @@ class Commands implements CommandExecutor {
 
 				int page = -1;
 				if (args.length > 1) {// && args[1].equalsIgnoreCase("compact"))
-					if (isInt(args[1])) {
+					if (Utils.isInt(args[1])) {
 						page = Math.abs(Integer.parseInt(args[1]));
 					} else {
 						plugin.sendMessage(sender, F("invalidPageNumber", args[1]));
@@ -1060,21 +933,5 @@ class Commands implements CommandExecutor {
 		return false;
 	}
 
-	public static boolean isInt(final String sInt) {
-		try {
-			Integer.parseInt(sInt);
-		} catch (NumberFormatException e) {
-			return false;
-		}
-		return true;
-	}
 
-	public static boolean isDouble(final String sDouble) {
-		try {
-			Double.parseDouble(sDouble);
-		} catch (NumberFormatException e) {
-			return false;
-		}
-		return true;
-	}
 }

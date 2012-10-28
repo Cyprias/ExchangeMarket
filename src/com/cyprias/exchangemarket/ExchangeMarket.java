@@ -6,6 +6,7 @@ import java.util.logging.Logger;
 import net.milkbowl.vault.economy.Economy;
 
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -284,4 +285,37 @@ public class ExchangeMarket extends JavaPlugin {
 		permMessage(permissionNode, message, "");
 	}
 
+	public boolean hasCommandPermission(CommandSender player, String permission) {
+		if (hasPermission(player, permission)) {
+			return true;
+		}
+		// sendMessage(player, F("stNoPermission", permission));
+		sendMessage(player, F("noPermission", permission));
+
+		return false;
+	}
+	
+	public boolean isGear(Material mat){
+		if (mat.toString().contains("SWORD"))
+			return true;
+		if (mat.toString().contains("PICKAXE"))
+			return true;
+		if (mat.toString().contains("SPADE"))
+			return true;
+		if (mat.toString().contains("AXE"))
+			return true;
+		if (mat.toString().contains("HOE"))
+			return true;
+		if (mat.toString().contains("HELMET"))
+			return true;
+		if (mat.toString().contains("CHESTPLATE"))
+			return true;
+		if (mat.toString().contains("LEGGINGS"))
+			return true;
+		if (mat.toString().contains("BOOTS"))
+			return true;
+		
+		return false;
+	}
+	
 }

@@ -17,3 +17,4 @@ blockUsageInCreativeMode: true
 logBalanceChangesToConsole: true
 checkNewVersionOnStartup: true
 grantOpsAllPermissions: false
+allowDamangedGear: false

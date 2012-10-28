@@ -25,7 +25,7 @@ public class Config {
 	public static String sqlUsername, sqlPassword, sqlURL, sqlPrefix, sqlDatabase, sqlHost, sqlPort;
 	//public static int sqlPort;
 	public static String locale;
-	public static Boolean grantOpsAllPermissions, checkNewVersionOnStartup, blockUsageInCreativeMode,  logBalanceChangesToConsole, logTransactionsToDB, convertCreatePriceToPerItem, cancelSelfSalesWhenBuying, autoPricePerUnit, clearRequestAfterConfirm, confirmAllOrders, autoPriceConfirm;
+	public static Boolean allowDamangedGear, grantOpsAllPermissions, checkNewVersionOnStartup, blockUsageInCreativeMode,  logBalanceChangesToConsole, logTransactionsToDB, convertCreatePriceToPerItem, cancelSelfSalesWhenBuying, autoPricePerUnit, clearRequestAfterConfirm, confirmAllOrders, autoPriceConfirm;
 	public static int priceRounding, transactionsPerPage;
 	public static Double autoBuyPrice, autoSellPrice;
 	
@@ -71,5 +71,6 @@ public class Config {
 		autoSellPrice = config.getDouble("autoSellPrice");
 		autoPricePerUnit = config.getBoolean("autoPricePerUnit");
 		
+		allowDamangedGear = config.getBoolean("allowDamangedGear");
 	}
 }

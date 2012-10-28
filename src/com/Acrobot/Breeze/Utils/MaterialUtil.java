@@ -11,6 +11,7 @@ import org.bukkit.material.*;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -240,8 +241,10 @@ public class MaterialUtil {
 * @param base32 The encoded enchantment
 * @return Enchantments found
 */
+    	public static Logger log = Logger.getLogger("Minecraft"); 
+    	
         public static Map<org.bukkit.enchantments.Enchantment, Integer> getEnchantments(String base32) {
-            if (base32 == null || base32.isEmpty() || !NumberUtil.isLong(base32)) {
+            if (base32 == null || base32.isEmpty() || NumberUtil.isLong(base32)) {
                 return new HashMap<org.bukkit.enchantments.Enchantment, Integer>();
             }
 
@@ -255,7 +258,6 @@ public class MaterialUtil {
 
             for (int i = 0; i < number.length() / 3; i++) {
                 String item = number.substring(i * 3, i * 3 + 3);
-
                 org.bukkit.enchantments.Enchantment enchantment = org.bukkit.enchantments.Enchantment.getById(Integer.parseInt(item.substring(0, 2)));
 
                 if (enchantment == null) {
@@ -263,7 +265,6 @@ public class MaterialUtil {
                 }
 
                 int level = Integer.parseInt(item.substring(2));
-
                 if (level > enchantment.getMaxLevel() || level < enchantment.getStartLevel()) {
                     continue;
                 }

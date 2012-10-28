@@ -16,10 +16,13 @@ import java.util.logging.Logger;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Item;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.Material;
+
+import com.Acrobot.Breeze.Utils.MaterialUtil;
 
 public class ItemDb {
 	private ExchangeMarket plugin;
@@ -81,17 +84,36 @@ public class ItemDb {
 	static HashMap<String, itemData> nameToID = new HashMap<String, itemData>();
 	static HashMap<String, String> idToName = new HashMap<String, String>();
 
-	public static ItemStack getItemStack(int itemID, short itemDur) {
+	public static ItemStack getItemStack(int itemID, short itemDur, String enchants) {
 		ItemStack is = new ItemStack(itemID, 1);
 		is.setDurability(itemDur);
+
+		if (enchants != null){
+			//log.info("Adding enchants: " + enchants);
+			
+			Map<Enchantment, Integer> ench = MaterialUtil.Enchantment.getEnchantments(enchants);
+			//log.info("ench: " + ench);
+			
+			is.addEnchantments(ench);
+			
+			//log.info("enchant count: " + is.getEnchantments().size());
+			
+			
+			
+		}
 
 		return is;
 	}
 
+	public static Logger log = Logger.getLogger("Minecraft"); 
 	public static ItemStack getItemStack(String id) {
 		int itemid = 0;
 		String itemname = null;
 		short metaData = 0;
+		
+		String[] split = id.trim().split("-");
+		if (split.length > 0)
+			id = split[0];
 		
 		if (id.matches("^\\d+[:+',;.]\\d+$")) {
 			itemid = Integer.parseInt(id.split("[:+',;.]")[0]);
@@ -105,15 +127,22 @@ public class ItemDb {
 			itemname = id.toLowerCase(Locale.ENGLISH);
 		}
 
+		log.info("id: " + id);
+		log.info("itemid: " + itemid);
+		log.info("metaData: " + metaData);
+		log.info("split: " + split[1]);
+		
+		
+		
 		if (itemid > 0){
-			return getItemStack(itemid, metaData);
+			return getItemStack(itemid, metaData, split[1]);
 		}
 		if (itemname != null){
 			if (!nameToID.containsKey(itemname)) {
 				return null;
 			}
 			itemData iD = nameToID.get(itemname);
-			return getItemStack(iD.itemID, iD.itemDur);
+			return getItemStack(iD.itemID, iD.itemDur, split[1]);
 		}
 		
 		return null;
