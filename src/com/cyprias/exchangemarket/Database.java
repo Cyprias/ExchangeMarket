@@ -123,7 +123,7 @@ public class Database {
 			if (tableExists(Config.sqlPrefix + "Orders") == false) {
 				query = "CREATE TABLE "
 					+ Config.sqlPrefix
-					+ "Orders (`id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY, `type` INT NOT NULL, `infinite` BOOLEAN NOT NULL DEFAULT '0' , `player` VARCHAR(32) NOT NULL, `itemID` INT NOT NULL, `itemDur` INT NOT NULL, `itemEnchants` VARCHAR(16) NULL, `price` DOUBLE NOT NULL, `amount` INT NOT NULL, `exchanged` INT NOT NULL DEFAULT '0')";
+					+ "Orders (`id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY, `type` INT NOT NULL, `infinite` BOOLEAN NOT NULL DEFAULT '0' , `player` VARCHAR(32) NOT NULL, `itemID` INT NOT NULL, `itemDur` INT NOT NULL, `itemEnchants` VARCHAR(16) NULL, `price` DOUBLE NOT NULL, `amount` INT NOT NULL)";
 				statement = con.prepareStatement(query);
 				statement.executeUpdate();
 			}
@@ -144,12 +144,28 @@ public class Database {
 					+ "Passwords` (`id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY, `username` VARCHAR(32) NOT NULL, `hash` VARCHAR(64) NOT NULL, `timestamp` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, UNIQUE (`username`))";
 				statement = con.prepareStatement(query);
 				statement.executeUpdate();
-			} else if (tableFieldExists(Config.sqlPrefix + "Passwords", "salt", con) == true) {
-				//
-
+			} else if (tableFieldExists(Config.sqlPrefix + "Passwords", "salt") == true) {
 				query = "ALTER TABLE `" + Config.sqlPrefix + "Passwords` DROP `salt`";
 				statement = con.prepareStatement(query);
 				statement.executeUpdate();
+			}
+
+			if (tableExists(Config.sqlPrefix + "Mailbox") == false) {
+				query = "CREATE TABLE `"
+					+ Config.sqlPrefix
+					+ "Mailbox"
+					+ "` (`id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY, `player` VARCHAR(32) NOT NULL, `itemId` INT NOT NULL, `itemDur` INT NOT NULL, `itemEnchant` VARCHAR(16) NULL, `amount` INT NOT NULL, `time` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP) ENGINE = InnoDB";
+				statement = con.prepareStatement(query);
+				statement.executeUpdate();
+			}
+			if (tableFieldExists(Config.sqlPrefix + "Orders", "exchanged") == true) {
+
+				migrateExchangedToMailbox();
+				/**/
+				query = "ALTER TABLE `" + Config.sqlPrefix + "Orders` DROP `exchanged`";
+				statement = con.prepareStatement(query);
+				statement.executeUpdate();
+
 			}
 
 			// statement.close();
@@ -159,9 +175,118 @@ public class Database {
 		}
 
 	}
+	public void cleanMailbox() {
+		Connection con = getSQLConnection();
+		String SQL = "DELETE FROM " + Config.sqlPrefix + "Mailbox WHERE `amount` <= 0";
 
-	public boolean tableFieldExists(String table, String field, Connection con) {
+		try {
+			PreparedStatement statement = con.prepareStatement(SQL);
+			statement.executeUpdate();
+			statement.close();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		closeSQLConnection(con);
+	}
+	
+	
+	private void migrateExchangedToMailbox() {
+		plugin.info("Migrating pending collection items to Mailbox table...");
+		Connection con = getSQLConnection();
+
+		String SQL = "SELECT * FROM `" + Config.sqlPrefix + "Orders" + "` WHERE `type` =2 AND `exchanged` >0";
+
+		int count = 0;
+		try {
+			PreparedStatement statement = con.prepareStatement(SQL);
+
+			ResultSet result = statement.executeQuery();
+
+			String playerName, itemEnchant;
+			int itemID, exchanged;
+			short itemDur;
+			String itemName;
+			while (result.next()) {
+				count += 1;
+
+				playerName = result.getString(4);
+				itemID = result.getInt(5);
+				itemDur = result.getShort(6);
+				itemEnchant = result.getString(7);
+				// amount = result.getInt(9);
+				exchanged = result.getInt(10);
+				itemName = ItemDb.getItemName(itemID, itemDur);
+
+				insertIntoMailbox(playerName, itemID, itemDur, itemEnchant, exchanged);
+
+			}
+
+			result.close();
+			statement.close();
+
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		closeSQLConnection(con);
+	}
+
+	private int insertIntoMailbox(String player, int itemID, int itemDur, String itemEnchant, int amount) {
+		int success = 0;
+		PreparedStatement statement = null;
+		Connection con = getSQLConnection();
+
+		String query = "UPDATE `" + Config.sqlPrefix + "Mailbox"
+			+ "` SET `amount` = `amount` + ?, `time` = CURRENT_TIMESTAMP WHERE `player` = ? AND `itemId` = ? AND `itemDur` = ? AND `itemEnchant` = ?";
+
+		try {
+			statement = con.prepareStatement(query);
+			statement.setInt(1, amount);
+
+			statement.setString(2, player);
+			statement.setInt(3, itemID);
+			statement.setInt(4, itemDur);
+			if (itemEnchant == null) {
+				statement.setObject(5, null);
+			} else {
+				statement.setString(5, itemEnchant);
+			}
+
+			success = statement.executeUpdate();
+			statement.close();
+
+			if (success == 0) {
+				query = "INSERT INTO `" + Config.sqlPrefix + "Mailbox"
+					+ "` (`id`, `player`, `itemId`, `itemDur`, `itemEnchant`, `amount`, `time`) VALUES (NULL, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP);";
+
+				statement = con.prepareStatement(query);
+				statement.setString(1, player);
+				statement.setInt(2, itemID);
+				statement.setInt(3, itemDur);
+				if (itemEnchant == null) {
+					statement.setObject(4, null);
+				} else {
+					statement.setString(4, itemEnchant);
+				}
+				statement.setInt(5, amount);
+
+				success = statement.executeUpdate();
+				statement.close();
+			}
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		closeSQLConnection(con);
+		return success;
+	}
+
+	public boolean tableFieldExists(String table, String field) {
 		boolean found = false;
+		Connection con = getSQLConnection();
 		String query = "SELECT * FROM " + table + ";";
 
 		try {
@@ -185,7 +310,7 @@ public class Database {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
+		closeSQLConnection(con);
 		return found;
 	}
 
@@ -377,7 +502,7 @@ public class Database {
 		return removeItemFromPlayer(player, itemID, itemDur, amount, null);
 	}
 
-	public boolean giveItemToPlayer(Player player, int itemID, short itemDur, int amount, String enchants) {
+	public boolean giveItemToPlayer(Player player, int itemID, short itemDur, String enchants, int amount) {
 		ItemStack itemStack = new ItemStack(itemID, 1);
 		itemStack.setDurability(itemDur);
 		itemStack.setAmount(amount);
@@ -393,14 +518,16 @@ public class Database {
 		return false;
 	}
 
+	/*
 	public boolean giveItemToPlayer(Player player, int itemID, short itemDur, int amount) {
 		return giveItemToPlayer(player, itemID, itemDur, amount, null);
 	}
-
-	public int checkBuyOrders(CommandSender sender, int itemID, short itemDur, int sellAmount, double sellPrice, Boolean dryrun, Connection con,
+*/
+	
+	public int checkBuyOrders(CommandSender sender, int itemID, short itemDur, String itemEnchants, int sellAmount, double sellPrice, Boolean dryrun, Connection con,
 		Boolean silentFail) {
 		String query = "SELECT * FROM " + Config.sqlPrefix
-			+ "Orders WHERE `type` = 2 AND `itemID` = ? AND `itemDur` = ? AND `price` >= ? AND `amount` > 0 AND `player` NOT LIKE ? ORDER BY `price` DESC";
+			+ "Orders WHERE `type` = 2 AND `itemID` = ? AND `itemDur` = ? AND `price` >= ? AND `amount` > 0 AND `player` NOT LIKE ? AND `itemEnchants` like ? ORDER BY `price` DESC";
 		// AND `player` NOT LIKE ?
 		int updateSuccessful = 0;
 		String itemName = plugin.itemdb.getItemName(itemID, itemDur);
@@ -423,6 +550,12 @@ public class Database {
 
 			statement.setString(4, sender.getName());
 
+			if (itemEnchants == null){
+				statement.setObject(5, null);
+			}else{
+				statement.setString(5, itemEnchants);
+			}
+			
 			ResultSet result = statement.executeQuery();
 
 			double price;
@@ -443,7 +576,6 @@ public class Database {
 				infinite = result.getBoolean(3);
 				trader = result.getString(4);
 				price = result.getDouble(8);
-
 				enchants = result.getString(7);
 
 				if (infinite == true) {
@@ -471,7 +603,11 @@ public class Database {
 					if (dryrun == false) {
 						if (infinite == false) {
 							decreaseInt(Config.sqlPrefix + "Orders", id, "amount", amount);
-							increaseInt(Config.sqlPrefix + "Orders", id, "exchanged", amount);
+							//increaseInt(Config.sqlPrefix + "Orders", id, "exchanged", amount);
+							//Mailbox Todo
+							
+							insertIntoMailbox(trader, itemID, itemDur, enchants, amount);
+							
 						}
 
 						plugin.notifyBuyerOfExchange(trader, itemID, itemDur, amount, price, sender.getName(), dryrun);
@@ -505,13 +641,13 @@ public class Database {
 		return sellAmount;
 	}
 
-	public void postSellOrder(CommandSender sender, int itemID, short itemDur, int sellAmount, double sellPrice, Boolean dryrun) {
+	public void postSellOrder(CommandSender sender, int itemID, short itemDur, String itemEnchants, int sellAmount, double sellPrice, Boolean dryrun) {
 		Connection con = getSQLConnection();
-		postSellOrder(sender, itemID, itemDur, sellAmount, sellPrice, dryrun, con);
+		postSellOrder(sender, itemID, itemDur, itemEnchants, sellAmount, sellPrice, dryrun, con);
 		closeSQLConnection(con);
 	}
 
-	public void postSellOrder(CommandSender sender, int itemID, short itemDur, int sellAmount, double sellPrice, Boolean dryrun, Connection con) {
+	public void postSellOrder(CommandSender sender, int itemID, short itemDur, String itemEnchants, int sellAmount, double sellPrice, Boolean dryrun, Connection con) {
 		int success = 0;
 		String itemName = plugin.itemdb.getItemName(itemID, itemDur);
 		Player player = (Player) sender;
@@ -535,7 +671,10 @@ public class Database {
 
 			ItemStack itemStack = new ItemStack(itemID, 1);
 			itemStack.setDurability(itemDur);
-
+			itemStack.addEnchantments(MaterialUtil.Enchantment.getEnchantments(itemEnchants));
+			
+			//itemEnchants 123333
+			
 			if (InventoryUtil.getAmount(itemStack, player.getInventory()) <= 0) {
 
 				plugin.sendMessage(sender, F("noItemInInventory", itemName));
@@ -549,14 +688,14 @@ public class Database {
 			// int success = plugin.database.processSellOrder(sender,
 			// stock.getTypeId(), stock.getDurability(), amount, price, dryrun);
 
-			sellAmount = checkBuyOrders(sender, itemID, itemDur, sellAmount, sellPrice, false, con, true);
+			sellAmount = checkBuyOrders(sender, itemID, itemDur, itemEnchants, sellAmount, sellPrice, false, con, true);
 
 			if (sellAmount == 0)
 				return;
 
 			if (dryrun == false)
 				success = insertOrder(1, false, sender.getName(), itemID, itemDur, null, sellPrice, sellAmount);
-			
+
 			if (success > 0 || dryrun == true) {
 				String preview = "";
 				if (dryrun == true)
@@ -585,13 +724,13 @@ public class Database {
 
 	}
 
-	public int processSellOrder(CommandSender sender, int itemID, short itemDur, int sellAmount, double sellPrice, Boolean dryrun) {
+	public int processSellOrder(CommandSender sender, int itemID, short itemDur, String itemEnchants, int sellAmount, double sellPrice, Boolean dryrun) {
 		Connection con = getSQLConnection();
 		int success = 0;
 
 		// plugin.info("sellAmountA: " + sellAmount);
 		int beforeAmount = sellAmount;
-		sellAmount = checkBuyOrders(sender, itemID, itemDur, sellAmount, sellPrice, dryrun, con, false);
+		sellAmount = checkBuyOrders(sender, itemID, itemDur, itemEnchants, sellAmount, sellPrice, dryrun, con, false);
 
 		if (beforeAmount != sellAmount)
 			return 1;
@@ -612,8 +751,9 @@ public class Database {
 		return value;
 	}
 
+
 	public int cleanBuyOrders(Connection con) {
-		String SQL = "DELETE FROM " + Config.sqlPrefix + "Orders WHERE `type` = 2 AND `amount` <= 0 AND `exchanged` <= 0;";
+		String SQL = "DELETE FROM " + Config.sqlPrefix + "Orders WHERE `type` = 2 AND `amount` <= 0";
 		int success = 0;
 
 		try {
@@ -675,11 +815,11 @@ public class Database {
 		return 0;
 	}
 
-	public int checkSellOrders(CommandSender sender, int itemID, short itemDur, int buyAmount, double buyPrice, Boolean dryrun, Connection con,
+	public int checkSellOrders(CommandSender sender, int itemID, short itemDur, String itemEnchants, int buyAmount, double buyPrice, Boolean dryrun, Connection con,
 		Boolean silentFail) {
 
 		String query = "SELECT * FROM " + Config.sqlPrefix
-			+ "Orders WHERE `type` = 1 AND `itemID` = ? AND `itemDur` = ? AND `price` <= ? AND `amount` > 0 AND `player` NOT LIKE ? ORDER BY `price` ASC";
+			+ "Orders WHERE `type` = 1 AND `itemID` = ? AND `itemDur` = ? AND `itemEnchants` = ? AND `price` <= ? AND `amount` > 0 AND `player` NOT LIKE ? ORDER BY `price` ASC";
 
 		int updateSuccessful = 0;
 		String itemName = plugin.itemdb.getItemName(itemID, itemDur);
@@ -699,13 +839,19 @@ public class Database {
 			statement.setInt(1, itemID);
 			statement.setInt(2, itemDur);
 
+			if (itemEnchants == null){
+				statement.setObject(3, null);
+			}else{
+				statement.setString(3, itemEnchants);
+			}
+			
 			if (buyPrice == -1) {
-				statement.setDouble(3, 9999);
+				statement.setDouble(4, 9999);
 			} else {
-				statement.setDouble(3, plugin.Round(buyPrice, Config.priceRounding));
+				statement.setDouble(4, plugin.Round(buyPrice, Config.priceRounding));
 			}
 
-			statement.setString(4, sender.getName());
+			statement.setString(5, sender.getName());
 
 			ResultSet result = statement.executeQuery();
 
@@ -776,7 +922,10 @@ public class Database {
 
 						if (infinite == false) {
 							decreaseInt(Config.sqlPrefix + "Orders", id, "amount", canBuy);
-							increaseInt(Config.sqlPrefix + "Orders", id, "exchanged", canBuy);
+							//increaseInt(Config.sqlPrefix + "Orders", id, "exchanged", canBuy);
+							//Mailbox Todo?
+							
+							
 						}
 
 						plugin.notifySellerOfExchange(trader, itemID, itemDur, canBuy, price, sender.getName(), dryrun);// buy
@@ -913,11 +1062,11 @@ public class Database {
 						is.setAmount(canBuy);
 
 						if (enchants != null && !enchants.equalsIgnoreCase("")) {
-							is.addEnchantments(MaterialUtil.Enchantment.getEnchantments(enchants));
+						//	is.addEnchantments(MaterialUtil.Enchantment.getEnchantments(enchants));
 						}
 
 						for (int i = canBuy; i > 0; i--) {
-							if (dryrun == true || plugin.database.giveItemToPlayer(player, ciID, ciDur, i) == true) {
+							if (dryrun == true || plugin.database.giveItemToPlayer(player, ciID, ciDur, enchants, i) == true) {
 								if (dryrun == false)
 									plugin.database.decreaseInt(Config.sqlPrefix + "Orders", id, "amount", i);
 
@@ -962,13 +1111,13 @@ public class Database {
 		return changes;
 	}
 
-	public void postBuyOrder(CommandSender sender, int itemID, short itemDur, int buyAmount, double buyPrice, Boolean dryrun) {
+	public void postBuyOrder(CommandSender sender, int itemID, short itemDur, String itemEnchants, int buyAmount, double buyPrice, Boolean dryrun) {
 		Connection con = getSQLConnection();
-		postBuyOrder(sender, itemID, itemDur, buyAmount, buyPrice, dryrun, con);
+		postBuyOrder(sender, itemID, itemDur, itemEnchants, buyAmount, buyPrice, dryrun, con);
 		closeSQLConnection(con);
 	}
 
-	public void postBuyOrder(CommandSender sender, int itemID, short itemDur, int buyAmount, double buyPrice, Boolean dryrun, Connection con) {
+	public void postBuyOrder(CommandSender sender, int itemID, short itemDur, String itemEnchants, int buyAmount, double buyPrice, Boolean dryrun, Connection con) {
 		int success = 0;
 
 		String itemName = plugin.itemdb.getItemName(itemID, itemDur);
@@ -991,14 +1140,14 @@ public class Database {
 				return;
 			}
 
-			buyAmount = checkSellOrders(sender, itemID, itemDur, buyAmount, buyPrice, false, con, true);
+			buyAmount = checkSellOrders(sender, itemID, itemDur, itemEnchants, buyAmount, buyPrice, false, con, true);
 
 			if (buyAmount == 0)
 				return;
 
 			if (dryrun == false)
-				success = insertOrder(2, false, sender.getName(), itemID, itemDur, null, buyPrice, buyAmount);
-			
+				success = insertOrder(2, false, sender.getName(), itemID, itemDur, itemEnchants, buyPrice, buyAmount);
+
 			if (dryrun == true || success > 0) {
 				String preview = "";
 				if (dryrun == true)
@@ -1026,7 +1175,7 @@ public class Database {
 
 	}
 
-	public int processBuyOrder(CommandSender sender, int itemID, short itemDur, int buyAmount, double buyPrice, Boolean dryrun, Connection con) {
+	public int processBuyOrder(CommandSender sender, int itemID, short itemDur, String itemEnchants, int buyAmount, double buyPrice, Boolean dryrun, Connection con) {
 		int success = 0;
 		int beforeAmount = buyAmount;
 
@@ -1036,7 +1185,7 @@ public class Database {
 		// buyAmount = checkPlayerSellOrders(sender, itemID, itemDur, buyAmount,
 		// buyPrice, dryrun, con);
 
-		buyAmount = checkSellOrders(sender, itemID, itemDur, buyAmount, buyPrice, dryrun, con, false);
+		buyAmount = checkSellOrders(sender, itemID, itemDur, itemEnchants, buyAmount, buyPrice, dryrun, con, false);
 		// plugin.info("buyAmountB: " + buyAmount);
 
 		if (buyAmount != beforeAmount) {
@@ -1051,13 +1200,12 @@ public class Database {
 		return success;
 	}
 
-	public int processBuyOrder(CommandSender sender, int itemID, short itemDur, int buyAmount, double buyPrice, Boolean dryrun) {
+	public int processBuyOrder(CommandSender sender, int itemID, short itemDur, String itemEnchants, int buyAmount, double buyPrice, Boolean dryrun) {
 		Connection con = getSQLConnection();
-		int value = processBuyOrder(sender, itemID, itemDur, buyAmount, buyPrice, dryrun, con);
+		int value = processBuyOrder(sender, itemID, itemDur, itemEnchants, buyAmount, buyPrice, dryrun, con);
 		closeSQLConnection(con);
 		return value;
 	}
-
 
 	public boolean increaseOrderAmount(int type, Boolean infinite, String player, int itemID, int itemDur, String itemEnchants, double price, int amount) {
 		boolean value = false;
@@ -1098,21 +1246,19 @@ public class Database {
 		return value;
 	}
 
-	public int insertOrder(int type, Boolean infinite, String player, int itemID, int itemDur, String itemEnchants, double price, int amount,
-		Connection con) {
-		
+	public int insertOrder(int type, Boolean infinite, String player, int itemID, int itemDur, String itemEnchants, double price, int amount, Connection con) {
+
 		if (increaseOrderAmount(type, infinite, player, itemID, itemDur, itemEnchants, price, amount) == true)
 			return 2;
-		
-		
+
 		int updateSuccessful = 0;
 		// price = plugin.Round(price, Config.priceRounding);
 
 		PreparedStatement statement;
-		
+
 		String query = "INSERT INTO "
 			+ Config.sqlPrefix
-			+ "Orders (`id`, `type`, `infinite`, `player`, `itemID`, `itemDur`, `itemEnchants`, `price`, `amount`, `exchanged`) VALUES (NULL, ?, ?, ?, ?, ?, ?, ?, ?, 0);";
+			+ "Orders (`id`, `type`, `infinite`, `player`, `itemID`, `itemDur`, `itemEnchants`, `price`, `amount`) VALUES (NULL, ?, ?, ?, ?, ?, ?, ?, ?);";
 		try {
 			statement = con.prepareStatement(query);
 			statement.setInt(1, type);
@@ -1222,6 +1368,8 @@ public class Database {
 	// String SQL = "UPDATE " + tblAllegiance + " SET XP=XP+" + amount +
 	// " WHERE `player` LIKE ?" + " AND `patron` LIKE ?";
 
+	
+	
 	public int removeRow(String table, int rowID, Connection con) {
 		int sucessful = 0;
 
@@ -1247,7 +1395,6 @@ public class Database {
 		return sucessful;
 	}
 
-	
 	public int increaseInt(String table, int rowID, String column, int amount) {
 		Connection con = getSQLConnection();
 		int sucessful = 0;
@@ -1269,7 +1416,6 @@ public class Database {
 		return sucessful;
 	}
 
-
 	/**/
 	public int decreaseInt(String table, int rowID, String column, int amount) {
 		int sucessful = 0;
@@ -1290,7 +1436,6 @@ public class Database {
 		closeSQLConnection(con);
 		return sucessful;
 	}
-
 
 	public int setInt(String table, int rowID, String column, int value, Connection con) {
 		int sucessful = 0;
@@ -1319,15 +1464,15 @@ public class Database {
 		return sucessful;
 	}
 
-	public itemStats getItemStats(int itemID, int itemDur, int getType) {
+	public itemStats getItemStats(int itemID, int itemDur, String itemEnchants, int getType) {
 		itemStats myReturn = new itemStats();
 
 		Connection con = getSQLConnection();
-		String query = "SELECT * FROM " + Config.sqlPrefix + "Orders WHERE `itemID` = ? AND `itemDur` = ? AND `itemEnchants` IS NULL AND `amount` > 0";
+		String query = "SELECT * FROM " + Config.sqlPrefix + "Orders WHERE `itemID` = ? AND `itemDur` = ? AND `itemEnchants` like ? AND `amount` > 0";
 
 		if (getType > 0) {
 			query = "SELECT * FROM " + Config.sqlPrefix
-				+ "Orders WHERE `itemID` = ? AND `itemDur` = ? AND `itemEnchants` IS NULL AND `amount` > 0 AND `type` = ?;";
+				+ "Orders WHERE `itemID` = ? AND `itemDur` = ? AND `itemEnchants` like ? AND `amount` > 0 AND `type` = ?;";
 		}
 
 		try {
@@ -1344,8 +1489,14 @@ public class Database {
 			statement.setInt(1, itemID);
 			statement.setInt(2, itemDur);
 
+			if (itemEnchants == null){
+				statement.setObject(3, null);
+			}else{
+				statement.setString(3, itemEnchants);
+			}
+			
 			if (getType > 0) {
-				statement.setInt(3, getType);
+				statement.setInt(4, getType);
 			}
 
 			ResultSet result = statement.executeQuery();
@@ -1423,19 +1574,22 @@ public class Database {
 
 	public static class checkPendingBuysTask implements Runnable {
 		private CommandSender sender;
+
 		public checkPendingBuysTask(CommandSender sender) {
 			this.sender = sender;
 		}
+
 		@Override
 		public void run() {
 			checkPendingBuys(this.sender);
 		}
 	}
-	
-	public static void checkPendingBuys(CommandSender sender){
-		
+
+	public static void checkPendingBuys(CommandSender sender) {
+
 		Connection con = getSQLConnection();
-		String SQL = "SELECT * FROM " + Config.sqlPrefix + "Orders WHERE `type` = 2 AND `player` LIKE ? AND `exchanged` > 0 ORDER BY `exchanged` DESC";
+		//String SQL = "SELECT * FROM " + Config.sqlPrefix + "Orders WHERE `type` = 2 AND `player` LIKE ? AND `exchanged` > 0 ORDER BY `exchanged` DESC";
+		String SQL = "SELECT * FROM " + Config.sqlPrefix + "Mailbox WHERE `player` LIKE ? ORDER BY `amount` DESC";
 		
 		int count = 0;
 		try {
@@ -1450,15 +1604,15 @@ public class Database {
 			while (result.next()) {
 				count += 1;
 
-				itemID = result.getInt(5);
-				itemDur = result.getShort(6);
+				itemID = result.getInt(3);
+				itemDur = result.getShort(4);
 				// amount = result.getInt(9);
-				exchanged = result.getInt(10);
+				exchanged = result.getInt(6);
 				itemName = ItemDb.getItemName(itemID, itemDur);
 
 				// plugin.sendMessage(sender, id + ": "+itemName+"x"+exchanged);
-				if (exchanged > 0) 
-					sender.sendMessage(ExchangeMarket.chatPrefix+F("collectPending", itemName, exchanged));
+				if (exchanged > 0)
+					sender.sendMessage(ExchangeMarket.chatPrefix + F("collectPending", itemName, exchanged));
 
 			}
 
@@ -1469,11 +1623,10 @@ public class Database {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-		
+
 		closeSQLConnection(con);
 	}
-	
+
 	public int collectPendingBuys(CommandSender sender) {
 		Connection con = getSQLConnection();
 		int value = collectPendingBuys(sender, con);
@@ -1484,7 +1637,8 @@ public class Database {
 	public int collectPendingBuys(CommandSender sender, Connection con) {
 		int success = 0;
 
-		String SQL = "SELECT * FROM " + Config.sqlPrefix + "Orders WHERE `type` = 2 AND `player` LIKE ? AND `exchanged` > 0 ORDER BY `exchanged` DESC";
+		//String SQL = "SELECT * FROM " + Config.sqlPrefix + "Orders WHERE `type` = 2 AND `player` LIKE ? AND `exchanged` > 0 ORDER BY `exchanged` DESC";
+		String SQL = "SELECT * FROM " + Config.sqlPrefix + "Mailbox WHERE `player` LIKE ? ORDER BY `amount` DESC";
 
 		Player player = (Player) sender;
 
@@ -1495,31 +1649,36 @@ public class Database {
 
 			ResultSet result = statement.executeQuery();
 
-			int id, type, itemID, mount, exchanged;
+			int id, type, itemID, mount, amount;
 			short itemDur;
 			double price;
 			String itemName;
 			Boolean infinite;
-			String toCollect;
+			String toCollect, enchants;
 			while (result.next()) {
 				count += 1;
-				// patron = result.getString(1);
+				//id = result.getInt(1);
+				//type = result.getInt(2);
+				//infinite = result.getBoolean(3);
+
+				//price = result.getDouble(8);
+				//exchanged = result.getInt(10);
+				
 				id = result.getInt(1);
-				type = result.getInt(2);
-				infinite = result.getBoolean(3);
-				itemID = result.getInt(5);
-				itemDur = result.getShort(6);
-				price = result.getDouble(8);
-				// amount = result.getInt(9);
-				exchanged = result.getInt(10);
+				itemID = result.getInt(3);
+				itemDur = result.getShort(4);
+				amount = result.getInt(6);
+				
+				enchants = result.getString(5);
+				
 				itemName = plugin.itemdb.getItemName(itemID, itemDur);
 
 				// plugin.sendMessage(sender, id + ": "+itemName+"x"+exchanged);
-				if (exchanged > 0) {
-					for (int i = exchanged; i > 0; i--) {
-						if (plugin.database.giveItemToPlayer(player, itemID, itemDur, i) == true) {
+				if (amount > 0) {
+					for (int i = amount; i > 0; i--) {
+						if (plugin.database.giveItemToPlayer(player, itemID, itemDur, enchants, i) == true) {
 							plugin.sendMessage(sender, F("collectedItem", itemName, i));
-							plugin.database.decreaseInt(Config.sqlPrefix + "Orders", id, "exchanged", i);
+							plugin.database.decreaseInt(Config.sqlPrefix + "Mailbox", id, "amount", i);
 							break;
 						}
 					}
@@ -1535,8 +1694,8 @@ public class Database {
 			e.printStackTrace();
 		}
 
-		cleanBuyOrders();
-
+		cleanMailbox();
+		
 		if (count == 0) {
 			plugin.sendMessage(sender, L("nothingToCollect"));
 		}
@@ -1544,8 +1703,6 @@ public class Database {
 		return success;
 	}
 
-
-	
 	public int getResultCount(String query, Object... args) {
 		// String query = "SELECT COUNT(*) FROM " + Config.sqlPrefix +
 		// "Orders WHERE `player` LIKE ? ";
@@ -1854,9 +2011,9 @@ public class Database {
 							is.setDurability(itemDur);
 							is.setAmount(amount);
 
-							if (enchants != null && !enchants.equalsIgnoreCase("")) {
-								is.addEnchantments(MaterialUtil.Enchantment.getEnchantments(enchants));
-							}
+							//if (enchants != null && !enchants.equalsIgnoreCase("")) {
+							//	is.addEnchantments(MaterialUtil.Enchantment.getEnchantments(enchants));
+							//}
 
 							// if (!InventoryUtil.fits(is,
 							// player.getInventory())) {
@@ -1865,7 +2022,7 @@ public class Database {
 							// return 0;
 
 							for (int i = amount; i > 0; i--) {
-								if (plugin.database.giveItemToPlayer(player, itemID, itemDur, i) == true) {
+								if (plugin.database.giveItemToPlayer(player, itemID, itemDur, enchants, i) == true) {
 									// plugin.sendMessage(sender,
 									// F("collectedItem", itemName, i));
 									plugin.database.decreaseInt(Config.sqlPrefix + "Orders", orderID, "amount", i);

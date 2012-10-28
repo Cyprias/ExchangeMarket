@@ -404,6 +404,8 @@ class Commands implements CommandExecutor {
 					amount = item.getAmount();
 				}
 
+				String itemEnchants = MaterialUtil.Enchantment.encodeEnchantment(item);
+				
 				if (item == null) {
 					plugin.sendMessage(sender, F("invalidItem", args[1]));
 					return true;
@@ -436,7 +438,7 @@ class Commands implements CommandExecutor {
 					}
 				}
 
-				Database.itemStats stats = plugin.database.getItemStats(item.getTypeId(), item.getDurability(), type);
+				Database.itemStats stats = plugin.database.getItemStats(item.getTypeId(), item.getDurability(), itemEnchants, type);
 				String itemName = plugin.itemdb.getItemName(item.getTypeId(), item.getDurability());
 
 				plugin.sendMessage(sender, F("itemShort", itemName, amount));
@@ -444,7 +446,22 @@ class Commands implements CommandExecutor {
 
 				return true;
 
-
+			}else if (args[0].equalsIgnoreCase("info")) {
+					
+				ItemStack item = player.getItemInHand();
+				int amount = item.getAmount();
+				String itemEnchants = MaterialUtil.Enchantment.encodeEnchantment(item);
+				String itemName = plugin.itemdb.getItemName(item.getTypeId(), item.getDurability());
+				
+				if (itemEnchants != null){
+					sender.sendMessage(itemName + "-" + itemEnchants + " x " + amount);
+				}else{
+					sender.sendMessage(itemName + " x " + amount);
+				}
+				
+				
+				
+				return true;
 			} else if (args[0].equalsIgnoreCase("search")) {
 				if (!hasCommandPermission(sender, "exchangemarket.search")) {
 					return true;
@@ -655,7 +672,9 @@ class Commands implements CommandExecutor {
 
 				// postBuyOrder
 
-				plugin.database.postSellOrder(sender, item.getTypeId(), item.getDurability(), amount, price, false);
+				
+				
+				plugin.database.postSellOrder(sender, item.getTypeId(), item.getDurability(), null, amount, price, false);
 
 				return true;
 			} else if (args[0].equalsIgnoreCase("buyorder")) {
@@ -728,8 +747,9 @@ class Commands implements CommandExecutor {
 				}
 
 				// postBuyOrder
-
-				plugin.database.postBuyOrder(sender, item.getTypeId(), item.getDurability(), amount, price, false);
+				String itemEnchants = MaterialUtil.Enchantment.encodeEnchantment(item);
+				
+				plugin.database.postBuyOrder(sender, item.getTypeId(), item.getDurability(), itemEnchants, amount, price, false);
 
 				// //////////////
 				return true;
@@ -800,8 +820,8 @@ class Commands implements CommandExecutor {
 				// }
 
 				// plugin.sendMessage(sender, "price: " + price);
-
-				int success = plugin.database.processBuyOrder(sender, item.getTypeId(), item.getDurability(), amount, price, dryrun);
+				String itemEnchants = MaterialUtil.Enchantment.encodeEnchantment(item);
+				int success = plugin.database.processBuyOrder(sender, item.getTypeId(), item.getDurability(), itemEnchants, amount, price, dryrun);
 
 				if (success > 0 && dryrun == true) {
 					lastRequest.put(sender.getName(), args);
@@ -832,7 +852,8 @@ class Commands implements CommandExecutor {
 				}
 
 				ItemStack stock = ItemDb.getItemStack(args[1]);
-
+				String itemEnchants = MaterialUtil.Enchantment.encodeEnchantment(stock);
+				
 				if (stock == null || stock.getType() == null) {
 					plugin.sendMessage(sender, F("invalidItem", args[1]));
 					return true;
@@ -903,7 +924,7 @@ class Commands implements CommandExecutor {
 					price = -1;
 				}
 
-				int success = plugin.database.processSellOrder(sender, stock.getTypeId(), stock.getDurability(), amount, price, dryrun);
+				int success = plugin.database.processSellOrder(sender, stock.getTypeId(), stock.getDurability(), itemEnchants, amount, price, dryrun);
 
 				// if (success == 0){
 				// plugin.sendMessage(sender, F("noBuyersForSell", itemName,
@@ -925,10 +946,10 @@ class Commands implements CommandExecutor {
 				ItemStack stock = player.getItemInHand();
 				Map<Enchantment, Integer> e = stock.getEnchantments();
 
-				if (e.size() > 0) {
-					plugin.sendMessage(sender, F("cantSellEnchants"));
-					return true;
-				}
+				//if (e.size() > 0) {
+				//	plugin.sendMessage(sender, F("cantSellEnchants"));
+				//	return true;
+				//}
 
 				int type = 1;
 				String playerName = sender.getName();
@@ -973,7 +994,7 @@ class Commands implements CommandExecutor {
 					}
 				}
 
-				plugin.database.postSellOrder(sender, stock.getTypeId(), stock.getDurability(), amount, price, false);
+				plugin.database.postSellOrder(sender, stock.getTypeId(), stock.getDurability(), itemEnchants, amount, price, false);
 
 				return true;
 
