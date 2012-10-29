@@ -86,7 +86,9 @@ public class Price  {
 
 		Database.itemStats stats = plugin.database.getItemStats(item.getTypeId(), item.getDurability(), itemEnchants, type);
 		String itemName = plugin.itemdb.getItemName(item.getTypeId(), item.getDurability());
-
+		if (itemEnchants != null)
+			itemName += "-" + itemEnchants;
+		
 		plugin.sendMessage(sender, F("itemShort", itemName, amount));
 		plugin.sendMessage(sender, plugin.commands.getItemStatsMsg(stats, amount));
 
