@@ -718,7 +718,7 @@ public class Database {
 		}else{
 			query = "SELECT * FROM "
 				+ Config.sqlPrefix
-				+ "Orders WHERE `type` = 2 AND `itemID` = ? AND `itemDur` = ? AND `price` >= ? AND `amount` > 0 AND `player` NOT LIKE ? AND `itemEnchants` like ? ORDER BY `price` DESC";
+				+ "Orders WHERE `type` = 2 AND `itemID` = ? AND `itemDur` = ? AND `itemEnchants` like ? AND `price` >= ? AND `amount` > 0 AND `player` NOT LIKE ? ORDER BY `price` DESC";
 			
 			qReturn = executeQuery(query, itemID, itemDur, itemEnchants, sellPrice, sender.getName());
 		}
