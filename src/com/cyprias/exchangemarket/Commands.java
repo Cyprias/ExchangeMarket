@@ -21,21 +21,21 @@ import org.mindrot.jbcrypt.BCrypt;
 import com.Acrobot.Breeze.Utils.InventoryUtil;
 import com.Acrobot.Breeze.Utils.MaterialUtil;
 import com.cyprias.exchangemarket.Utilis.Utils;
-import com.cyprias.exchangemarket.commands.Info;
+import com.cyprias.exchangemarket.commands.ItemInfo;
 import com.cyprias.exchangemarket.commands.Price;
 import com.cyprias.exchangemarket.commands.SellOrder;
 
 public class Commands implements CommandExecutor {
 	protected ExchangeMarket plugin;
 
-	private Info info;
+	private ItemInfo itemInfo;
 	private Price price;
 	private SellOrder sellOrder;
 	
 	//CommandExecutor info = null;
 	public Commands(ExchangeMarket plugin) {
 		this.plugin = plugin;
-		this.info = new Info(plugin);
+		this.itemInfo = new ItemInfo(plugin);
 		this.price = new Price(plugin);
 		this.sellOrder = new SellOrder(plugin);
 	}
@@ -205,6 +205,10 @@ public class Commands implements CommandExecutor {
 				if (plugin.hasPermission(sender, "exchangemarket.infsell"))
 					plugin.sendMessage(sender, "§a/" + commandLabel + " infsell §7- " + L("cmdInfSellDesc"), true, false);
 
+				if (plugin.hasPermission(sender, "exchangemarket.iteminfo"))
+					plugin.sendMessage(sender, "§a/" + commandLabel + " iteminfo [itemName] §7- " + L("cmdItemInfoDesc"), true, false);
+				
+				
 				if (plugin.hasPermission(sender, "exchangemarket.list") && (sender instanceof Player))
 					plugin.sendMessage(sender, "§a/" + commandLabel + " list [Buy/Sell] [page]§7- " + L("cmdListDesc"), true, false);
 
@@ -393,9 +397,8 @@ public class Commands implements CommandExecutor {
 			
 			if (args[0].equalsIgnoreCase("price")) {
 				return price.onCommand(sender, cmd, commandLabel, args);
-			}else if (args[0].equalsIgnoreCase("info")) {
-				
-				return info.onCommand(sender, cmd, commandLabel, args);
+			}else if (args[0].equalsIgnoreCase("iteminfo")) {
+				return itemInfo.onCommand(sender, cmd, commandLabel, args);
 			} else if (args[0].equalsIgnoreCase("search")) {
 				if (!hasCommandPermission(sender, "exchangemarket.search")) {
 					return true;

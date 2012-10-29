@@ -13,19 +13,27 @@ import com.Acrobot.Breeze.Utils.MaterialUtil;
 import com.cyprias.exchangemarket.Commands;
 import com.cyprias.exchangemarket.ExchangeMarket;
 import com.cyprias.exchangemarket.ItemDb;
+import com.cyprias.exchangemarket.Localization;
 
-public class Info {
+public class ItemInfo {
 	private ExchangeMarket plugin;
 
-	public Info(ExchangeMarket plugin) {
+	public ItemInfo(ExchangeMarket plugin) {
 		this.plugin = plugin;
 		// TODO Auto-generated constructor stub
 	}
+	private String F(String string, Object... args) {
+		return Localization.F(string, args);
+	}
 
+	private String L(String string) {
+		return Localization.L(string);
+	}
+	
 	/**/
 	public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
 		
-		if (!plugin.commands.hasCommandPermission(sender, "exchangemarket.info")) {
+		if (!plugin.commands.hasCommandPermission(sender, "exchangemarket.iteminfo")) {
 			return true;
 		}
 		
@@ -35,30 +43,28 @@ public class Info {
 		
 		if (args.length>1)
 			item = ItemDb.getItemStack(args[1]);
-		
-		
-		
-		int amount = item.getAmount();
-		String itemEnchants = MaterialUtil.Enchantment.encodeEnchantment(item);
+
+		plugin.sendMessage(sender, F("itemInfomation"));
 		String itemName = ItemDb.getItemName(item.getTypeId(), item.getDurability());
+		String itemEnchants = MaterialUtil.Enchantment.encodeEnchantment(item);
 		
 		if (itemEnchants != null){
-			sender.sendMessage(itemName + "-" + itemEnchants + " x " + amount);
+			plugin.sendMessage(sender, F("itemNameAndID", itemName, item.getTypeId() + "-" + itemEnchants) );
 		}else{
-			sender.sendMessage(itemName + " x " + amount);
+			plugin.sendMessage(sender, F("itemNameAndID", itemName, item.getTypeId()) );
 		}
 		
+		
+		
 		Map<Enchantment, Integer> ench = item.getEnchantments();
-		
-		
-		
+
 		if (ench.size() > 0){
 			for (Map.Entry<org.bukkit.enchantments.Enchantment, Integer> entry : ench.entrySet()) {
+				plugin.sendMessage(sender, entry.getKey().getName() + " " + entry.getValue());
 				
-				sender.sendMessage("enchant: " + entry.toString());
+				
 				
 			}
-			
 		}
 		
 		return false;
