@@ -483,13 +483,13 @@ public class Database {
 		return reply;
 	}
 
-	public boolean removeItemFromPlayer(Player player, int itemID, short itemDur, int amount, String enchants) {
+	public boolean removeItemFromPlayer(Player player, int itemID, short itemDur, String itemEnchants, int amount) {
 		ItemStack itemStack = new ItemStack(itemID, 1);
 		itemStack.setDurability(itemDur);
 		itemStack.setAmount(amount);
 
-		if (enchants != null && !enchants.equalsIgnoreCase("")) {
-			itemStack.addEnchantments(MaterialUtil.Enchantment.getEnchantments(enchants));
+		if (itemEnchants != null && !itemEnchants.equalsIgnoreCase("")) {
+			itemStack.addEnchantments(MaterialUtil.Enchantment.getEnchantments(itemEnchants));
 		}
 
 		if (InventoryUtil.getAmount(itemStack, player.getInventory()) >= amount) {
@@ -500,9 +500,6 @@ public class Database {
 		return false;
 	}
 
-	public boolean removeItemFromPlayer(Player player, int itemID, short itemDur, int amount) {
-		return removeItemFromPlayer(player, itemID, itemDur, amount, null);
-	}
 
 	public boolean giveItemToPlayer(Player player, int itemID, short itemDur, String enchants, int amount) {
 		ItemStack itemStack = new ItemStack(itemID, 1);
@@ -594,11 +591,15 @@ public class Database {
 
 				// plugin.info("amount: " + amount);
 
+				plugin.info("checkBuyOrders: " + id);
+				
+				
+				
 				String preview = "";
 				if (dryrun == true)
 					preview = L("preview");
 
-				if (dryrun == true || removeItemFromPlayer(player, itemID, itemDur, amount) == true) {
+				if (dryrun == true || removeItemFromPlayer(player, itemID, itemDur, itemEnchants, amount) == true) {
 					sellAmount -= amount;
 
 					if (dryrun == false) {
@@ -607,7 +608,7 @@ public class Database {
 						plugin.sendMessage(sender, preview + F("withdrewItem", itemName, amount));
 					}
 
-					plugin.notifySellerOfExchange(sender.getName(), itemID, itemDur, amount, price, trader, dryrun);
+					plugin.notifySellerOfExchange(sender.getName(), itemID, itemDur, itemEnchants, amount, price, trader, dryrun);
 
 					if (dryrun == false) {
 						if (infinite == false) {
@@ -750,14 +751,11 @@ public class Database {
 		int beforeAmount = sellAmount;
 		sellAmount = checkBuyOrders(sender, itemID, itemDur, itemEnchants, sellAmount, sellPrice, dryrun, con, false);
 
-		if (beforeAmount != sellAmount)
-			return 1;
-		// success = 1;
-
-		// plugin.info("sellAmountB: " + sellAmount);
-
 		if (dryrun == false)
 			cleanSellOrders(con);
+		
+		if (beforeAmount != sellAmount)
+			success = 1;
 
 		return success;
 	}
@@ -946,7 +944,7 @@ public class Database {
 
 						}
 
-						plugin.notifySellerOfExchange(trader, itemID, itemDur, canBuy, price, sender.getName(), dryrun);// buy
+						plugin.notifySellerOfExchange(trader, itemID, itemDur, itemEnchants, canBuy, price, sender.getName(), dryrun);// buy
 
 						if (Config.logTransactionsToDB == true)
 							insertTransaction(1, sender.getName(), itemID, itemDur, enchants, canBuy, price, trader);
@@ -1627,16 +1625,21 @@ public class Database {
 
 			int itemID, exchanged;
 			short itemDur;
-			String itemName;
+			String itemName, itemEnchants;
 			while (result.next()) {
 				count += 1;
 
 				itemID = result.getInt(3);
 				itemDur = result.getShort(4);
+				itemEnchants = result.getString(5);
 				// amount = result.getInt(9);
 				exchanged = result.getInt(6);
+				
 				itemName = ItemDb.getItemName(itemID, itemDur);
 
+				if (itemEnchants != null)
+					itemName += "-" + itemEnchants;
+				
 				// plugin.sendMessage(sender, id + ": "+itemName+"x"+exchanged);
 				if (exchanged > 0)
 					sender.sendMessage(ExchangeMarket.chatPrefix + F("collectPending", itemName, exchanged));
@@ -1682,7 +1685,7 @@ public class Database {
 			double price;
 			String itemName;
 			Boolean infinite;
-			String toCollect, enchants;
+			String toCollect, itemEnchants;
 			while (result.next()) {
 				count += 1;
 				// id = result.getInt(1);
@@ -1697,14 +1700,16 @@ public class Database {
 				itemDur = result.getShort(4);
 				amount = result.getInt(6);
 
-				enchants = result.getString(5);
+				itemEnchants = result.getString(5);
 
 				itemName = plugin.itemdb.getItemName(itemID, itemDur);
-
+				if (itemEnchants != null)
+					itemName += "-" + itemEnchants;
+				
 				// plugin.sendMessage(sender, id + ": "+itemName+"x"+exchanged);
 				if (amount > 0) {
 					for (int i = amount; i > 0; i--) {
-						if (plugin.database.giveItemToPlayer(player, itemID, itemDur, enchants, i) == true) {
+						if (plugin.database.giveItemToPlayer(player, itemID, itemDur, itemEnchants, i) == true) {
 							plugin.sendMessage(sender, F("collectedItem", itemName, i));
 							plugin.database.decreaseInt(Config.sqlPrefix + "Mailbox", id, "amount", i);
 							break;

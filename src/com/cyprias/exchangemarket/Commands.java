@@ -756,6 +756,8 @@ public class Commands implements CommandExecutor {
 				// plugin.sendMessage(sender, "amount: " + amount);
 
 				String itemName = plugin.itemdb.getItemName(stock.getTypeId(), stock.getDurability());
+				if (itemEnchants != null)
+					itemName += "-" + itemEnchants;
 				// if (invAmount < amount) {
 				// amount = InventoryUtil.getAmount(stock,
 				// player.getInventory());

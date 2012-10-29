@@ -173,11 +173,13 @@ public class ExchangeMarket extends JavaPlugin {
 		}
 	}
 
-	public void notifySellerOfExchange(String buyerName, int itemID, int itemDur, int amount, double price, String trader, Boolean dryrun) {
+	public void notifySellerOfExchange(String buyerName, int itemID, int itemDur, String itemEnchants, int amount, double price, String trader, Boolean dryrun) {
 		Player player = findPlayerByName(buyerName);
 		if (player != null) {
 			String itemName = itemdb.getItemName(itemID, itemDur);
-
+			if (itemEnchants != null)
+				itemName += "-" + itemEnchants;
+			
 			String preview = "";
 			if (dryrun == true)
 				preview = L("preview");
