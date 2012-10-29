@@ -21,6 +21,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
+import com.Acrobot.Breeze.Utils.InventoryUtil;
+
 public class ExchangeMarket extends JavaPlugin {
 	public static String chatPrefix = "§f[§6EM§f] ";
 	public Config config;
@@ -300,24 +302,26 @@ public class ExchangeMarket extends JavaPlugin {
 	}
 
 	public boolean isGear(Material mat) {
-		if (mat.toString().contains("SWORD"))
-			return true;
-		if (mat.toString().contains("PICKAXE"))
-			return true;
-		if (mat.toString().contains("SPADE"))
-			return true;
-		if (mat.toString().contains("AXE"))
-			return true;
-		if (mat.toString().contains("HOE"))
-			return true;
-		if (mat.toString().contains("HELMET"))
-			return true;
-		if (mat.toString().contains("CHESTPLATE"))
-			return true;
-		if (mat.toString().contains("LEGGINGS"))
-			return true;
-		if (mat.toString().contains("BOOTS"))
-			return true;
+		try{
+			if (mat.toString().contains("SWORD"))
+				return true;
+			if (mat.toString().contains("PICKAXE"))
+				return true;
+			if (mat.toString().contains("SPADE"))
+				return true;
+			if (mat.toString().contains("AXE"))
+				return true;
+			if (mat.toString().contains("HOE"))
+				return true;
+			if (mat.toString().contains("HELMET"))
+				return true;
+			if (mat.toString().contains("CHESTPLATE"))
+				return true;
+			if (mat.toString().contains("LEGGINGS"))
+				return true;
+			if (mat.toString().contains("BOOTS"))
+				return true;
+		} catch (Exception e) {e.printStackTrace();}
 
 		return false;
 	}

@@ -1,5 +1,7 @@
 package com.cyprias.exchangemarket.commands;
 
+import java.util.Map;
+
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -40,16 +42,22 @@ public class SellOrder {
 		ItemStack item = ItemDb.getItemStack(args[1]);
 		//ItemStack item = MaterialUtil.getItem(args[1]);
 		
+
 		
 		
-		if (item == null) {
+		if (item == null || item.getTypeId() == 0) {
 			plugin.sendMessage(sender, F("invalidItem", args[1]));
 			return true;
 		}
 
 		Player player = (Player) sender;
 		
-		int amount = InventoryUtil.getAmount(item, player.getInventory());
+		int amount = 0;
+		
+		try{
+			amount = InventoryUtil.getAmount(item, player.getInventory());
+		} catch (Exception e) {e.printStackTrace();}
+		
 		if (args.length > 2) {
 
 			if (Utils.isInt(args[2])) {

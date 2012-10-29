@@ -14,6 +14,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import org.apache.commons.lang.UnhandledException;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.enchantments.Enchantment;
@@ -88,32 +89,39 @@ public class ItemDb {
 		ItemStack is = new ItemStack(itemID, 1);
 		is.setDurability(itemDur);
 
-		if (enchants != null){
-			//log.info("Adding enchants: " + enchants);
-			
+		if (enchants != null) {
+			// log.info("Adding enchants: " + enchants);
+
 			Map<Enchantment, Integer> ench = MaterialUtil.Enchantment.getEnchantments(enchants);
-			//log.info("ench: " + ench);
+			// log.info("ench: " + ench);
+
+			for (Map.Entry<org.bukkit.enchantments.Enchantment, Integer> entry : ench.entrySet()) {
+				
+				if (entry.getKey().canEnchantItem(is))
+					is.addEnchantment(entry.getKey(), entry.getValue());
+				
+			}
 			
-			is.addEnchantments(ench);
 			
-			//log.info("enchant count: " + is.getEnchantments().size());
-			
-			
-			
+
+
+			// log.info("enchant count: " + is.getEnchantments().size());
+
 		}
 
 		return is;
 	}
 
-	public static Logger log = Logger.getLogger("Minecraft"); 
+	public static Logger log = Logger.getLogger("Minecraft");
+
 	public static ItemStack getItemStack(String id) {
 		int itemid = 0;
 		String itemname = null;
 		short metaData = 0;
-		
+
 		String[] split = id.trim().split("-");
 		String enchant = null;
-		if (split.length > 1){
+		if (split.length > 1) {
 			id = split[0];
 			enchant = split[1];
 		}
@@ -129,19 +137,17 @@ public class ItemDb {
 			itemname = id.toLowerCase(Locale.ENGLISH);
 		}
 
-
-		
-		if (itemid > 0){
+		if (itemid > 0) {
 			return getItemStack(itemid, metaData, enchant);
 		}
-		if (itemname != null){
+		if (itemname != null) {
 			if (!nameToID.containsKey(itemname)) {
 				return null;
 			}
 			itemData iD = nameToID.get(itemname);
 			return getItemStack(iD.itemID, iD.itemDur, enchant);
 		}
-		
+
 		return null;
 	}
 
