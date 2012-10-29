@@ -32,6 +32,7 @@ permissions:
             exchangemarket.transactions: true
             exchangemarket.confirm: true
             exchangemarket.loginPendingCollection: true
+            exchangemarket.info: true
     exchangemarket.admin:
         description: Gives access to admin commands.
         default: false
