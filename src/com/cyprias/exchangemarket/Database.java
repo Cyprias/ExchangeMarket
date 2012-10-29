@@ -1982,7 +1982,11 @@ public class Database {
 				itemEnchants = qReturn.result.getString(7);
 				price = qReturn.result.getDouble(8);
 				amount = qReturn.result.getInt(9);
-
+				itemName = plugin.itemdb.getItemName(itemID, itemDur);
+				if (itemEnchants != null)
+					itemName += "-" + itemEnchants;
+				
+				
 				String typeString = ChatColor.RED + TypeToString(type, infinite);
 				if (type == 2)
 					typeString = ChatColor.GREEN + TypeToString(type, infinite);
@@ -2242,7 +2246,7 @@ public class Database {
 				if (type == 2)
 					typeString = ChatColor.GREEN + TypeToString(type, infinite);
 
-					sender.sendMessage(F("playerOrder", typeString, id, itemName, amount, plugin.Round(amount * price, Config.priceRounding),
+				sender.sendMessage(F("playerOrder", typeString, id, itemName, amount, plugin.Round(amount * price, Config.priceRounding),
 						plugin.Round(price, Config.priceRounding), ColourName(sender, trader)));
 
 				/*
