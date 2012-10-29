@@ -915,6 +915,10 @@ public class Database {
 				if (canBuy > 0) {
 					itemStack = new ItemStack(itemID, 1);
 					itemStack.setDurability(itemDur);
+					
+					if (enchants != null)
+						itemStack.addEnchantments(MaterialUtil.Enchantment.getEnchantments(enchants));
+
 					// itemStack.setAmount(canBuy);
 
 					canBuy = getFitAmount(itemStack, canBuy, player);
@@ -931,9 +935,6 @@ public class Database {
 
 					if (dryrun == false) {
 						plugin.debtPlayer(sender.getName(), canBuy * price);
-						// plugin.sendMessage(sender, preview +
-						// F("withdrewMoney", plugin.Round(canBuy * price,
-						// Config.priceRounding)));
 
 						if (infinite == false)
 							plugin.payPlayer(trader, canBuy * price);
@@ -942,9 +943,6 @@ public class Database {
 
 						if (infinite == false) {
 							decreaseInt(Config.sqlPrefix + "Orders", id, "amount", canBuy);
-							// increaseInt(Config.sqlPrefix + "Orders", id,
-							// "exchanged", canBuy);
-							// Mailbox Todo?
 
 						}
 
@@ -992,9 +990,6 @@ public class Database {
 							plugin.Round(tPrice / tAmount, Config.priceRounding)));
 
 		} else if (silentFail == false) {
-			if (itemEnchants != null)
-				itemName += "-" + itemEnchants;
-			
 			if (found == 0) {
 				// String itemName = plugin.itemdb.getItemName(itemID, itemDur);
 				plugin.sendMessage(sender, F("noSellersForBuy", itemName));
