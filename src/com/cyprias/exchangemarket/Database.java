@@ -989,6 +989,76 @@ public class Database {
 		return Localization.L(string);
 	}
 
+	public void searchOrders(CommandSender sender, int itemID, short itemDur, String itemEnchants) {
+		int rows = 0;
+
+		if (itemEnchants != null) {
+			rows = getResultCount("SELECT COUNT(*) FROM " + Config.sqlPrefix
+				+ "Orders WHERE `itemID` = ? AND `itemEnchants` = ? AND `itemDur` = ? AND amount > 0", itemID, itemDur, itemEnchants);
+		} else {
+			rows = getResultCount("SELECT COUNT(*) FROM " + Config.sqlPrefix + "Orders WHERE `itemID` = ? AND `itemDur` = ? AND amount > 0", itemID, itemDur);
+		}
+
+		String itemName = plugin.itemdb.getItemName(itemID, itemDur);
+		if (itemEnchants != null)
+			itemName += "-" + itemEnchants;
+
+		plugin.sendMessage(sender, F("resultsForItem", rows, itemName));
+		if (rows <= 0)
+			return;
+		queryReturn qReturn;
+
+		String query;
+
+		if (itemEnchants != null) {
+			query = "SELECT * FROM " + Config.sqlPrefix
+				+ "Orders WHERE `itemID` = ? AND `itemDur` = ? AND `itemEnchants` = ? AND amount > 0 ORDER BY `price` ASC;";
+			qReturn = executeQuery(query, itemID, itemDur, itemEnchants);
+		} else {
+			query = "SELECT * FROM " + Config.sqlPrefix + "Orders WHERE `itemID` = ? AND `itemDur` = ? AND amount > 0 ORDER BY `price` ASC;";
+			qReturn = executeQuery(query, itemID, itemDur);
+		}
+
+		/**/
+
+		int results = 0;
+		try {
+			int id, type, amount, exchanged;
+			Boolean infinite;
+			String trader;
+			Double price;
+
+			while (qReturn.result.next()) {
+				results += 1;
+				id = qReturn.result.getInt(1);
+				type = qReturn.result.getInt(2);
+				infinite = qReturn.result.getBoolean(3);
+				trader = qReturn.result.getString(4);
+				itemEnchants = qReturn.result.getString(7);
+				price = qReturn.result.getDouble(8);
+				amount = qReturn.result.getInt(9);
+				itemName = plugin.itemdb.getItemName(itemID, itemDur);
+				if (itemEnchants != null)
+					itemName += "-" + itemEnchants;
+
+				String typeString = ChatColor.RED + TypeToString(type, infinite);
+				if (type == 2)
+					typeString = ChatColor.GREEN + TypeToString(type, infinite);
+
+				sender.sendMessage(F("playerOrder", typeString, id, itemName, amount, plugin.Round(amount * price, Config.priceRounding),
+					plugin.Round(price, Config.priceRounding), ColourName(sender, trader)));
+
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		if (results == 0)
+			plugin.sendMessage(sender, L("noActiveList"));
+
+		closeQuery(qReturn);
+	}
+	
 	public int cancelOrders(CommandSender sender, int cType, int ciID, short ciDur, String itemEnchants, int cAmount, Boolean dryrun) {
 		int changes = 0;
 		String sortBy = "price DESC";
@@ -996,60 +1066,54 @@ public class Database {
 			sortBy = "price ASC";
 		}
 
-		String query = "SELECT * FROM "
-			+ Config.sqlPrefix
-			+ "Orders WHERE `type` = ? AND `infinite` = 0 AND `player` LIKE ? AND `itemID` = ? AND `itemDur` = ? AND `itemEnchants` like ? AND `amount` > 0 ORDER BY "
-			+ sortBy;
-
+		
+		String query;
+		
+		
+		queryReturn qReturn;
+		if (itemEnchants == null){
+			query = "SELECT * FROM "
+				+ Config.sqlPrefix
+				+ "Orders WHERE `type` = ? AND `infinite` = 0 AND `player` LIKE ? AND `itemID` = ? AND `itemDur` = ? AND `itemEnchants` IS NULL AND `amount` > 0 ORDER BY "
+				+ sortBy;
+			
+			qReturn = executeQuery(query, cType, sender.getName(), ciID, ciDur);
+		}else{
+			query = "SELECT * FROM "
+				+ Config.sqlPrefix
+				+ "Orders WHERE `type` = ? AND `infinite` = 0 AND `player` LIKE ? AND `itemID` = ? AND `itemDur` = ? AND `itemEnchants` like ? AND `amount` > 0 ORDER BY "
+				+ sortBy;
+			
+			qReturn = executeQuery(query, cType, sender.getName(), ciID, ciDur, itemEnchants);
+		}
+		
 		Player player = (Player) sender;
-		Connection con = getSQLConnection();
-
+		int results = 0;
+		Boolean hasOrders = false;
+		
 		String itemName = plugin.itemdb.getItemName(ciID, ciDur);
 		if (itemEnchants != null)
 			itemName += "-" + itemEnchants;
-
-		Boolean hasOrders = false;
-
 		try {
-			PreparedStatement statement = con.prepareStatement(query);
-			statement.setInt(1, cType);
-			statement.setString(2, sender.getName());
-			statement.setInt(3, ciID);
-			statement.setInt(4, ciDur);
-
-			if (itemEnchants != null) {
-				statement.setString(5, itemEnchants);
-			} else {
-				statement.setObject(5, null);
-			}
-
-			// statement.setString(3, sender.getName());
-
-			// statement.setDouble(3, buyPrice);
-
-			ResultSet result = statement.executeQuery();
-
-			double price;
-			int id, amount;
-			double senderBalance;
-			String trader;
-			int canBuy;
-			ItemStack itemStack;
+			int id, type, amount, exchanged;
 			Boolean infinite;
-			String enchants;
-
-			while (result.next()) {
+			String trader, enchants;
+			Double price;
+			int canBuy;
+			
+			
+			while (qReturn.result.next()) {
 				if (cAmount <= 0)
 					break;
 				hasOrders = true;
 				// patron = result.getString(1);
 
-				id = result.getInt(1);
-				infinite = result.getBoolean(3);
-				trader = result.getString(4);
-				price = result.getDouble(8);
-				amount = result.getInt(9);
-				enchants = result.getString(7);
+				id = qReturn.result.getInt(1);
+				infinite = qReturn.result.getBoolean(3);
+				trader = qReturn.result.getString(4);
+				price = qReturn.result.getDouble(8);
+				amount = qReturn.result.getInt(9);
+				enchants = qReturn.result.getString(7);
 
 				// plugin.info("processBuyOrder id: " + id + ", price: " + price
 				// + ", amount: " + amount);
@@ -1095,16 +1159,13 @@ public class Database {
 				}
 
 			}
-
-			statement.close();
+		
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		// clean sell orders.
-		if (dryrun == false) {
-			cleanSellOrders(con);
-			cleanBuyOrders(con);
-		}
+
+		closeQuery(qReturn);
+		
 		if (hasOrders == false)
 			plugin.sendMessage(sender, L("noActiveOrders"));
 
@@ -1918,75 +1979,7 @@ public class Database {
 		return false;
 	}
 
-	public void searchOrders(CommandSender sender, int itemID, short itemDur, String itemEnchants) {
-		int rows = 0;
 
-		if (itemEnchants != null) {
-			rows = getResultCount("SELECT COUNT(*) FROM " + Config.sqlPrefix
-				+ "Orders WHERE `itemID` = ? AND `itemEnchants` = ? AND `itemDur` = ? AND amount > 0", itemID, itemDur, itemEnchants);
-		} else {
-			rows = getResultCount("SELECT COUNT(*) FROM " + Config.sqlPrefix + "Orders WHERE `itemID` = ? AND `itemDur` = ? AND amount > 0", itemID, itemDur);
-		}
-
-		String itemName = plugin.itemdb.getItemName(itemID, itemDur);
-		if (itemEnchants != null)
-			itemName += "-" + itemEnchants;
-
-		plugin.sendMessage(sender, F("resultsForItem", rows, itemName));
-		if (rows <= 0)
-			return;
-		queryReturn qReturn;
-
-		String query;
-
-		if (itemEnchants != null) {
-			query = "SELECT * FROM " + Config.sqlPrefix
-				+ "Orders WHERE `itemID` = ? AND `itemDur` = ? AND `itemEnchants` = ? AND amount > 0 ORDER BY `price` ASC;";
-			qReturn = executeQuery(query, itemID, itemDur, itemEnchants);
-		} else {
-			query = "SELECT * FROM " + Config.sqlPrefix + "Orders WHERE `itemID` = ? AND `itemDur` = ? AND amount > 0 ORDER BY `price` ASC;";
-			qReturn = executeQuery(query, itemID, itemDur);
-		}
-
-		/**/
-
-		int results = 0;
-		try {
-			int id, type, amount, exchanged;
-			Boolean infinite;
-			String trader;
-			Double price;
-
-			while (qReturn.result.next()) {
-				results += 1;
-				id = qReturn.result.getInt(1);
-				type = qReturn.result.getInt(2);
-				infinite = qReturn.result.getBoolean(3);
-				trader = qReturn.result.getString(4);
-				itemEnchants = qReturn.result.getString(7);
-				price = qReturn.result.getDouble(8);
-				amount = qReturn.result.getInt(9);
-				itemName = plugin.itemdb.getItemName(itemID, itemDur);
-				if (itemEnchants != null)
-					itemName += "-" + itemEnchants;
-
-				String typeString = ChatColor.RED + TypeToString(type, infinite);
-				if (type == 2)
-					typeString = ChatColor.GREEN + TypeToString(type, infinite);
-
-				sender.sendMessage(F("playerOrder", typeString, id, itemName, amount, plugin.Round(amount * price, Config.priceRounding),
-					plugin.Round(price, Config.priceRounding), ColourName(sender, trader)));
-
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-
-		if (results == 0)
-			plugin.sendMessage(sender, L("noActiveList"));
-
-		closeQuery(qReturn);
-	}
 
 	public int cancelOrder(CommandSender sender, int orderID, Connection con) {
 		int updateSuccessful = 0;
