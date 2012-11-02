@@ -506,7 +506,7 @@ public class Database {
 		itemStack.setDurability(itemDur);
 		itemStack.setAmount(amount);
 
-		plugin.info("giveItemToPlayer1: enchants: " + enchants);
+		//plugin.info("giveItemToPlayer1: enchants: " + enchants);
 
 		if (enchants != null && !enchants.equalsIgnoreCase("")) {
 			plugin.info("giveItemToPlayer2: enchants: " + enchants);
@@ -902,7 +902,7 @@ public class Database {
 
 					canBuy = getFitAmount(itemStack, canBuy, player);
 
-					if (canBuy < 0)
+					if (canBuy <= 0)
 						break;
 
 					itemStack.setAmount(canBuy);
