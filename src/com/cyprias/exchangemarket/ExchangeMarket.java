@@ -269,10 +269,8 @@ public class ExchangeMarket extends JavaPlugin {
 		// info("announceNewOrder: " + type + ", " + sType);
 		String msg = F("newOrder", player.getDisplayName(), sType, itemName, amount, Round(price * amount, Config.priceRounding),
 			Round(price, Config.priceRounding));
-		if (itemEnchants != null) {
-			msg = F("newOrder", player.getDisplayName(), sType, itemName, amount, Round(price * amount, Config.priceRounding),
-				Round(price, Config.priceRounding));
-		}
+
+		
 		if (type == 1) {
 			permMessage("exchangemarket.announceneworder.sell", msg, sender.getName());
 		} else if (type == 2) {
