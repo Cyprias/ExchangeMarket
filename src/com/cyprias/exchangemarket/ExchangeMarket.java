@@ -258,7 +258,9 @@ public class ExchangeMarket extends JavaPlugin {
 		Player player = (Player) sender;
 
 		String itemName = itemdb.getItemName(itemID, itemDur);
-
+		if (itemEnchants != null)
+			itemName += "-" + itemEnchants;
+		
 		String sType = L("sell").toLowerCase();
 
 		if (type == 2)
@@ -268,7 +270,7 @@ public class ExchangeMarket extends JavaPlugin {
 		String msg = F("newOrder", player.getDisplayName(), sType, itemName, amount, Round(price * amount, Config.priceRounding),
 			Round(price, Config.priceRounding));
 		if (itemEnchants != null) {
-			msg = F("newOrderEnchant", player.getDisplayName(), sType, itemName, itemEnchants, amount, Round(price * amount, Config.priceRounding),
+			msg = F("newOrder", player.getDisplayName(), sType, itemName, amount, Round(price * amount, Config.priceRounding),
 				Round(price, Config.priceRounding));
 		}
 		if (type == 1) {
