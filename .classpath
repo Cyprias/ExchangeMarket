@@ -4,6 +4,6 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
 	<classpathentry kind="lib" path="D:/BukkitResorces/Vault.jar"/>
 	<classpathentry kind="lib" path="D:/BukkitResorces/odditem-0.9.5.jar"/>
-	<classpathentry kind="lib" path="D:/BukkitResorces/craftbukkit-1.4.2-R0.1.jar"/>
+	<classpathentry kind="lib" path="D:/BukkitResorces/craftbukkit-1.4.2-R0.2.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
