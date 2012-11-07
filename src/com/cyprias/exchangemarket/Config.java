@@ -27,8 +27,7 @@ public class Config {
 	public static String locale;
 	public static Boolean allowDamangedGear, grantOpsAllPermissions, checkNewVersionOnStartup, blockUsageInCreativeMode,  logBalanceChangesToConsole, logTransactionsToDB, convertCreatePriceToPerItem, cancelSelfSalesWhenBuying, autoPricePerUnit, clearRequestAfterConfirm, confirmAllOrders, autoPriceConfirm;
 	public static int priceRounding, transactionsPerPage;
-	public static Double autoBuyPrice, autoSellPrice;
-	
+	public static Double minOrderPrice;
 	
 	private void loadConfigOpts(){
 		sqlUsername = config.getString("mysql.username");
@@ -46,6 +45,8 @@ public class Config {
 		//}else if (sqlSystem.equals("mysql")){
 			sqlURL = "jdbc:mysql://" + sqlHost + ":" + sqlPort + "/" + sqlDatabase;
 		//}
+		minOrderPrice = config.getDouble("minOrderPrice");
+			
 			
 		grantOpsAllPermissions	= config.getBoolean("grantOpsAllPermissions");
 		checkNewVersionOnStartup = config.getBoolean("checkNewVersionOnStartup");
@@ -67,8 +68,6 @@ public class Config {
 		priceRounding = config.getInt("priceRounding");
 		transactionsPerPage = config.getInt("transactionsPerPage");
 		
-		autoBuyPrice = config.getDouble("autoBuyPrice");
-		autoSellPrice = config.getDouble("autoSellPrice");
 		autoPricePerUnit = config.getBoolean("autoPricePerUnit");
 		
 		allowDamangedGear = config.getBoolean("allowDamangedGear");

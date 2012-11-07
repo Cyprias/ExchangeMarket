@@ -2,6 +2,7 @@ package com.cyprias.exchangemarket;
 
 import java.io.IOException;
 import java.net.URL;
+import java.text.DecimalFormat;
 import java.util.logging.Logger;
 import net.milkbowl.vault.economy.Economy;
 
@@ -246,11 +247,13 @@ public class ExchangeMarket extends JavaPlugin {
 		return false;
 	}
 
-	public static double Round(double Rval, int Rpl) {
-		double p = (double) Math.pow(10, Rpl);
-		Rval = Rval * p;
-		double tmp = Math.round(Rval);
-		return (double) tmp / p;
+	public static String Round(double Rval, int Rpl) {
+		String format = "#.";
+		for (int i=1; i<=Rpl; i++)
+			format += "#";
+		
+		DecimalFormat df = new DecimalFormat(format);
+		return df.format(Rval);
 	}
 
 	public void announceNewOrder(int type, CommandSender sender, int itemID, int itemDur, String itemEnchants, int amount, double price) {

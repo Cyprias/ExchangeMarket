@@ -89,7 +89,7 @@ public class BuyOrder {
 			price = plugin.database.getTradersLastPrice(sender.getName(), item.getTypeId(), item.getDurability(), 2);
 		}
 
-		if (price == 0) {
+		if (price == 0 || price < Config.minOrderPrice) {
 			plugin.sendMessage(sender, F("invalidPrice", price));
 			return true;
 		}

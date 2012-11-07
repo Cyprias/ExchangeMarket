@@ -18,3 +18,4 @@ logBalanceChangesToConsole: true
 checkNewVersionOnStartup: true
 grantOpsAllPermissions: false
 allowDamangedGear: false
+minOrderPrice: 0.001

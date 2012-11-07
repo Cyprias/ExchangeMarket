@@ -29,6 +29,7 @@ import com.cyprias.exchangemarket.commands.Orders;
 import com.cyprias.exchangemarket.commands.Password;
 import com.cyprias.exchangemarket.commands.Price;
 import com.cyprias.exchangemarket.commands.Search;
+import com.cyprias.exchangemarket.commands.SellHand;
 import com.cyprias.exchangemarket.commands.SellOrder;
 import com.cyprias.exchangemarket.commands.Transactions;
 
@@ -45,6 +46,7 @@ public class Commands implements CommandExecutor {
 	private Collect collect;
 	private Transactions transactions;
 	private Password password;
+	private SellHand sellHand;
 	
 	//CommandExecutor info = null;
 	public Commands(ExchangeMarket plugin) {
@@ -59,6 +61,7 @@ public class Commands implements CommandExecutor {
 		this.collect = new Collect(plugin);
 		this.transactions = new Transactions(plugin);
 		this.password = new Password(plugin);
+		this.sellHand = new SellHand(plugin);
 	}
 
 	public String getItemStatsMsg(Database.itemStats stats, int stackCount) {
@@ -285,6 +288,7 @@ public class Commands implements CommandExecutor {
 				plugin.versionChecker.retreiveVersionInfo(sender, false, false);
 
 				return true;
+
 			} else if (args[0].equalsIgnoreCase("whatsnew") && args.length == 1) {
 				if (!hasCommandPermission(sender, "exchangemarket.whatsnew")) {
 					return true;
@@ -439,6 +443,8 @@ public class Commands implements CommandExecutor {
 				return transactions.onCommand(sender, cmd, commandLabel, args);
 			} else if (args[0].equalsIgnoreCase("password")) {
 				return password.onCommand(sender, cmd, commandLabel, args);
+			} else if (args[0].equalsIgnoreCase("sellhand")) {
+				return sellHand.onCommand(sender, cmd, commandLabel, args);
 				
 				
 			} else if (args[0].equalsIgnoreCase("cancel")) {
@@ -696,67 +702,8 @@ public class Commands implements CommandExecutor {
 
 				return true;
 
-			} else if (args[0].equalsIgnoreCase("sellhand")) {
-				if (!hasCommandPermission(sender, "exchangemarket.sellhand")) {
-					return true;
-				}
 
-				ItemStack stock = player.getItemInHand();
-				Map<Enchantment, Integer> e = stock.getEnchantments();
-
-				int type = 1;
-				String playerName = sender.getName();
-				int itemID = stock.getTypeId();
-				int itemDur = stock.getDurability();
-				String itemEnchants = MaterialUtil.Enchantment.encodeEnchantment(stock);
-
-				int amount = stock.getAmount();
-
-				double price = -1;
-				// plugin.sendMessage(sender, "amount: " + amount);
-
-				if (args.length > 1) {
-
-					// if (args.length > 2) {
-
-					Boolean priceEach = false;
-
-					if (args[1].substring(args[1].length() - 1, args[1].length()).equalsIgnoreCase("e")) {
-						priceEach = true;
-						args[1] = args[1].substring(0, args[1].length() - 1);
-					}
-
-					if (Utils.isDouble(args[1])) {
-						price = Math.abs(Double.parseDouble(args[1]));
-					} else {
-						plugin.sendMessage(sender, F("invalidPrice", args[1]));
-						return true;
-					}
-					if (price == 0) {
-						plugin.sendMessage(sender, F("invalidPrice", 0));
-						return true;
-					}
-					if (priceEach == false && Config.convertCreatePriceToPerItem == true)
-						price = price / amount;
-
-					// price = plugin.Round(price, Config.priceRounding);
-
-					if (price == 0) {
-						plugin.sendMessage(sender, F("invalidPrice", price));
-						return true;
-					}
-				}
-
-				if (Config.allowDamangedGear == false && plugin.isGear(stock.getType()) && stock.getDurability() > 0){
-					plugin.sendMessage(sender, F("cannotPostDamagedOrder"));
-					return true;
-				}
 				
-				plugin.database.postSellOrder(sender, stock.getTypeId(), stock.getDurability(), itemEnchants, amount, price, false);
-
-				return true;
-
-
 			} else if (args[0].equalsIgnoreCase("confirm")) {
 				if (!hasCommandPermission(sender, "exchangemarket.confirm")) {
 					return true;

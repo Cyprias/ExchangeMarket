@@ -96,14 +96,12 @@ public class SellOrder {
 			if (priceEach == false && Config.convertCreatePriceToPerItem == true)
 				price = price / rawAmount;
 
-			// price = plugin.Round(price, Config.priceRounding);
-
-			if (price == 0) {
-				plugin.sendMessage(sender, F("invalidPrice", price));
-				return true;
-			}
 		}
-
+		if (price == 0 || price < Config.minOrderPrice) {
+			plugin.sendMessage(sender, F("invalidPrice", price));
+			return true;
+		}
+		
 		if (Config.allowDamangedGear == false && plugin.isGear(item.getType()) && item.getDurability() > 0){
 			plugin.sendMessage(sender, F("cannotPostDamagedOrder"));
 			return true;
