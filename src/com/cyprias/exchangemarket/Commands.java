@@ -552,7 +552,7 @@ public class Commands implements CommandExecutor {
 				item.setAmount(amount);
 				// plugin.sendMessage(sender, "amount: " + amount);
 
-				double price = 0;
+				double price = 1000000;
 				// if (args.length > 2) {
 
 				if (args.length > 3) {
@@ -573,7 +573,7 @@ public class Commands implements CommandExecutor {
 						plugin.sendMessage(sender, F("invalidPrice", 0));
 						return true;
 					}
-					if (priceEach == false && Config.convertCreatePriceToPerItem == true)
+					if (priceEach == false)
 						price = price / rawAmount;
 
 				} else {
@@ -581,8 +581,6 @@ public class Commands implements CommandExecutor {
 					// plugin.info("no price given.");
 					if (confirmed == null)
 						dryrun = Config.autoPriceConfirm;
-
-					price = -1;
 
 
 				}
@@ -676,7 +674,7 @@ public class Commands implements CommandExecutor {
 						plugin.sendMessage(sender, F("invalidPrice", 0));
 						return true;
 					}
-					if (priceEach == false && Config.convertCreatePriceToPerItem == true)
+					if (priceEach == false)
 						price = price / rawAmount;
 
 				} else {
@@ -685,7 +683,6 @@ public class Commands implements CommandExecutor {
 					if (confirmed == null)
 						dryrun = Config.autoPriceConfirm;
 
-					price = -1;
 				}
 
 				int success = plugin.database.processSellOrder(sender, stock.getTypeId(), stock.getDurability(), itemEnchants, amount, price, dryrun);

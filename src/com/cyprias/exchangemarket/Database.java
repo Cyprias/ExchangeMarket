@@ -545,6 +545,7 @@ public class Database {
 
 		if (sellAmount > 0) {
 
+			/*
 			if (sellPrice == -1) {
 
 				sellPrice = getTradersLastPrice(sender.getName(), itemID, itemDur, 1);
@@ -557,8 +558,9 @@ public class Database {
 
 					return;
 				}
-
-			}
+			 */
+			
+			
 
 			ItemStack itemStack = new ItemStack(itemID, 1);
 			itemStack.setDurability(itemDur);
@@ -825,9 +827,11 @@ public class Database {
 		String query;
 		queryReturn qReturn;
 		
+		/*
 		if (buyPrice == -1) {
 			buyPrice = 999999;
 		}
+		*/
 		
 		if (itemEnchants == null) {
 			query = "SELECT * FROM "
@@ -1070,7 +1074,7 @@ public class Database {
 		String query;
 		
 		
-		queryReturn qReturn;
+		queryReturn qReturn; 
 		if (itemEnchants == null){
 			query = "SELECT * FROM "
 				+ Config.sqlPrefix
@@ -1188,15 +1192,17 @@ public class Database {
 
 		if (buyAmount > 0) {
 
+			/*
 			if (buyPrice == -1) {
-				buyPrice = getTradersLastPrice(sender.getName(), itemID, itemDur, 2);
+				buyPrice = getTradersLastPrice(2, sender.getName(), itemID, itemDur, itemEnchants);
 
 				if (buyPrice <= 0) {
 					plugin.sendMessage(sender, L("mustSupplyAPrice"));
 					return;
 				}
 			}
-
+			 */
+			
 			if (plugin.getBalance(sender.getName()) < (buyAmount * buyPrice)) {
 				plugin.sendMessage(sender,
 					F("buyNotEnoughFunds", plugin.Round(buyPrice * buyAmount, Config.priceRounding), plugin.Round(buyPrice, Config.priceRounding)));
@@ -1276,6 +1282,34 @@ public class Database {
 
 	public boolean increaseOrderAmount(int type, Boolean infinite, String player, int itemID, int itemDur, String itemEnchants, double price, int amount) {
 		boolean value = false;
+		
+		int success;
+		String query;
+		
+		
+		
+		if (itemEnchants != null){
+			query = "UPDATE "
+				+ Config.sqlPrefix
+				+ "Orders"
+				+ " SET `amount` = `amount` + ? WHERE `type` = ? AND `infinite` = ? AND `player` LIKE ? AND `itemID` = ? AND `itemDur` = ? AND `itemEnchants` = ? AND `price` = ?;";
+			success = executeUpdate(query, amount, type, infinite, player, itemID, itemDur, itemEnchants, price);
+		}else{
+			query = "UPDATE "
+				+ Config.sqlPrefix
+				+ "Orders"
+				+ " SET `amount` = `amount` + ? WHERE `type` = ? AND `infinite` = ? AND `player` LIKE ? AND `itemID` = ? AND `itemDur` = ? AND `itemEnchants` IS NULL  AND `price` = ?;";
+
+			success = executeUpdate(query, amount, type, infinite, player, itemID, itemDur, price);
+		}
+
+		if (success > 0)
+			return true;
+			
+		return false;
+		
+		
+		/*
 		if (itemEnchants == null) {
 			Connection con = getSQLConnection();
 
@@ -1309,8 +1343,7 @@ public class Database {
 			}
 
 			closeSQLConnection(con);
-		}
-		return value;
+		}*/
 	}
 
 	public int insertOrder(int type, Boolean infinite, String player, int itemID, int itemDur, String itemEnchants, double price, int amount, Connection con) {
@@ -1931,6 +1964,60 @@ public class Database {
 		}
 	}
 
+	//int sucessful = statement.executeUpdate();
+	
+	public int executeUpdate(String query, Object... args) {
+		Connection con = getSQLConnection();
+		int sucessful =0;
+
+		try {
+			PreparedStatement statement = con.prepareStatement(query);
+
+			// plugin.info("executeQuery: " + args.length);
+
+			int i = 0;
+			for (Object a : args) {
+				i += 1;
+				// plugin.info("executeQuery "+i+": " + a);
+				statement.setObject(i, a);
+			}
+
+			sucessful = statement.executeUpdate();
+
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		closeSQLConnection(con);
+
+		return sucessful;
+	}
+	
+	public double getTradersLastPrice(int type, String trader, int itemID, short itemDur, String itemEnchants) {
+		double price = 0;
+		
+		String query;
+		queryReturn qReturn;
+		
+		if (itemEnchants == null){
+			query = "SELECT * FROM " + Config.sqlPrefix + "Orders WHERE `type` = ? AND `player` LIKE ? AND `itemID` = ? AND `itemDur` = ?  AND `itemEnchants` IS NULL ORDER BY `id` DESC LIMIT 0 , 1";
+			qReturn = executeQuery(query, type, trader, itemID, itemDur);
+		}else{
+			query = "SELECT * FROM " + Config.sqlPrefix + "Orders WHERE `type` = ? AND `player` LIKE ? AND `itemID` = ? AND `itemDur` = ?  AND `itemEnchants` = ? ORDER BY `id` DESC LIMIT 0 , 1";
+			qReturn = executeQuery(query, type, trader, itemID, itemDur, itemEnchants);	
+		}
+		
+		try {
+			while (qReturn.result.next()) {
+				price = qReturn.result.getDouble(8);
+				break;
+			}
+		} catch (SQLException e) {e.printStackTrace();}
+		
+		return price;
+	}
+
 	public queryReturn executeQuery(String query, Object... args) {
 		Connection con = getSQLConnection();
 		// myreturn = null;
@@ -1962,7 +2049,9 @@ public class Database {
 			e.printStackTrace();
 		}
 
-		// closeSQLConnection(con);
+		
+		
+		// closeSQLConnection(con); use myreturn.con.close(); later
 
 		return myreturn;
 	}
@@ -2087,42 +2176,7 @@ public class Database {
 		return value;
 	}
 
-	public double getTradersLastPrice(String trader, int itemID, short itemDur, int type, Connection con) {
-		double price = 0;
-		String SQL = "SELECT * FROM " + Config.sqlPrefix + "Orders WHERE `player` LIKE ? AND `itemID` = ? AND `itemDur` = ?  AND `type` = ? ORDER BY `id` DESC";
 
-		try {
-			PreparedStatement statement = con.prepareStatement(SQL);
-
-			statement.setString(1, trader);
-			statement.setInt(2, itemID);
-			statement.setShort(3, itemDur);
-			statement.setInt(4, type);
-
-			ResultSet result = statement.executeQuery();
-
-			while (result.next()) {
-				price = result.getDouble(8);
-				break;
-			}
-
-			result.close();
-			statement.close();
-
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		return price;
-	}
-
-	public Double getTradersLastPrice(String trader, int itemID, short itemDur, int type) {
-		Connection con = getSQLConnection();
-		Double value = getTradersLastPrice(trader, itemID, itemDur, type, con);
-		closeSQLConnection(con);
-		return value;
-	}
 
 	public int listOrders(CommandSender sender, int getType, int page, Connection con) {
 		String query = "SELECT COUNT(*) FROM " + Config.sqlPrefix + "Orders WHERE `amount` > 0";

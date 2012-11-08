@@ -6,7 +6,6 @@ mysql:
   database: minecraft
   prefix: "EM_"
 locale: enUS.yml
-convertCreatePriceToPerItem: true
 priceRounding: 4
 clearRequestAfterConfirm: false
 autoPriceConfirm: true
@@ -18,4 +17,4 @@ logBalanceChangesToConsole: true
 checkNewVersionOnStartup: true
 grantOpsAllPermissions: false
 allowDamangedGear: false
-minOrderPrice: 0.001
+minOrderPrice: 0.0001

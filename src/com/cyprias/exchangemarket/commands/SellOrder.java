@@ -69,7 +69,10 @@ public class SellOrder {
 		}
 		int rawAmount = amount;
 		item.setAmount(amount);
-		double price = -1;
+		
+		String itemEnchants = MaterialUtil.Enchantment.encodeEnchantment(item);
+		
+		double price = 0;
 		// plugin.sendMessage(sender, "amount: " + amount);
 
 		if (args.length > 3) {
@@ -93,9 +96,11 @@ public class SellOrder {
 				plugin.sendMessage(sender, F("invalidPrice", 0));
 				return true;
 			}
-			if (priceEach == false && Config.convertCreatePriceToPerItem == true)
+			if (priceEach == false)
 				price = price / rawAmount;
-
+			
+		}else{
+			price = plugin.database.getTradersLastPrice(1, sender.getName(), item.getTypeId(), item.getDurability(), itemEnchants);
 		}
 		if (price == 0 || price < Config.minOrderPrice) {
 			plugin.sendMessage(sender, F("invalidPrice", price));
@@ -108,7 +113,7 @@ public class SellOrder {
 		}
 		
 		// postBuyOrder
-		String itemEnchants = MaterialUtil.Enchantment.encodeEnchantment(item);
+		
 		
 		plugin.database.postSellOrder(sender, item.getTypeId(), item.getDurability(), itemEnchants, amount, price, false);
 

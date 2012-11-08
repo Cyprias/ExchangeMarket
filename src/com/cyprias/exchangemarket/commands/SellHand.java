@@ -34,18 +34,18 @@ public class SellHand {
 
 		Player player = (Player) sender;
 		
-		ItemStack stock = player.getItemInHand();
-		Map<Enchantment, Integer> e = stock.getEnchantments();
+		ItemStack item = player.getItemInHand();
+		Map<Enchantment, Integer> e = item.getEnchantments();
 
 		int type = 1;
 		String playerName = sender.getName();
-		int itemID = stock.getTypeId();
-		int itemDur = stock.getDurability();
-		String itemEnchants = MaterialUtil.Enchantment.encodeEnchantment(stock);
+		int itemID = item.getTypeId();
+		int itemDur = item.getDurability();
+		String itemEnchants = MaterialUtil.Enchantment.encodeEnchantment(item);
 
-		int amount = stock.getAmount();
+		int amount = item.getAmount();
 
-		double price = -1;
+		double price = 0;
 		// plugin.sendMessage(sender, "amount: " + amount);
 
 		if (args.length > 1) {
@@ -69,10 +69,12 @@ public class SellHand {
 				plugin.sendMessage(sender, F("invalidPrice", 0));
 				return true;
 			}
-			if (priceEach == false && Config.convertCreatePriceToPerItem == true)
+			if (priceEach == false )
 				price = price / amount;
 
-			// price = plugin.Round(price, Config.priceRounding);
+			
+		}else{
+			price = plugin.database.getTradersLastPrice(1, sender.getName(), item.getTypeId(), item.getDurability(), itemEnchants);
 		}
 
 		if (price == 0 || price < Config.minOrderPrice) {
@@ -80,12 +82,12 @@ public class SellHand {
 			return true;
 		}
 		
-		if (Config.allowDamangedGear == false && plugin.isGear(stock.getType()) && stock.getDurability() > 0){
+		if (Config.allowDamangedGear == false && plugin.isGear(item.getType()) && item.getDurability() > 0){
 			plugin.sendMessage(sender, F("cannotPostDamagedOrder"));
 			return true;
 		}
 		
-		plugin.database.postSellOrder(sender, stock.getTypeId(), stock.getDurability(), itemEnchants, amount, price, false);
+		plugin.database.postSellOrder(sender, item.getTypeId(), item.getDurability(), itemEnchants, amount, price, false);
 
 		return true;
 
