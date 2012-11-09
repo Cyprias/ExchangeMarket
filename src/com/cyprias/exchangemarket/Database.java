@@ -377,7 +377,10 @@ public class Database {
 				timestamp = result.getTimestamp(10);
 
 				String itemName = plugin.itemdb.getItemName(itemID, itemDur);
-
+				if (itemEnchants != null)
+					itemName += "-" + itemEnchants;
+				
+				
 				String date = new SimpleDateFormat("MM/dd/yy").format(timestamp);
 
 				if (type == 1) {

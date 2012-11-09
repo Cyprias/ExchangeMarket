@@ -152,7 +152,10 @@ public class Commands implements CommandExecutor {
 		public void run() {
 			// commandHandler(savedCmd.sender, savedCmd.cmd,
 			// savedCmd.commandLabel, savedCmd.args, null);
+			try{
 			commandHandler(sender, cmd, commandLabel, args, null);
+			} catch (Exception e) {e.printStackTrace();}
+			
 			// plugin.getServer().getScheduler().cancelTask(id);
 
 			cmdTasks.remove(this);

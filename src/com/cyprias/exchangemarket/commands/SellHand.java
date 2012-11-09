@@ -77,8 +77,11 @@ public class SellHand {
 			price = plugin.database.getTradersLastPrice(1, sender.getName(), item.getTypeId(), item.getDurability(), itemEnchants);
 		}
 
-		if (price == 0 || price < Config.minOrderPrice) {
+		if (price == 0) {
 			plugin.sendMessage(sender, F("invalidPrice", price));
+			return true;
+		}else if (price < Config.minOrderPrice){
+			plugin.sendMessage(sender, F("orderPriceTooLow", price, Config.minOrderPrice));
 			return true;
 		}
 		
