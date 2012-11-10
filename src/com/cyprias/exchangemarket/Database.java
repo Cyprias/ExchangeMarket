@@ -1567,49 +1567,37 @@ public class Database {
 	public itemStats getItemStats(int itemID, int itemDur, String itemEnchants, int getType) {
 		itemStats myReturn = new itemStats();
 
-		Connection con = getSQLConnection();
-		String query = "SELECT * FROM " + Config.sqlPrefix + "Orders WHERE `itemID` = ? AND `itemDur` = ? AND `itemEnchants` like ? AND `amount` > 0";
+		String query = "SELECT * FROM " + Config.sqlPrefix + "Orders WHERE `itemID` = ? AND `itemDur` = ? AND `amount` > 0";
+		queryReturn qReturn;
+		
 
-		if (getType > 0) {
-			query = "SELECT * FROM " + Config.sqlPrefix
-				+ "Orders WHERE `itemID` = ? AND `itemDur` = ? AND `itemEnchants` like ? AND `amount` > 0 AND `type` = ?;";
+		if (itemEnchants != null && getType > 0){
+			query += " AND `itemEnchants` like ?"; 
+			query += " AND `type` like ?"; 
+			qReturn = executeQuery(query, itemID, itemDur, itemEnchants, getType);
+		}else if (itemEnchants != null){
+			query += " AND `itemEnchants` like ?"; 
+			qReturn = executeQuery(query, itemID, itemDur, itemEnchants);
+		}else if (getType > 0){
+			qReturn = executeQuery(query, itemID, itemDur, getType);
+		}else{
+			qReturn = executeQuery(query, itemID, itemDur);
 		}
-
+		
 		try {
-			int i = 0, type, amount;
+			int i = 0, amount;
 			double price, aPrice;
-			String itemName;
 			double totalPrice = 0;
 			double totalAmount = 0;
 			List<Double> prices = new ArrayList<Double>();
 			List<Integer> amounts = new ArrayList<Integer>();
 
-			PreparedStatement statement = con.prepareStatement(query);
 
-			statement.setInt(1, itemID);
-			statement.setInt(2, itemDur);
-
-			if (itemEnchants == null) {
-				statement.setObject(3, null);
-			} else {
-				statement.setString(3, itemEnchants);
-			}
-
-			if (getType > 0) {
-				statement.setInt(4, getType);
-			}
-
-			ResultSet result = statement.executeQuery();
-
-			while (result.next()) {
-				// patron = result.getString(1);
-
-				type = result.getInt(2);
-				itemID = result.getInt(5);
-				itemDur = result.getInt(6);
-				price = result.getDouble(8);
-				amount = result.getInt(9);
-				itemName = plugin.itemdb.getItemName(itemID, itemDur);
+			while (qReturn.result.next()) {
+				itemID = qReturn.result.getInt(5);
+				itemDur = qReturn.result.getInt(6);
+				price = qReturn.result.getDouble(8);
+				amount = qReturn.result.getInt(9);
 
 				aPrice = price * amount;// / amount;
 
@@ -1624,16 +1612,14 @@ public class Database {
 
 			}
 
-			result.close();
-			statement.close();
+			qReturn.result.close();
+			qReturn.statement.close();
+			qReturn.con.close();
+			
 			myReturn.total = i;
 			myReturn.totalAmount = totalAmount;
 
 			double avgPrice = totalPrice / totalAmount;
-			// plugin.info("totalAmount: "+totalAmount );
-			// plugin.info("totalPrice: "+totalPrice );
-			// plugin.info("i: "+i );
-			// plugin.info("avgPrice: "+avgPrice );
 
 			myReturn.avgPrice = avgPrice;
 
@@ -1647,7 +1633,6 @@ public class Database {
 				for (int i1 = 0; i1 < prices.size(); i1++)
 					dPrices[i1] = prices.get(i1);
 
-				// myReturn.mean = mean(dPrices);
 				myReturn.median = median(dPrices);
 				myReturn.mode = mode(dPrices);
 			}
@@ -1662,13 +1647,14 @@ public class Database {
 				myReturn.amode = mode(dAmounts);
 			}
 
+			
+			
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
-		closeSQLConnection(con);
-
+		
 		return myReturn;
 	}
 

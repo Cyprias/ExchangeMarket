@@ -150,13 +150,9 @@ public class Commands implements CommandExecutor {
 		}
 
 		public void run() {
-			// commandHandler(savedCmd.sender, savedCmd.cmd,
-			// savedCmd.commandLabel, savedCmd.args, null);
 			try{
-			commandHandler(sender, cmd, commandLabel, args, null);
+				commandHandler(sender, cmd, commandLabel, args, null);
 			} catch (Exception e) {e.printStackTrace();}
-			
-			// plugin.getServer().getScheduler().cancelTask(id);
 
 			cmdTasks.remove(this);
 		}
@@ -173,16 +169,12 @@ public class Commands implements CommandExecutor {
 			}
 		}
 
-		// if (Config.allowMultipleQueuedCommands == false) {
 		for (int i = 0; i < cmdTasks.size(); i++) {
 			if (cmdTasks.get(i).sender.equals(sender)) {
 				plugin.sendMessage(sender, F("processingPreviousCMD"));
 				return true;
 			}
 		}
-		// }
-
-		// for (int x = 0; x < 5; x++) {
 
 		cmdTask task = new cmdTask();
 		int taskID = plugin.getServer().getScheduler().scheduleAsyncDelayedTask(plugin, task, 0L);
@@ -194,7 +186,6 @@ public class Commands implements CommandExecutor {
 		// task.addCommand(newCmd);
 
 		cmdTasks.add(task);
-		// }
 
 		return true;
 	}
@@ -624,13 +615,9 @@ public class Commands implements CommandExecutor {
 					plugin.sendMessage(sender, F("invalidItem", args[1]));
 					return true;
 				}
-
-				String itemEnchants = MaterialUtil.Enchantment.encodeEnchantment(item);
 				
-				// int invAmount = InventoryUtil.getAmount(stock,
-				// player.getInventory());
-				// plugin.sendMessage(sender, "stock: " + stock);
-
+				
+				
 				int invAmount = InventoryUtil.getAmount(item, player.getInventory());
 				int amount = invAmount;
 				if (args.length > 2) {
@@ -646,13 +633,11 @@ public class Commands implements CommandExecutor {
 				int rawAmount = amount;
 				// plugin.sendMessage(sender, "amount: " + amount);
 
+
 				String itemName = plugin.itemdb.getItemName(item.getTypeId(), item.getDurability());
+				String itemEnchants = MaterialUtil.Enchantment.encodeEnchantment(item);
 				if (itemEnchants != null)
 					itemName += "-" + itemEnchants;
-				// if (invAmount < amount) {
-				// amount = InventoryUtil.getAmount(stock,
-				// player.getInventory());
-				// }
 
 				amount = Math.min(invAmount, amount);
 
@@ -692,6 +677,7 @@ public class Commands implements CommandExecutor {
 						dryrun = Config.autoPriceConfirm;
 
 				}
+				
 
 				int success = plugin.database.processSellOrder(sender, item.getTypeId(), item.getDurability(), itemEnchants, amount, price, dryrun);
 
