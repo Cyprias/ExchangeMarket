@@ -35,6 +35,12 @@ public class SellHand {
 		Player player = (Player) sender;
 		
 		ItemStack item = player.getItemInHand();
+		
+		if (item == null || item.getTypeId() == 0) {
+			plugin.sendMessage(sender, F("invalidItem", args[1]));
+			return true;
+		}
+		
 		Map<Enchantment, Integer> e = item.getEnchantments();
 
 		int type = 1;

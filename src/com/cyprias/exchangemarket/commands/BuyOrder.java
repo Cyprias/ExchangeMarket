@@ -38,7 +38,7 @@ public class BuyOrder {
 
 		ItemStack item = ItemDb.getItemStack(args[1]);
 
-		if (item == null) {
+		if (item == null || item.getTypeId() == 0) {
 			plugin.sendMessage(sender, F("invalidItem", args[1]));
 			return true;
 		}

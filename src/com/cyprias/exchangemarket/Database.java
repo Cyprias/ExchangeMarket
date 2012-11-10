@@ -361,7 +361,7 @@ public class Database {
 
 			double price;
 			int type, itemID, itemDur, amount;
-			String buyer, itemEnchants, seller;
+			String buyer, itemEnchants, seller, itemName;
 			Timestamp timestamp;
 
 			while (result.next()) {
@@ -376,7 +376,7 @@ public class Database {
 				price = result.getDouble(8);
 				timestamp = result.getTimestamp(10);
 
-				String itemName = plugin.itemdb.getItemName(itemID, itemDur);
+				itemName = plugin.itemdb.getItemName(itemID, itemDur);
 				if (itemEnchants != null)
 					itemName += "-" + itemEnchants;
 				

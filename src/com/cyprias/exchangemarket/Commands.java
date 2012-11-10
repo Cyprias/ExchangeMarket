@@ -320,9 +320,9 @@ public class Commands implements CommandExecutor {
 					return true;
 				}
 
-				ItemStack stock = ItemDb.getItemStack(args[1]);
+				ItemStack item = ItemDb.getItemStack(args[1]);
 
-				if (stock == null || stock.getType() == null) {
+				if (item == null || item.getType() == null) {
 					plugin.sendMessage(sender, F("invalidItem", args[1]));
 					return true;
 				}
@@ -341,11 +341,13 @@ public class Commands implements CommandExecutor {
 				}
 				// plugin.sendMessage(sender, "price: " + price);
 
-				String itemName = plugin.itemdb.getItemName(stock.getTypeId(), stock.getDurability());
-
+				String itemName = plugin.itemdb.getItemName(item.getTypeId(), item.getDurability());
+				String itemEnchants = MaterialUtil.Enchantment.encodeEnchantment(item);
+				
+				
 				int success = 0;
 				if (dryrun == false)
-					success = plugin.database.insertOrder(2, true, plugin.pluginName, stock.getTypeId(), stock.getDurability(), null, price, 1);
+					success = plugin.database.insertOrder(2, true, plugin.pluginName, item.getTypeId(), item.getDurability(), itemEnchants, price, 1);
 
 				if (success > 0) {
 					plugin.sendMessage(sender, F("infiniteBuyCreated", itemName, price));
@@ -360,9 +362,9 @@ public class Commands implements CommandExecutor {
 					plugin.sendMessage(sender, "§a/" + commandLabel + " infsell <itemName> <price> §7- " + L("cmdInfSellDesc"));
 					return true;
 				}
-				ItemStack stock = ItemDb.getItemStack(args[1]);
+				ItemStack item = ItemDb.getItemStack(args[1]);
 
-				if (stock == null || stock.getType() == null) {
+				if (item == null || item.getType() == null) {
 					plugin.sendMessage(sender, F("invalidItem", args[1]));
 					return true;
 				}
@@ -381,11 +383,12 @@ public class Commands implements CommandExecutor {
 				}
 				// plugin.sendMessage(sender, "price: " + price);
 
-				String itemName = plugin.itemdb.getItemName(stock.getTypeId(), stock.getDurability());
-
+				String itemName = plugin.itemdb.getItemName(item.getTypeId(), item.getDurability());
+				String itemEnchants = MaterialUtil.Enchantment.encodeEnchantment(item);
+				
 				int success = 0;
 				if (dryrun == false)
-					success = plugin.database.insertOrder(1, true, plugin.pluginName, stock.getTypeId(), stock.getDurability(), null, price, 1);
+					success = plugin.database.insertOrder(1, true, plugin.pluginName, item.getTypeId(), item.getDurability(), itemEnchants, price, 1);
 
 				if (success > 0) {
 					plugin.sendMessage(sender, F("infiniteSellCreated", itemName, price));
@@ -536,7 +539,7 @@ public class Commands implements CommandExecutor {
 
 				ItemStack item = ItemDb.getItemStack(args[1]);
 
-				if (item == null) {
+				if (item == null || item.getTypeId() == 0) {
 					plugin.sendMessage(sender, F("invalidItem", args[1]));
 					return true;
 				}
@@ -614,19 +617,21 @@ public class Commands implements CommandExecutor {
 					return true;
 				}
 
-				ItemStack stock = ItemDb.getItemStack(args[1]);
-				String itemEnchants = MaterialUtil.Enchantment.encodeEnchantment(stock);
+				ItemStack item = ItemDb.getItemStack(args[1]);
 				
-				if (stock == null || stock.getType() == null) {
+				
+				if (item == null || item.getType() == null) {
 					plugin.sendMessage(sender, F("invalidItem", args[1]));
 					return true;
 				}
 
+				String itemEnchants = MaterialUtil.Enchantment.encodeEnchantment(item);
+				
 				// int invAmount = InventoryUtil.getAmount(stock,
 				// player.getInventory());
 				// plugin.sendMessage(sender, "stock: " + stock);
 
-				int invAmount = InventoryUtil.getAmount(stock, player.getInventory());
+				int invAmount = InventoryUtil.getAmount(item, player.getInventory());
 				int amount = invAmount;
 				if (args.length > 2) {
 
@@ -637,11 +642,11 @@ public class Commands implements CommandExecutor {
 						return true;
 					}
 				}
-				stock.setAmount(amount);
+				item.setAmount(amount);
 				int rawAmount = amount;
 				// plugin.sendMessage(sender, "amount: " + amount);
 
-				String itemName = plugin.itemdb.getItemName(stock.getTypeId(), stock.getDurability());
+				String itemName = plugin.itemdb.getItemName(item.getTypeId(), item.getDurability());
 				if (itemEnchants != null)
 					itemName += "-" + itemEnchants;
 				// if (invAmount < amount) {
@@ -688,7 +693,7 @@ public class Commands implements CommandExecutor {
 
 				}
 
-				int success = plugin.database.processSellOrder(sender, stock.getTypeId(), stock.getDurability(), itemEnchants, amount, price, dryrun);
+				int success = plugin.database.processSellOrder(sender, item.getTypeId(), item.getDurability(), itemEnchants, amount, price, dryrun);
 
 				// if (success == 0){
 				// plugin.sendMessage(sender, F("noBuyersForSell", itemName,
