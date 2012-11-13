@@ -8,6 +8,7 @@ import com.Acrobot.Breeze.Utils.MaterialUtil;
 import com.cyprias.exchangemarket.ExchangeMarket;
 import com.cyprias.exchangemarket.ItemDb;
 import com.cyprias.exchangemarket.Localization;
+import com.cyprias.exchangemarket.Utilis.Utils;
 
 public class Search {
 	private ExchangeMarket plugin;
@@ -43,7 +44,17 @@ public class Search {
 		}
 		String itemEnchants = MaterialUtil.Enchantment.encodeEnchantment(item);
 		
-		plugin.database.searchOrders(sender, item.getTypeId(), item.getDurability(), itemEnchants);
+		int page = 0;
+		if (args.length > 2) {// && args[1].equalsIgnoreCase("compact"))
+			if (Utils.isInt(args[2])) {
+				page = Math.abs(Integer.parseInt(args[2]));
+			} else {
+				plugin.sendMessage(sender, F("invalidPageNumber", args[2]));
+				return true;
+			}
+		}
+		
+		plugin.database.searchOrders(sender, item.getTypeId(), item.getDurability(), itemEnchants, page);
 
 		return true;
 	}

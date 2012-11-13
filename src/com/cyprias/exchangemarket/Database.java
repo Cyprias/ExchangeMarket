@@ -874,8 +874,6 @@ public class Database {
 		
 		int totalFit = getFitAmount(itemStack, 64*9*4, player);
 		
-		//plugin.info("totalFit: " + totalFit);
-		
 		String preview = "";
 		if (dryrun == true)
 			preview = L("preview");
@@ -915,16 +913,9 @@ public class Database {
 					if (enchants != null)
 						itemStack.addEnchantments(MaterialUtil.Enchantment.getEnchantments(enchants));
 
-					// itemStack.setAmount(canBuy);
-
-					//canBuy = getFitAmount(itemStack, canBuy, player);
-
-					//totalFit
 					if (canBuy > totalFit){
 						canBuy = totalFit;
 						
-					//}else{
-					//	canBuy = totalFit;
 					}
 					totalFit -= canBuy;
 					
@@ -1016,7 +1007,7 @@ public class Database {
 		return Localization.L(string);
 	}
 
-	public void searchOrders(CommandSender sender, int itemID, short itemDur, String itemEnchants) {
+	public void searchOrders(CommandSender sender, int itemID, short itemDur, String itemEnchants, int page) {
 		int rows = 0;
 
 		if (itemEnchants != null) {
@@ -1033,16 +1024,24 @@ public class Database {
 		plugin.sendMessage(sender, F("resultsForItem", rows, itemName));
 		if (rows <= 0)
 			return;
+
+		int maxPages = (int) Math.ceil((double) rows / Config.transactionsPerPage);
+
+		if (page <= 0) {
+			page = maxPages;
+		}
+		
+		plugin.sendMessage(sender, F("transactionPage", page, maxPages));
+		
+
 		queryReturn qReturn;
-
 		String query;
-
 		if (itemEnchants != null) {
 			query = "SELECT * FROM " + Config.sqlPrefix
-				+ "Orders WHERE `itemID` = ? AND `itemDur` = ? AND `itemEnchants` = ? AND amount > 0 ORDER BY `price` ASC, `amount` ASC;";
+				+ "Orders WHERE `itemID` = ? AND `itemDur` = ? AND `itemEnchants` = ? AND amount > 0 ORDER BY `price` ASC, `amount` ASC LIMIT " + (Config.transactionsPerPage * (page-1)) + ", " + Config.transactionsPerPage;
 			qReturn = executeQuery(query, itemID, itemDur, itemEnchants);
 		} else {
-			query = "SELECT * FROM " + Config.sqlPrefix + "Orders WHERE `itemID` = ? AND `itemDur` = ? AND amount > 0 ORDER BY `price` ASC, `amount` ASC;";
+			query = "SELECT * FROM " + Config.sqlPrefix + "Orders WHERE `itemID` = ? AND `itemDur` = ? AND amount > 0 ORDER BY `price` ASC, `amount` ASC LIMIT " + (Config.transactionsPerPage * (page-1)) + ", " + Config.transactionsPerPage;
 			qReturn = executeQuery(query, itemID, itemDur);
 		}
 
@@ -1808,51 +1807,37 @@ public class Database {
 		return success;
 	}
 
-	public int getResultCount(String query, Object... args) {
-		// String query = "SELECT COUNT(*) FROM " + Config.sqlPrefix +
-		// "Orders WHERE `player` LIKE ? ";
 
-		Connection con = getSQLConnection();
+	public int getResultCount(String query, Object... args) {
+		queryReturn qReturn = executeQuery(query, args);
 		int rows = 0;
 		try {
-			PreparedStatement statement = con.prepareStatement(query);
-			// statement.setString(1, sender.getName());
-
-			int i = 0;
-			for (Object a : args) {
-				i += 1;
-				// plugin.info("executeQuery "+i+": " + a);
-				statement.setObject(i, a);
-			}
-
-			ResultSet result = statement.executeQuery();
-			while (result.next()) {
-				rows = result.getInt(1);
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-
+			qReturn.result.first();
+			rows = (qReturn.result.getInt(1));
+			
+			qReturn.statement.close();
+			qReturn.con.close();
+			
+		} catch (SQLException e) {e.printStackTrace();}
+		
 		return rows;
 	}
 
 	public int listPlayerOrders(CommandSender sender, String trader, int page) {
-
 		int rows = getResultCount("SELECT COUNT(*) FROM " + Config.sqlPrefix + "Orders WHERE `player` LIKE ?", sender.getName());
 
-		int maxPages = (int) Math.floor(rows / Config.transactionsPerPage);
+		int maxPages = (int) Math.ceil((double) rows / Config.transactionsPerPage);
 
-		if (page < 0) {
+		if (page <= 0) {
 			page = maxPages;
-		} else {
-			page -= 1;
 		}
-
-		plugin.sendMessage(sender, F("transactionPage", page + 1, maxPages + 1));
+		
+		plugin.sendMessage(sender, F("transactionPage", page, maxPages));
+		
 
 		int updateSuccessful = 0;
 
-		String SQL = "SELECT * FROM " + Config.sqlPrefix + "Orders WHERE `player` LIKE ? ORDER BY id ASC LIMIT " + (Config.transactionsPerPage * page) + ", "
+		String SQL = "SELECT * FROM " + Config.sqlPrefix + "Orders WHERE `player` LIKE ? ORDER BY id ASC LIMIT " + (Config.transactionsPerPage * (page-1)) + ", "
 			+ Config.transactionsPerPage;// `amount`
 		Connection con = getSQLConnection(); // >
 		// 0
@@ -2017,6 +2002,8 @@ public class Database {
 		return price;
 	}
 
+
+	
 	public queryReturn executeQuery(String query, Object... args) {
 		Connection con = getSQLConnection();
 		// myreturn = null;
@@ -2176,64 +2163,36 @@ public class Database {
 	}
 
 
-
 	public int listOrders(CommandSender sender, int getType, int page, Connection con) {
-		String query = "SELECT COUNT(*) FROM " + Config.sqlPrefix + "Orders WHERE `amount` > 0";
-		if (getType > 0) {
-			// query = "SELECT * FROM " + Config.sqlPrefix
-			// +
-			// "Orders WHERE `itemID` = ? AND `itemDur` = ? AND `itemEnchants` IS NULL AND `amount` > 0 AND `type` = ?;";
-
-			query = "SELECT COUNT(*) FROM " + Config.sqlPrefix + "Orders WHERE `amount` > 0 AND `type` = ?";
-			// SQL = "SELECT * FROM " + Config.sqlPrefix +
-			// "Orders WHERE `amount` > 0 AND `type` = ? ORDER BY " +
-			// Config.listSortOrder + " LIMIT " + (Config.transactionsPerPage *
-			// page) + ", "+Config.transactionsPerPage;
-		}
-
-		// Connection con = getSQLConnection();
+		String query;
 		int rows = 0;
-		try {
-			PreparedStatement statement = con.prepareStatement(query);
-			// statement.setString(1, sender.getName());
-
-			if (getType > 0) {
-				statement.setInt(1, getType);
-			}
-			ResultSet result = statement.executeQuery();
-			while (result.next()) {
-				rows = (result.getInt(1) - 1);
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
+		if (getType > 0) {
+			query = "SELECT COUNT(*) FROM " + Config.sqlPrefix + "Orders WHERE `amount` > 0 AND `type` = ?";
+			rows = getResultCount(query, getType);
+		}else{
+			query = "SELECT COUNT(*) FROM " + Config.sqlPrefix + "Orders WHERE `amount` > 0";
+			rows = getResultCount(query);
 		}
 
-		// int Config.transactionsPerPage = ;
-		int maxPages = (int) Math.floor(rows / Config.transactionsPerPage);
 
-		if (page < 0) {
+		int maxPages = (int) Math.ceil((double) rows / Config.transactionsPerPage);
+
+		if (page <= 0) {
 			page = maxPages;
-		} else {
-			page -= 1;
 		}
-
-		plugin.sendMessage(sender, F("transactionPage", page + 1, maxPages + 1));
-
-		// query = "SELECT * FROM " + Config.sqlPrefix + "Transactions" +
-		// " WHERE `seller` LIKE ? LIMIT " + (Config.transactionsPerPage * page)
-		// + ", "+Config.transactionsPerPage;
-
+		
+		plugin.sendMessage(sender, F("transactionPage", page, maxPages));
+		
+		
+		
+		
 		int updateSuccessful = 0;
 
-		String SQL = "SELECT * FROM " + Config.sqlPrefix + "Orders WHERE `amount` > 0 ORDER BY id ASC LIMIT " + (Config.transactionsPerPage * page) + ", "
+		String SQL = "SELECT * FROM " + Config.sqlPrefix + "Orders WHERE `amount` > 0 ORDER BY id ASC LIMIT " + (Config.transactionsPerPage * (page-1)) + ", "
 			+ Config.transactionsPerPage;
 
 		if (getType > 0) {
-			// query = "SELECT * FROM " + Config.sqlPrefix
-			// +
-			// "Orders WHERE `itemID` = ? AND `itemDur` = ? AND `itemEnchants` IS NULL AND `amount` > 0 AND `type` = ?;";
-
-			SQL = "SELECT * FROM " + Config.sqlPrefix + "Orders WHERE `amount` > 0 AND `type` = ? ORDER BY id ASC LIMIT " + (Config.transactionsPerPage * page)
+			SQL = "SELECT * FROM " + Config.sqlPrefix + "Orders WHERE `amount` > 0 AND `type` = ? ORDER BY id ASC LIMIT " + (Config.transactionsPerPage * (page-1))
 				+ ", " + Config.transactionsPerPage;
 		}
 
@@ -2277,21 +2236,6 @@ public class Database {
 
 				sender.sendMessage(F("playerOrder", typeString, id, itemName, amount, plugin.Round(amount * price, Config.priceRounding),
 					plugin.Round(price, Config.priceRounding), ColourName(sender, trader)));
-
-				/*
-				 * if (type == 1) {
-				 * 
-				 * sender.sendMessage(F("playerOrder", ChatColor.RED +
-				 * TypeToString(type, infinite), id, itemName, amount,
-				 * plugin.Round(amount * price, Config.priceRounding),
-				 * plugin.Round(price, Config.priceRounding), ColourName(sender,
-				 * trader))); } else { sender.sendMessage(F("playerOrder",
-				 * ChatColor.GREEN + TypeToString(type, infinite), id, itemName,
-				 * amount, plugin.Round(amount * price, Config.priceRounding),
-				 * plugin.Round(price, Config.priceRounding), ColourName(sender,
-				 * trader))); }
-				 */
-				// plugin.sendMessage(sender, );
 
 			}
 
