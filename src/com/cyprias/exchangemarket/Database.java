@@ -824,6 +824,8 @@ public class Database {
 		return sellAmount;
 	}
 	
+
+	
 	public int checkSellOrders(CommandSender sender, int itemID, short itemDur, String itemEnchants, int buyAmount, double buyPrice, Boolean dryrun,
 		Connection con, Boolean silentFail) {
 		
@@ -852,6 +854,8 @@ public class Database {
 		if (itemEnchants != null)
 			itemName += "-" + itemEnchants;
 		
+		
+		
 		int initialAmount = buyAmount;
 		double price;
 		int id, amount;
@@ -865,6 +869,12 @@ public class Database {
 		int tAmount = 0;
 		double tPrice = 0;
 		Player player = (Player) sender;
+		
+		itemStack = new ItemStack(itemID, 1);
+		
+		int totalFit = getFitAmount(itemStack, 64*9*4, player);
+		
+		//plugin.info("totalFit: " + totalFit);
 		
 		String preview = "";
 		if (dryrun == true)
@@ -907,8 +917,18 @@ public class Database {
 
 					// itemStack.setAmount(canBuy);
 
-					canBuy = getFitAmount(itemStack, canBuy, player);
+					//canBuy = getFitAmount(itemStack, canBuy, player);
 
+					//totalFit
+					if (canBuy > totalFit){
+						canBuy = totalFit;
+						
+					//}else{
+					//	canBuy = totalFit;
+					}
+					totalFit -= canBuy;
+					
+					
 					if (canBuy <= 0)
 						break;
 
@@ -1255,12 +1275,6 @@ public class Database {
 		int success = 0;
 		int beforeAmount = buyAmount;
 
-		// plugin.info("buyAmountA: " + buyAmount);
-
-		// if (Config.cancelSelfSalesWhenBuying == true)
-		// buyAmount = checkPlayerSellOrders(sender, itemID, itemDur, buyAmount,
-		// buyPrice, dryrun, con);
-
 		buyAmount = checkSellOrders(sender, itemID, itemDur, itemEnchants, buyAmount, buyPrice, dryrun, con, false);
 		// plugin.info("buyAmountB: " + buyAmount);
 
@@ -1268,10 +1282,6 @@ public class Database {
 			cleanSellOrders(con);
 			return 1;
 		}
-		// success = 1;
-
-		// success = postBuyOrder(sender, itemID, itemDur, buyAmount, buyPrice,
-		// dryrun, con);
 
 		return success;
 	}
