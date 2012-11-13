@@ -716,14 +716,14 @@ public class Database {
 		if (itemEnchants == null) {
 			query = "SELECT * FROM "
 				+ Config.sqlPrefix
-				+ "Orders WHERE `type` = 2 AND `itemID` = ? AND `itemDur` = ? AND `price` >= ? AND `amount` > 0 AND `player` NOT LIKE ? AND `itemEnchants` IS NULL ORDER BY `price` DESC";
+				+ "Orders WHERE `type` = 2 AND `itemID` = ? AND `itemDur` = ? AND `price` >= ? AND `amount` > 0 AND `player` NOT LIKE ? AND `itemEnchants` IS NULL ORDER BY `price` DESC, `amount` ASC";
 			
 			
 			qReturn = executeQuery(query, itemID, itemDur, sellPrice, sender.getName());
 		}else{
 			query = "SELECT * FROM "
 				+ Config.sqlPrefix
-				+ "Orders WHERE `type` = 2 AND `itemID` = ? AND `itemDur` = ? AND `itemEnchants` like ? AND `price` >= ? AND `amount` > 0 AND `player` NOT LIKE ? ORDER BY `price` DESC";
+				+ "Orders WHERE `type` = 2 AND `itemID` = ? AND `itemDur` = ? AND `itemEnchants` like ? AND `price` >= ? AND `amount` > 0 AND `player` NOT LIKE ? ORDER BY `price` DESC, `amount` ASC";
 			
 			qReturn = executeQuery(query, itemID, itemDur, itemEnchants, sellPrice, sender.getName());
 		}
@@ -839,12 +839,12 @@ public class Database {
 		if (itemEnchants == null) {
 			query = "SELECT * FROM "
 				+ Config.sqlPrefix
-				+ "Orders WHERE `type` = 1 AND `itemID` = ? AND `itemDur` = ? AND `itemEnchants` IS NULL AND `price` <= ? AND `amount` > 0 AND `player` NOT LIKE ? ORDER BY `price` ASC";
+				+ "Orders WHERE `type` = 1 AND `itemID` = ? AND `itemDur` = ? AND `itemEnchants` IS NULL AND `price` <= ? AND `amount` > 0 AND `player` NOT LIKE ? ORDER BY `price` ASC, `amount` ASC;";
 			qReturn = executeQuery(query, itemID, itemDur, buyPrice, sender.getName());
 		}else{
 			query = "SELECT * FROM "
 				+ Config.sqlPrefix
-				+ "Orders WHERE `type` = 1 AND `itemID` = ? AND `itemDur` = ? AND `itemEnchants` like ? AND `price` <= ? AND `amount` > 0 AND `player` NOT LIKE ? ORDER BY `price` ASC";
+				+ "Orders WHERE `type` = 1 AND `itemID` = ? AND `itemDur` = ? AND `itemEnchants` like ? AND `price` <= ? AND `amount` > 0 AND `player` NOT LIKE ? ORDER BY `price` ASC, `amount` ASC;";
 			
 			qReturn = executeQuery(query, itemID, itemDur, itemEnchants, buyPrice, sender.getName());
 		}
@@ -1019,10 +1019,10 @@ public class Database {
 
 		if (itemEnchants != null) {
 			query = "SELECT * FROM " + Config.sqlPrefix
-				+ "Orders WHERE `itemID` = ? AND `itemDur` = ? AND `itemEnchants` = ? AND amount > 0 ORDER BY `price` ASC;";
+				+ "Orders WHERE `itemID` = ? AND `itemDur` = ? AND `itemEnchants` = ? AND amount > 0 ORDER BY `price` ASC, `amount` ASC;";
 			qReturn = executeQuery(query, itemID, itemDur, itemEnchants);
 		} else {
-			query = "SELECT * FROM " + Config.sqlPrefix + "Orders WHERE `itemID` = ? AND `itemDur` = ? AND amount > 0 ORDER BY `price` ASC;";
+			query = "SELECT * FROM " + Config.sqlPrefix + "Orders WHERE `itemID` = ? AND `itemDur` = ? AND amount > 0 ORDER BY `price` ASC, `amount` ASC;";
 			qReturn = executeQuery(query, itemID, itemDur);
 		}
 
