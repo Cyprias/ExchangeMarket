@@ -138,12 +138,12 @@ public class VersionChecker {
 						description = subElement.getChildNodes().item(0).getNodeValue();
 						versions.add(new versionInfo(title, link, pubDate, description));
 					}
+					VersionCheckerEvent event = new VersionCheckerEvent(me.plugin.getName(), versions, this.args);
+					me.plugin.getServer().getPluginManager().callEvent(event);
 				}
 
 			} catch (Exception localException) {
 			}
-			VersionCheckerEvent event = new VersionCheckerEvent(me.plugin.getName(), versions, this.args);
-			me.plugin.getServer().getPluginManager().callEvent(event);
 		}
 	}
 
@@ -171,7 +171,10 @@ public class VersionChecker {
 		}
 
 		public versionInfo getVersionInfo(int index) {
-			return versions.get(index);
+			if (versions.size() >= (index+1))
+				return versions.get(index);
+			
+			return null;
 		}
 
 		public Object[] getArgs(){
