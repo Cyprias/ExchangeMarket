@@ -377,7 +377,7 @@ public class Database {
 				timestamp = result.getTimestamp(10);
 
 				itemName = plugin.itemdb.getItemName(itemID, itemDur);
-				if (itemEnchants != null)
+				if (itemEnchants != null && !itemEnchants.equalsIgnoreCase(""))
 					itemName += "-" + itemEnchants;
 				
 				
