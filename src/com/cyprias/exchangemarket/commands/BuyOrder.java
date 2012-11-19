@@ -83,7 +83,7 @@ public class BuyOrder {
 				price = price / rawAmount;
 
 		}else{
-			plugin.database.getTradersLastPrice(2, sender.getName(), item.getTypeId(), item.getDurability(), itemEnchants);
+			price = plugin.database.getTradersLastPrice(2, sender.getName(), item.getTypeId(), item.getDurability(), itemEnchants);
 		}
 
 		if (price == 0) {
