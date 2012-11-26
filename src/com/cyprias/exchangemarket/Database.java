@@ -1588,6 +1588,7 @@ public class Database {
 			query += " AND `itemEnchants` like ?"; 
 			qReturn = executeQuery(query, itemID, itemDur, itemEnchants);
 		}else if (getType > 0){
+			query += " AND `type` like ?"; 
 			qReturn = executeQuery(query, itemID, itemDur, getType);
 		}else{
 			qReturn = executeQuery(query, itemID, itemDur);
