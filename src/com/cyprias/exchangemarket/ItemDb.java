@@ -34,10 +34,10 @@ public class ItemDb {
 		this.plugin = plugin;
 
 		file = new File(plugin.getDataFolder(), "items.csv");
-		// if (!file.exists()) {
-		file.getParentFile().mkdirs();
-		copy(plugin.getResource("items.csv"), file);
-		// }
+		if (!file.exists()) {
+			file.getParentFile().mkdirs();
+			copy(plugin.getResource("items.csv"), file);
+		}
 
 		loadFile();
 	}

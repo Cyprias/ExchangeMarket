@@ -764,7 +764,7 @@ public class Database {
 
 				// plugin.info("amount: " + amount);
 
-				plugin.info("checkBuyOrders: " + id);
+				//plugin.info("checkBuyOrders: " + id);
 
 				String preview = "";
 				if (dryrun == true)
