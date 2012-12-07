@@ -554,16 +554,18 @@ public class Commands implements CommandExecutor {
 
 				if (args.length > 3) {
 					Boolean priceEach = false;
-
-					if (args[3].substring(args[3].length() - 1, args[3].length()).equalsIgnoreCase("e")) {
+					
+					String sPrice = args[3].trim();
+					
+					if (sPrice.substring(sPrice.length() - 1, sPrice.length()).equalsIgnoreCase("e")) {
 						priceEach = true;
-						args[3] = args[3].substring(0, args[3].length() - 1);
+						sPrice = sPrice.substring(0, sPrice.length() - 1);
 					}
 
-					if (Utils.isDouble(args[3])) {
-						price = Math.abs(Double.parseDouble(args[3]));
+					if (Utils.isDouble(sPrice)) {
+						price = Math.abs(Double.parseDouble(sPrice));
 					} else {
-						plugin.sendMessage(sender, F("invalidPrice", args[3]));
+						plugin.sendMessage(sender, F("invalidPrice", sPrice));
 						return true;
 					}
 					if (price == 0) {
@@ -652,15 +654,16 @@ public class Commands implements CommandExecutor {
 				if (args.length > 3) {
 					Boolean priceEach = false;
 
-					if (args[3].substring(args[3].length() - 1, args[3].length()).equalsIgnoreCase("e")) {
+					String sPrice = args[3].trim();
+					if (sPrice.substring(sPrice.length() - 1, sPrice.length()).equalsIgnoreCase("e")) {
 						priceEach = true;
-						args[3] = args[3].substring(0, args[3].length() - 1);
+						sPrice = sPrice.substring(0, sPrice.length() - 1);
 					}
 
-					if (Utils.isDouble(args[3])) {
-						price = Math.abs(Double.parseDouble(args[3]));
+					if (Utils.isDouble(sPrice)) {
+						price = Math.abs(Double.parseDouble(sPrice));
 					} else {
-						plugin.sendMessage(sender, F("invalidPrice", args[3]));
+						plugin.sendMessage(sender, F("invalidPrice", sPrice));
 						return true;
 					}
 					if (price == 0) {

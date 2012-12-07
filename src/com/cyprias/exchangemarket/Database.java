@@ -796,6 +796,7 @@ public class Database {
 
 						plugin.notifyBuyerOfExchange(trader, itemID, itemDur, amount, price, sender.getName(), dryrun);
 
+	
 						if (Config.logTransactionsToDB == true)
 							insertTransaction(2, sender.getName(), itemID, itemDur, enchants, amount, price, trader);
 
