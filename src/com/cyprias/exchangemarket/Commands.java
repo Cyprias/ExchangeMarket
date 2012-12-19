@@ -549,7 +549,7 @@ public class Commands implements CommandExecutor {
 				item.setAmount(amount);
 				// plugin.sendMessage(sender, "amount: " + amount);
 
-				double price = 1000000;
+				double price = plugin.getBalance(sender.getName());
 				// if (args.length > 2) {
 
 				if (args.length > 3) {

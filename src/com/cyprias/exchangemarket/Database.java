@@ -928,29 +928,26 @@ public class Database {
 					int bought = 0;
 
 					if (dryrun == false) {
-						int gave;
-						for (int i = canBuy; i > 0; i--) {
-							gave = plugin.database.giveItemToPlayer(player, itemID, itemDur, itemEnchants, i);
-							if (gave > 0) {
-								bought = gave;
-								plugin.debtPlayer(sender.getName(), bought * price);
+					int gave = plugin.database.giveItemToPlayer(player, itemID, itemDur, itemEnchants, canBuy);
+						if (gave > 0) {
+							bought = gave;
+							plugin.debtPlayer(sender.getName(), bought * price);
 
-								if (infinite == false)
-									plugin.payPlayer(trader, bought * price);
+							if (infinite == false)
+								plugin.payPlayer(trader, bought * price);
 
 
-								if (infinite == false) {
-									decreaseInt(Config.sqlPrefix + "Orders", id, "amount", bought);
+							if (infinite == false) {
+								decreaseInt(Config.sqlPrefix + "Orders", id, "amount", bought);
 
-								}
-
-								plugin.notifySellerOfExchange(trader, itemID, itemDur, itemEnchants, bought, price, sender.getName(), dryrun);// buy
-
-								if (Config.logTransactionsToDB == true)
-									insertTransaction(1, sender.getName(), itemID, itemDur, enchants, bought, price, trader);
-
-								break;
 							}
+
+							plugin.notifySellerOfExchange(trader, itemID, itemDur, itemEnchants, bought, price, sender.getName(), dryrun);// buy
+
+							if (Config.logTransactionsToDB == true)
+								insertTransaction(1, sender.getName(), itemID, itemDur, enchants, bought, price, trader);
+
+							break;
 						}
 					} else {
 						bought = canBuy;
@@ -1155,17 +1152,15 @@ public class Database {
 						// is.setAmount(canBuy);
 						
 						int gave;
-						for (int i = canBuy; i > 0; i--) {
-							if (dryrun == true){
-								plugin.sendMessage(sender, preview + F("returnedYourItem", itemName, i));
-								break;
-							}else {
-								gave = plugin.database.giveItemToPlayer(player, ciID, ciDur, itemEnchants, i);
-								plugin.database.decreaseInt(Config.sqlPrefix + "Orders", id, "amount", gave);
+						if (dryrun == true){
+							plugin.sendMessage(sender, preview + F("returnedYourItem", itemName, canBuy));
+							break;
+						}else {
+							gave = plugin.database.giveItemToPlayer(player, ciID, ciDur, itemEnchants, canBuy);
+							plugin.database.decreaseInt(Config.sqlPrefix + "Orders", id, "amount", gave);
 
-								plugin.sendMessage(sender, preview + F("returnedYourItem", itemName, gave));
-								break;
-							}
+							plugin.sendMessage(sender, preview + F("returnedYourItem", itemName, gave));
+							break;
 						}
 
 					} else if (cType == 2) {// Buy, return money.
@@ -1760,14 +1755,11 @@ public class Database {
 
 				// plugin.sendMessage(sender, id + ": "+itemName+"x"+exchanged);
 				if (amount > 0) {
-					int gave;
-					for (int i = amount; i > 0; i--) {
-						gave = plugin.database.giveItemToPlayer(player, itemID, itemDur, itemEnchants, i);
-						if (gave > 0) {
-							plugin.sendMessage(sender, F("collectedItem", itemName, gave));
-							plugin.database.decreaseInt(Config.sqlPrefix + "Mailbox", id, "amount", gave);
-							break;
-						}
+					int gave = plugin.database.giveItemToPlayer(player, itemID, itemDur, itemEnchants,amount);
+					if (gave > 0) {
+						plugin.sendMessage(sender, F("collectedItem", itemName, gave));
+						plugin.database.decreaseInt(Config.sqlPrefix + "Mailbox", id, "amount", gave);
+						break;
 					}
 				}
 
@@ -2084,18 +2076,15 @@ public class Database {
 
 					if (infinite == false) {
 						if (type == 1) {// Sale, return items.
-							int gave;
-							for (int i = amount; i > 0; i--) {
-								gave = plugin.database.giveItemToPlayer(player, itemID, itemDur, itemEnchants, i);
-								if (gave > 0) {
-									// plugin.sendMessage(sender,
-									// F("collectedItem", itemName, i));
-									plugin.database.decreaseInt(Config.sqlPrefix + "Orders", orderID, "amount", gave);
+							int gave = plugin.database.giveItemToPlayer(player, itemID, itemDur, itemEnchants, amount);
+							if (gave > 0) {
+								// plugin.sendMessage(sender,
+								// F("collectedItem", itemName, i));
+								plugin.database.decreaseInt(Config.sqlPrefix + "Orders", orderID, "amount", gave);
 
-									plugin.sendMessage(sender, F("returnedYourItem", itemName, gave));
-									updateSuccessful = 1;
-									break;
-								}
+								plugin.sendMessage(sender, F("returnedYourItem", itemName, gave));
+								updateSuccessful = 1;
+								break;
 							}
 
 						} else if (type == 2) {// Buy, return money.
