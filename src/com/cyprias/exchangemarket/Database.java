@@ -819,12 +819,7 @@ public class Database {
 		}
 
 		if (silentFail == false) {
-
-			if (found == 0) {
-				// String itemName = plugin.itemdb.getItemName(itemID, itemDur);
-				plugin.sendMessage(sender, F("noBuyersForSell", itemName));
-
-			} else if (found > 0 && initialAmount == sellAmount) {
+			if (initialAmount == sellAmount) {
 				plugin.sendMessage(sender, F("noBuyersForSellPrice", itemName, sellAmount, sellPrice * sellAmount, sellPrice));
 			}
 		}
@@ -982,10 +977,7 @@ public class Database {
 							plugin.Round(tPrice / tAmount, Config.priceRounding)));
 
 		} else if (silentFail == false) {
-			if (found == 0) {
-				// String itemName = plugin.itemdb.getItemName(itemID, itemDur);
-				plugin.sendMessage(sender, F("noSellersForBuy", itemName));
-			} else if (found > 0 && initialAmount == buyAmount) {
+			if (initialAmount == buyAmount) {
 				plugin.sendMessage(sender, F("noSellersForBuyPrice", itemName, buyAmount, buyPrice * buyAmount, buyPrice));
 			}
 
