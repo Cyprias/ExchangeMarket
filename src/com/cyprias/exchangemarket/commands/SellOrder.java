@@ -1,5 +1,6 @@
 package com.cyprias.exchangemarket.commands;
 
+import java.sql.SQLException;
 import java.util.Map;
 
 import org.bukkit.Material;
@@ -11,9 +12,9 @@ import org.bukkit.inventory.ItemStack;
 import com.Acrobot.Breeze.Utils.InventoryUtil;
 import com.Acrobot.Breeze.Utils.MaterialUtil;
 import com.cyprias.exchangemarket.Config;
+import com.cyprias.exchangemarket.Database;
 import com.cyprias.exchangemarket.ExchangeMarket;
 import com.cyprias.exchangemarket.ItemDb;
-import com.cyprias.exchangemarket.Localization;
 import com.cyprias.exchangemarket.Utilis.Utils;
 
 public class SellOrder {
@@ -24,13 +25,13 @@ public class SellOrder {
 		this.plugin = plugin;
 	}
 	private String F(String string, Object... args) {
-		return Localization.F(string, args);
+		return ExchangeMarket.F(string, args);
 	}
 
 	private String L(String string) {
-		return Localization.L(string);
+		return ExchangeMarket.L(string);
 	}
-	public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
+	public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) throws SQLException {
 		if (!plugin.hasCommandPermission(sender, "exchangemarket.sellorder")) {
 			return true;
 		}
@@ -100,7 +101,7 @@ public class SellOrder {
 				price = price / rawAmount;
 			
 		}else{
-			price = plugin.database.getTradersLastPrice(1, sender.getName(), item.getTypeId(), item.getDurability(), itemEnchants);
+			price = Database.getTradersLastPrice(1, sender.getName(), item.getTypeId(), item.getDurability(), itemEnchants);
 		}
 		if (price == 0) {
 			plugin.sendMessage(sender, F("invalidPrice", price));
@@ -118,7 +119,7 @@ public class SellOrder {
 		// postBuyOrder
 		
 		
-		plugin.database.postSellOrder(sender, item.getTypeId(), item.getDurability(), itemEnchants, amount, price, false);
+		Database.postSellOrder(sender, item.getTypeId(), item.getDurability(), itemEnchants, amount, price, false);
 
 		return true;
 	}

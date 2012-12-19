@@ -1,10 +1,12 @@
 package com.cyprias.exchangemarket.commands;
 
+import java.sql.SQLException;
+
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
+import com.cyprias.exchangemarket.Database;
 import com.cyprias.exchangemarket.ExchangeMarket;
-import com.cyprias.exchangemarket.Localization;
 import com.cyprias.exchangemarket.Utilis.Utils;
 
 public class List {
@@ -14,14 +16,14 @@ public class List {
 		this.plugin = plugin;
 	}
 	private String F(String string, Object... args) {
-		return Localization.F(string, args);
+		return ExchangeMarket.F(string, args);
 	}
 
 	private String L(String string) {
-		return Localization.L(string);
+		return ExchangeMarket.L(string);
 	}
 	
-	public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
+	public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) throws SQLException {
 		if (!plugin.hasCommandPermission(sender, "exchangemarket.list")) {
 			return true;
 		}
@@ -49,7 +51,7 @@ public class List {
 			}
 		}
 
-		plugin.database.listOrders(sender, type, page);
+		Database.listOrders(sender, type, page);
 
 		return true;
 	}

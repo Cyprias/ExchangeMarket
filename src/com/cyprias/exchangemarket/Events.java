@@ -24,21 +24,20 @@ public class Events implements Listener {
 	public Events(ExchangeMarket plugin) {
 		this.plugin = plugin;
 
-		FileConfiguration cfgAliases = plugin.yml.getYMLConfig("aliases.yml"); //
-
-		String value;
-		ConfigurationSection info;
-		for (String aliase : cfgAliases.getKeys(false)) {
-			aliases.put(aliase, cfgAliases.getString(aliase));
+		YML yml = new YML(plugin.getResource("aliases.yml"),plugin.getDataFolder(), "aliases.yml");
+		
+		for (String key : yml.getKeys(false)) {
+			Events.aliases.put(key, yml.getString(key));
 		}
+		
 	}
 
 	private String F(String string, Object... args) {
-		return Localization.F(string, args);
+		return ExchangeMarket.F(string, args);
 	}
 
 	private String L(String string) {
-		return Localization.L(string);
+		return ExchangeMarket.L(string);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
@@ -57,7 +56,7 @@ public class Events implements Listener {
 		Player player = event.getPlayer();
 
 		if (player.hasPermission("exchangemarket.loginNewVersion")) 
-			plugin.versionChecker.retreiveVersionInfo(player, true);
+			VersionChecker.retreiveVersionInfo(plugin, "http://dev.bukkit.org/server-mods/exchangemarket/files.rss", player, true);
 		
 		
 		if (player.hasPermission("exchangemarket.loginPendingCollection")) 
@@ -79,7 +78,7 @@ public class Events implements Listener {
 
 			if (args.length == 0) {
 				
-				int compare = plugin.versionChecker.compareVersions(curVersion, info.getTitle());
+				int compare = VersionChecker.compareVersions(curVersion, info.getTitle());
 				//plugin.info("curVersion: " + curVersion +", title: " + info.getTitle() + ", compare: " + compare);
 				if (compare < 0){
 					plugin.info(F("versionAvailable", curVersion, info.getTitle()));
@@ -97,7 +96,7 @@ public class Events implements Listener {
 				if (args.length >= 3)
 					showChangelog = (Boolean) args[2];
 
-				int compare = plugin.versionChecker.compareVersions(curVersion, info.getTitle());
+				int compare = VersionChecker.compareVersions(curVersion, info.getTitle());
 				//plugin.info("curVersion: " + curVersion +", title: " + info.getTitle() + ", compare: " + compare);
 				if (compare < 0){
 					plugin.sendMessage(sender, F("versionAvailable", curVersion, info.getTitle()));
@@ -114,7 +113,7 @@ public class Events implements Listener {
 					for (int v = 0; v < event.getVersionCount(); v++) { // && v < 3
 						info = event.getVersionInfo(v);
 						
-						compare = plugin.versionChecker.compareVersions(curVersion, info.getTitle());
+						compare = VersionChecker.compareVersions(curVersion, info.getTitle());
 						//plugin.info("curVersion: " + curVersion +", title: " + info.getTitle() + ", compare: " + compare);
 						if (compare > 0)
 							break;

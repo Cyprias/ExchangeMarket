@@ -13,7 +13,6 @@ import com.Acrobot.Breeze.Utils.MaterialUtil;
 import com.cyprias.exchangemarket.Commands;
 import com.cyprias.exchangemarket.ExchangeMarket;
 import com.cyprias.exchangemarket.ItemDb;
-import com.cyprias.exchangemarket.Localization;
 
 public class ItemInfo {
 	private ExchangeMarket plugin;
@@ -23,11 +22,11 @@ public class ItemInfo {
 		// TODO Auto-generated constructor stub
 	}
 	private String F(String string, Object... args) {
-		return Localization.F(string, args);
+		return ExchangeMarket.F(string, args);
 	}
 
 	private String L(String string) {
-		return Localization.L(string);
+		return ExchangeMarket.L(string);
 	}
 	
 	/**/

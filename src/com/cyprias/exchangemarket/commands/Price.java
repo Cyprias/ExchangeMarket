@@ -1,5 +1,7 @@
 package com.cyprias.exchangemarket.commands;
 
+import java.sql.SQLException;
+
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -9,7 +11,6 @@ import com.Acrobot.Breeze.Utils.MaterialUtil;
 import com.cyprias.exchangemarket.Database;
 import com.cyprias.exchangemarket.ExchangeMarket;
 import com.cyprias.exchangemarket.ItemDb;
-import com.cyprias.exchangemarket.Localization;
 import com.cyprias.exchangemarket.Utilis.Utils;
 
 public class Price  {
@@ -20,14 +21,14 @@ public class Price  {
 		this.plugin = plugin;
 	}
 	private String F(String string, Object... args) {
-		return Localization.F(string, args);
+		return ExchangeMarket.F(string, args);
 	}
 
 	private String L(String string) {
-		return Localization.L(string);
+		return ExchangeMarket.L(string);
 	}
 	/**/
-	public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
+	public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) throws SQLException {
 		Player player = (Player) sender;
 		
 		if (!plugin.commands.hasCommandPermission(sender, "exchangemarket.price")) {
@@ -84,8 +85,8 @@ public class Price  {
 			}
 		}
 
-		Database.itemStats stats = plugin.database.getItemStats(item.getTypeId(), item.getDurability(), itemEnchants, type);
-		String itemName = plugin.itemdb.getItemName(item.getTypeId(), item.getDurability());
+		Database.itemStats stats = Database.getItemStats(item.getTypeId(), item.getDurability(), itemEnchants, type);
+		String itemName = ItemDb.getItemName(item.getTypeId(), item.getDurability());
 		if (itemEnchants != null)
 			itemName += "-" + itemEnchants;
 		

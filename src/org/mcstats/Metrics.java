@@ -1,4 +1,4 @@
-package com.cyprias.exchangemarket;
+package org.mcstats;
 /*
  * Copyright 2011 Tyler Blair. All rights reserved.
  *

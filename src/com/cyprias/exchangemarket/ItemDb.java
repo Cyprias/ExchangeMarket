@@ -21,16 +21,17 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Item;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.permissions.PermissionAttachment;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.Material;
 
 import com.Acrobot.Breeze.Utils.MaterialUtil;
 
 public class ItemDb {
-	private ExchangeMarket plugin;
+	private JavaPlugin plugin;
 
 	private File file;
 
-	public ItemDb(ExchangeMarket plugin) {
+	public ItemDb(JavaPlugin plugin) {
 		this.plugin = plugin;
 
 		file = new File(plugin.getDataFolder(), "items.csv");
@@ -153,6 +154,7 @@ public class ItemDb {
 
 	private void loadFile() {
 		try {
+			@SuppressWarnings("resource")
 			BufferedReader r = new BufferedReader(new FileReader(file));
 
 			String line;

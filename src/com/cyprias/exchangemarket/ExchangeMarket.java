@@ -1,63 +1,52 @@
 package com.cyprias.exchangemarket;
 
+import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.text.DecimalFormat;
+import java.util.HashMap;
 import java.util.logging.Logger;
 import net.milkbowl.vault.economy.Economy;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
-import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
-
-import javax.xml.parsers.DocumentBuilderFactory;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
+import org.mcstats.Metrics;
 
 import com.Acrobot.Breeze.Utils.InventoryUtil;
+import com.Acrobot.Breeze.Utils.MaterialUtil;
 
 public class ExchangeMarket extends JavaPlugin {
 	public static String chatPrefix = "§f[§6EM§f] ";
 	public Config config;
-	public Database database;
 	public Commands commands;
-	public ItemDb itemdb;
 	public Events events;
 
-	public VersionChecker versionChecker;
-
-	public YML yml;
-	public Localization localization;
-
-	public String pluginName;
+	public static String pluginName;
 	public static Economy econ = null;
 	public Logger log = Logger.getLogger("Minecraft"); // Minecraft log and
 														// console
 	private String stPluginEnabled = "§f%s §7v§f%s §7is enabled.";
-
+	private static Server server;
+	private static File dataFolder;
+	static JavaPlugin plugin;
+	
 	public void onEnable() {
+		this.plugin = this;
+		this.dataFolder = getDataFolder();
+		this.server = getServer();
+		
 		this.config = new Config(this);
-		this.database = new Database(this);
-		if (this.isEnabled() == false)
-			return;
-
 		this.commands = new Commands(this);
-		this.itemdb = new ItemDb(this);
-		this.versionChecker = new VersionChecker(this, "http://dev.bukkit.org/server-mods/exchangemarket/files.rss");
+		
+		new ItemDb(this);
 
 		if (Config.checkNewVersionOnStartup == true)
-			this.versionChecker.retreiveVersionInfo();
-
-		this.yml = new YML(this);
-		this.localization = new Localization(this);
+			VersionChecker.retreiveVersionInfo(this, "http://dev.bukkit.org/server-mods/exchangemarket/files.rss");
 
 		this.events = new Events(this);
 		getServer().getPluginManager().registerEvents(this.events, this);
@@ -66,7 +55,9 @@ public class ExchangeMarket extends JavaPlugin {
 
 		pluginName = getDescription().getName();
 
-		info(String.format(this.stPluginEnabled, pluginName, getDescription().getVersion()));
+		loadLocales();
+		
+		log.info(String.format("%s v%s is enabled.", pluginName, this.getDescription().getVersion()));
 
 		try {
 			Metrics metrics = new Metrics(this);
@@ -74,8 +65,36 @@ public class ExchangeMarket extends JavaPlugin {
 		} catch (IOException e) {
 		}
 	}
+	public static HashMap<String, String> locales = new HashMap<String, String>();
+	static void loadLocales(){
+		String localeDir =dataFolder.separator + "locales" +dataFolder.separator;
 
-	public boolean hasPermission(CommandSender sender, String node) {
+		//Copy existing locales into plugin dir, so admin knows what's available. 
+		new YML(plugin.getResource("enUS.yml"), dataFolder, localeDir + "enUS.yml", true);
+		
+		
+		
+		//Copy any new locale strings to file on disk.
+		YML resLocale = new YML(plugin.getResource("enUS.yml"));
+		YML locale = new YML(plugin.getResource(Config.locale), dataFolder, localeDir+ Config.locale);
+		for (String key : resLocale.getKeys(false)) {
+			if (locale.get(key) == null){
+				info("Adding new locale " + key + " = " + resLocale.getString(key).replaceAll("(?i)&([a-k0-9])", "\u00A7$1"));
+				locale.set(key, resLocale.getString(key));
+				locale.save();
+			}
+		}
+		
+		
+		//Load locales into our hashmap. 
+		locales.clear();
+		for (String key : locale.getKeys(false)) {
+			locales.put(key, locale.getString(key).replaceAll("(?i)&([a-k0-9])", "\u00A7$1"));// §
+		}
+	}
+	
+	
+	public static boolean hasPermission(CommandSender sender, String node) {
 		if (!(sender instanceof Player)) {
 			return true;
 		}
@@ -104,11 +123,11 @@ public class ExchangeMarket extends JavaPlugin {
 		return player.hasPermission(node);
 	}
 
-	public void info(String msg) {
-		getServer().getConsoleSender().sendMessage(chatPrefix + msg);
+	public static void info(String msg) {
+		server.getConsoleSender().sendMessage(chatPrefix + msg);
 	}
 
-	public void sendMessage(CommandSender sender, String message, Boolean showConsole, Boolean sendPrefix) {
+	public static void sendMessage(CommandSender sender, String message, Boolean showConsole, Boolean sendPrefix) {
 		if (sender instanceof Player && showConsole == true) {
 			info("§e" + sender.getName() + "->§f" + message);
 		}
@@ -119,19 +138,19 @@ public class ExchangeMarket extends JavaPlugin {
 		}
 	}
 
-	public void sendMessage(CommandSender sender, String message, Boolean showConsole) {
+	public static void sendMessage(CommandSender sender, String message, Boolean showConsole) {
 		sendMessage(sender, message, showConsole, true);
 	}
 
-	public void sendMessage(CommandSender sender, String message) {
+	public static void sendMessage(CommandSender sender, String message) {
 		sendMessage(sender, message, true);
 	}
 
-	public boolean setupEconomy() {
-		if (getServer().getPluginManager().getPlugin("Vault") == null) {
+	public static boolean setupEconomy() {
+		if (server.getPluginManager().getPlugin("Vault") == null) {
 			return false;
 		}
-		RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
+		RegisteredServiceProvider<Economy> rsp = server.getServicesManager().getRegistration(Economy.class);
 		if (rsp == null) {
 			return false;
 		}
@@ -139,16 +158,16 @@ public class ExchangeMarket extends JavaPlugin {
 		return econ != null;
 	}
 
-	public double getBalance(String pName) {
+	public static double getBalance(String pName) {
 		if (setupEconomy()) {
 			return econ.getBalance(pName.toLowerCase());
 		}
 		return 0;
 	}
 
-	public Player findPlayerByName(String name) {
+	public static Player findPlayerByName(String name) {
 
-		for (Player p : getServer().getOnlinePlayers()) {
+		for (Player p : server.getOnlinePlayers()) {
 			if (p.getName().equalsIgnoreCase(name))
 				return p;
 
@@ -159,11 +178,11 @@ public class ExchangeMarket extends JavaPlugin {
 		return null;
 	}
 
-	public void notifyBuyerOfExchange(String buyerName, int itemID, int itemDur, int amount, double price, String trader, Boolean dryrun) {
+	public static void notifyBuyerOfExchange(String buyerName, int itemID, int itemDur, int amount, double price, String trader, Boolean dryrun) {
 		Player player = findPlayerByName(buyerName);
 
 		if (player != null) {
-			String itemName = itemdb.getItemName(itemID, itemDur);
+			String itemName = ItemDb.getItemName(itemID, itemDur);
 			String preview = "";
 			if (dryrun == true)
 				preview = L("preview");
@@ -176,10 +195,10 @@ public class ExchangeMarket extends JavaPlugin {
 		}
 	}
 
-	public void notifySellerOfExchange(String buyerName, int itemID, int itemDur, String itemEnchants, int amount, double price, String trader, Boolean dryrun) {
+	public static void notifySellerOfExchange(String buyerName, int itemID, int itemDur, String itemEnchants, int amount, double price, String trader, Boolean dryrun) {
 		Player player = findPlayerByName(buyerName);
 		if (player != null) {
-			String itemName = itemdb.getItemName(itemID, itemDur);
+			String itemName = ItemDb.getItemName(itemID, itemDur);
 			if (itemEnchants != null)
 				itemName += "-" + itemEnchants;
 			
@@ -202,15 +221,24 @@ public class ExchangeMarket extends JavaPlugin {
 	// false);
 	// }
 
-	private String F(String string, Object... args) {
-		return Localization.F(string, args);
+	static public String L(String key) {
+		if (locales.containsKey(key))
+			return locales.get(key).toString();
+		
+		return "MISSING LOCALE: " + ChatColor.RED + key;
 	}
 
-	private String L(String string) {
-		return Localization.L(string);
+	static public String F(String key, Object... args) {
+		String value = L(key);
+		try {
+			if (value != null || args != null)
+				value = String.format(value, args); // arg.toString()
+		} catch (Exception e) {e.printStackTrace();
+		}
+		return value;
 	}
 
-	public boolean payPlayer(String pName, double amount) {
+	public static boolean payPlayer(String pName, double amount) {
 		pName = pName.toLowerCase();
 		if (setupEconomy()) {
 			// return econ.getBalance(pName);
@@ -227,7 +255,7 @@ public class ExchangeMarket extends JavaPlugin {
 		return false;
 	}
 
-	public boolean debtPlayer(String pName, double amount) {
+	public static boolean debtPlayer(String pName, double amount) {
 		pName = pName.toLowerCase();
 		if (setupEconomy()) {
 
@@ -256,11 +284,11 @@ public class ExchangeMarket extends JavaPlugin {
 		return df.format(Rval);
 	}
 
-	public void announceNewOrder(int type, CommandSender sender, int itemID, int itemDur, String itemEnchants, int amount, double price) {
+	public static void announceNewOrder(int type, CommandSender sender, int itemID, int itemDur, String itemEnchants, int amount, double price) {
 
 		Player player = (Player) sender;
 
-		String itemName = itemdb.getItemName(itemID, itemDur);
+		String itemName = ItemDb.getItemName(itemID, itemDur);
 		if (itemEnchants != null)
 			itemName += "-" + itemEnchants;
 		
@@ -282,8 +310,8 @@ public class ExchangeMarket extends JavaPlugin {
 
 	}
 
-	public void permMessage(String permissionNode, String message, String excludeName) {
-		for (Player p : getServer().getOnlinePlayers()) {
+	public static void permMessage(String permissionNode, String message, String excludeName) {
+		for (Player p : server.getOnlinePlayers()) {
 			if (hasPermission(p, permissionNode) && !p.getName().equalsIgnoreCase(excludeName))
 				// if (hasPermission(p, permissionNode))
 				p.sendMessage(chatPrefix + message);
@@ -329,4 +357,40 @@ public class ExchangeMarket extends JavaPlugin {
 		return false;
 	}
 
+	public static int giveItemToPlayer(Player player, int itemID, short itemDur, String enchants, int totalAmount) {
+		ItemStack itemStack = new ItemStack(itemID, 1);
+		itemStack.setDurability(itemDur);
+
+		itemStack.setAmount(totalAmount);
+
+
+		if (enchants != null && !enchants.equalsIgnoreCase("")) {
+			itemStack.addEnchantments(MaterialUtil.Enchantment.getEnchantments(enchants));
+		}
+
+		int amount;
+		int gave = 0;
+		while (totalAmount > 0){
+			if (totalAmount > itemStack.getMaxStackSize()){
+				amount = itemStack.getMaxStackSize();
+			}else{
+				amount = totalAmount;
+			}
+			itemStack.setAmount(amount);
+			
+			if (InventoryUtil.fits(itemStack, player.getInventory())) {
+			
+				InventoryUtil.add(itemStack, player.getInventory());
+				
+				totalAmount-=amount;
+				gave += amount;
+			}else{
+				break;
+			}
+		}
+
+		return gave;
+
+	}
+	
 }

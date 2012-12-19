@@ -1,6 +1,7 @@
 package com.cyprias.exchangemarket;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,38 +14,55 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public class YML {
-	HashMap<String, File> Files = new HashMap<String, File>();
-	HashMap<String, FileConfiguration> FileConfigs = new HashMap<String, FileConfiguration>();
-	private JavaPlugin plugin;
-	
-	public YML(JavaPlugin plugin2) {
-		this.plugin = plugin2;
-	}
-	public boolean reloadYMLConfig(String file) {
-		if (!FileConfigs.containsKey(file)){
-			FileConfigs.put(file, new YamlConfiguration());
+public class YML extends YamlConfiguration {
+	private static File file = null;
+	public YML(InputStream fileStream) {
+		//load yml from resources. 
+		try {
+			load(fileStream);
+		} catch (IOException e) {e.printStackTrace();
+		} catch (InvalidConfigurationException e) {e.printStackTrace();
 		}
+	}
+	
+	public YML(File pluginDur, String fileName) {
+		//Load yml from directory.
+		this.file = new File(pluginDur, fileName);
+
+		try {
+			load(this.file);
+		} catch (FileNotFoundException e) {e.printStackTrace();
+		} catch (IOException e) {e.printStackTrace();
+		} catch (InvalidConfigurationException e) {e.printStackTrace();
+		}
+	}
+	
+	public YML(InputStream fileStream, File pluginDur, String fileName) {
+		//Copy yml resource to directory then load it.
+
+		this.file = new File(pluginDur, fileName);
+		if (!this.file.exists())
+			this.file = toFile(fileStream, pluginDur, fileName);
 		
 		try {
-			Files.put(file, new File(plugin.getDataFolder(), file));
-
-			if (!Files.get(file).exists()) {
-				InputStream r = plugin.getResource(file);
-				if (r == null)
-					return false;
-				
-				Files.get(file).getParentFile().mkdirs();
-				copy(plugin.getResource(file), Files.get(file));
-			}
-
-			FileConfigs.get(file).load(Files.get(file));
-		} catch (Exception e) {e.printStackTrace();
+			load(this.file);
+		} catch (FileNotFoundException e) {e.printStackTrace();
+		} catch (IOException e) {e.printStackTrace();
+		} catch (InvalidConfigurationException e) {e.printStackTrace();
 		}
-		return true;
 	}
 	
-	public static void copy(InputStream in, File file) {
+	public YML(InputStream fileStream, File pluginDur, String fileName, Boolean noLoad) {
+		//Just copy the stream to directory, no loading as YML. 
+		this.file = new File(pluginDur, fileName);
+		if (!this.file.exists())
+			this.file = toFile(fileStream, pluginDur, fileName);
+	}
+	
+	//Write a stream to file on disk, return the file object.  
+	private static File toFile(InputStream in, File pluginDur, String fileName) {
+		File file = new File(pluginDur, fileName);
+		file.getParentFile().mkdirs();
 		try {
 			OutputStream out = new FileOutputStream(file);
 			byte[] buf = new byte[1024];
@@ -54,78 +72,15 @@ public class YML {
 			}
 			out.close();
 			in.close();
-		} catch (Exception e) {
-			e.printStackTrace();
+		} catch (Exception e) {e.printStackTrace();
 		}
-	}
-
-	public FileConfiguration getYMLConfig(String file, Boolean loadNewKeys) {
-		if (!Files.containsKey(file)) {
-			if (reloadYMLConfig(file) == false)
-				return null;
-		}
-		
-		if (loadNewKeys == true)
-			copyNewKeysToDisk(file);
-		
-		return FileConfigs.get(file);
-	}
-
-	public FileConfiguration getYMLConfig(String file) {
-		return getYMLConfig(file, false);
+		return file;
 	}
 	
-	public void saveYMLFile(String fileName) {
-		if (!FileConfigs.containsKey(fileName)) {
-			FileConfigs.put(fileName, new YamlConfiguration());
-		}
-
+	public void save(){
 		try {
-			FileConfigs.get(fileName).save(Files.get(fileName));
+			save(file);
 		} catch (IOException e) {e.printStackTrace();
-		}
-	}
-	
-	private Logger log = Logger.getLogger("Minecraft");
-	public void copyNewKeysToDisk(String fileName){
-		InputStream in = plugin.getResource(fileName);
-
-		if (in == null)//File isn't in our jar, exit.
-			return;
-		
-		//Load the stream to a ymlconfig object.
-		YamlConfiguration locales = new YamlConfiguration();
-		try {
-			locales.load(in);
-		} catch (IOException e1) {e1.printStackTrace();
-		} catch (InvalidConfigurationException e1) {e1.printStackTrace();
-		}
-		
-		//Load the file from disk.
-		FileConfiguration targetConfig = FileConfigs.get(fileName);
-		Boolean save = false;
-		String value;
-		for (String key : locales.getKeys(false)) {
-			value = locales.getString(key);
-
-			if (targetConfig.getString(key) == null){
-				//Our stream has a key the file on disk doesn't have, copy the new key to file. 
-				
-				
-				log.info(plugin.getName() + ": Copying new locale key [" + key + "]=[" + value + "] to " + fileName+".");
-				
-				targetConfig.set(key, value);
-				save = true; //Only save if we make changes.
-			}
-			
-		}
-
-		if (save == true){
-			//Save changes to disk.
-			try {
-				targetConfig.save(Files.get(fileName));
-			} catch (IOException e) {e.printStackTrace();
-			}
 		}
 	}
 	

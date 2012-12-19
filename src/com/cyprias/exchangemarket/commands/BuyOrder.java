@@ -1,14 +1,16 @@
 package com.cyprias.exchangemarket.commands;
 
+import java.sql.SQLException;
+
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.inventory.ItemStack;
 
 import com.Acrobot.Breeze.Utils.MaterialUtil;
 import com.cyprias.exchangemarket.Config;
+import com.cyprias.exchangemarket.Database;
 import com.cyprias.exchangemarket.ExchangeMarket;
 import com.cyprias.exchangemarket.ItemDb;
-import com.cyprias.exchangemarket.Localization;
 import com.cyprias.exchangemarket.Utilis.Utils;
 
 public class BuyOrder {
@@ -18,14 +20,14 @@ public class BuyOrder {
 		this.plugin = plugin;
 	}
 	private String F(String string, Object... args) {
-		return Localization.F(string, args);
+		return ExchangeMarket.F(string, args);
 	}
 
 	private String L(String string) {
-		return Localization.L(string);
+		return ExchangeMarket.L(string);
 	}
 	
-	public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
+	public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) throws SQLException {
 		if (!plugin.hasCommandPermission(sender, "exchangemarket.buyorder")) {
 			return true;
 		}
@@ -83,7 +85,7 @@ public class BuyOrder {
 				price = price / rawAmount;
 
 		}else{
-			price = plugin.database.getTradersLastPrice(2, sender.getName(), item.getTypeId(), item.getDurability(), itemEnchants);
+			price = Database.getTradersLastPrice(2, sender.getName(), item.getTypeId(), item.getDurability(), itemEnchants);
 		}
 
 		if (price == 0) {
@@ -102,7 +104,7 @@ public class BuyOrder {
 		// postBuyOrder
 		
 		
-		plugin.database.postBuyOrder(sender, item.getTypeId(), item.getDurability(), itemEnchants, amount, price, false);
+		Database.postBuyOrder(sender, item.getTypeId(), item.getDurability(), itemEnchants, amount, price, false);
 
 		// //////////////
 		return true;

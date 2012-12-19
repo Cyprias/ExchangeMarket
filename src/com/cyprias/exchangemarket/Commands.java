@@ -1,5 +1,6 @@
 package com.cyprias.exchangemarket;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -73,9 +74,6 @@ public class Commands implements CommandExecutor {
 
 		return "§7Items: §f"
 			+ plugin.Round(stats.totalAmount, 0)
-			// "§7, price: $§f" + Database.Round(stats.avgPrice * stackCount,
-			// roundTo) + "/" + Database.Round(stats.median * stackCount,
-			// roundTo) + "/" + Database.Round(stats.mode * stackCount, roundTo)
 			+ "§7, avg: $§f" + plugin.Round(stats.avgPrice * stackCount, roundTo) + "§7, med: $§f" + plugin.Round(stats.median * stackCount, roundTo)
 			+ "§7, mod: $§f" + plugin.Round(stats.mode * stackCount, roundTo);
 	}
@@ -85,11 +83,11 @@ public class Commands implements CommandExecutor {
 	}
 
 	private String F(String string, Object... args) {
-		return Localization.F(string, args);
+		return ExchangeMarket.F(string, args);
 	}
 
 	private String L(String string) {
-		return Localization.L(string);
+		return ExchangeMarket.L(string);
 	}
 
 	public static String getFinalArg(final String[] args, final int start) {
@@ -190,7 +188,7 @@ public class Commands implements CommandExecutor {
 		return true;
 	}
 
-	public boolean commandHandler(CommandSender sender, Command cmd, String commandLabel, String[] args, Boolean confirmed) {
+	public boolean commandHandler(CommandSender sender, Command cmd, String commandLabel, String[] args, Boolean confirmed) throws SQLException {
 		// TODO Auto-generated method stub
 
 		if (commandLabel.equalsIgnoreCase("em")) {
@@ -279,7 +277,7 @@ public class Commands implements CommandExecutor {
 
 				// plugin.queueVersionCheck(sender, false, false);
 
-				plugin.versionChecker.retreiveVersionInfo(sender, false, false);
+				VersionChecker.retreiveVersionInfo(plugin,"http://dev.bukkit.org/server-mods/exchangemarket/files.rss", sender, false, false);
 
 				return true;
 
@@ -290,7 +288,7 @@ public class Commands implements CommandExecutor {
 
 				// plugin.queueVersionRSS();
 
-				plugin.versionChecker.retreiveVersionInfo(sender, false, true);
+				VersionChecker.retreiveVersionInfo(plugin,"http://dev.bukkit.org/server-mods/exchangemarket/files.rss", sender, false, true);
 				return true;
 			} else if (args[0].equalsIgnoreCase("reload")) {
 				if (!hasCommandPermission(sender, "exchangemarket.reload")) {
@@ -298,7 +296,7 @@ public class Commands implements CommandExecutor {
 				}
 
 				plugin.config.reloadOurConfig();
-				plugin.localization.loadLocales();
+				ExchangeMarket.loadLocales();
 				plugin.sendMessage(sender, L("reloadedOurConfigs"));
 
 				return true;
@@ -332,13 +330,13 @@ public class Commands implements CommandExecutor {
 				}
 				// plugin.sendMessage(sender, "price: " + price);
 
-				String itemName = plugin.itemdb.getItemName(item.getTypeId(), item.getDurability());
+				String itemName = ItemDb.getItemName(item.getTypeId(), item.getDurability());
 				String itemEnchants = MaterialUtil.Enchantment.encodeEnchantment(item);
 				
 				
 				int success = 0;
 				if (dryrun == false)
-					success = plugin.database.insertOrder(2, true, plugin.pluginName, item.getTypeId(), item.getDurability(), itemEnchants, price, 1);
+					success = Database.insertOrder(2, true, plugin.pluginName, item.getTypeId(), item.getDurability(), itemEnchants, price, 1);
 
 				if (success > 0) {
 					plugin.sendMessage(sender, F("infiniteBuyCreated", itemName, price));
@@ -374,12 +372,12 @@ public class Commands implements CommandExecutor {
 				}
 				// plugin.sendMessage(sender, "price: " + price);
 
-				String itemName = plugin.itemdb.getItemName(item.getTypeId(), item.getDurability());
+				String itemName = ItemDb.getItemName(item.getTypeId(), item.getDurability());
 				String itemEnchants = MaterialUtil.Enchantment.encodeEnchantment(item);
 				
 				int success = 0;
 				if (dryrun == false)
-					success = plugin.database.insertOrder(1, true, plugin.pluginName, item.getTypeId(), item.getDurability(), itemEnchants, price, 1);
+					success = Database.insertOrder(1, true, plugin.pluginName, item.getTypeId(), item.getDurability(), itemEnchants, price, 1);
 
 				if (success > 0) {
 					plugin.sendMessage(sender, F("infiniteSellCreated", itemName, price));
@@ -397,7 +395,7 @@ public class Commands implements CommandExecutor {
 				}
 
 				if (Utils.isInt(args[1])) {
-					int success = plugin.database.removeOrder(sender, Integer.parseInt(args[1]));
+					int success = Database.removeOrder(sender, Integer.parseInt(args[1]));
 					if (success > 0) {
 						plugin.sendMessage(sender, L("removeSuccessful"));
 					} else {
@@ -455,7 +453,7 @@ public class Commands implements CommandExecutor {
 				}
 
 				if (Utils.isInt(args[1])) {
-					plugin.database.cancelOrder(sender, Integer.parseInt(args[1]));
+					Database.cancelOrder(sender, Integer.parseInt(args[1]));
 				} else {
 					if (confirmed == null)
 						dryrun = true;
@@ -497,7 +495,7 @@ public class Commands implements CommandExecutor {
 							return true;
 						}
 					}
-					String itemName = plugin.itemdb.getItemName(item.getTypeId(), item.getDurability());
+					String itemName = ItemDb.getItemName(item.getTypeId(), item.getDurability());
 
 					// plugin.info("type: " +type);
 					// plugin.info("itemName: " +itemName);
@@ -505,7 +503,7 @@ public class Commands implements CommandExecutor {
 
 					dryrun = false;
 					String itemEnchants = MaterialUtil.Enchantment.encodeEnchantment(item);
-					int success = plugin.database.cancelOrders(sender, type, item.getTypeId(), item.getDurability(), itemEnchants, amount, dryrun);
+					int success = Database.cancelOrders(sender, type, item.getTypeId(), item.getDurability(), itemEnchants, amount, dryrun);
 					// plugin.info("success: " +success);
 
 					if (success > 0 && dryrun == true) {
@@ -548,10 +546,12 @@ public class Commands implements CommandExecutor {
 				int rawAmount = amount;
 				item.setAmount(amount);
 				// plugin.sendMessage(sender, "amount: " + amount);
-
-				double price = plugin.getBalance(sender.getName());
-				// if (args.length > 2) {
-
+				String itemEnchants = MaterialUtil.Enchantment.encodeEnchantment(item);
+				
+				double price = ExchangeMarket.getBalance(sender.getName());
+				//double price = Database.getUsersLastPrice(1, sender.getName(), item.getTypeId(), item.getDurability(), itemEnchants);//plugin.getBalance(sender.getName());
+				//plugin.info("price: " + price);
+				
 				if (args.length > 3) {
 					Boolean priceEach = false;
 					
@@ -586,8 +586,8 @@ public class Commands implements CommandExecutor {
 				// }
 
 				// plugin.sendMessage(sender, "price: " + price);
-				String itemEnchants = MaterialUtil.Enchantment.encodeEnchantment(item);
-				int success = plugin.database.processBuyOrder(sender, item.getTypeId(), item.getDurability(), itemEnchants, amount, price, dryrun);
+				
+				int success = Database.processBuyOrder(sender, item.getTypeId(), item.getDurability(), itemEnchants, amount, price, dryrun);
 
 				if (success > 0 && dryrun == true) {
 					lastRequest.put(sender.getName(), args);
@@ -636,7 +636,7 @@ public class Commands implements CommandExecutor {
 				// plugin.sendMessage(sender, "amount: " + amount);
 
 
-				String itemName = plugin.itemdb.getItemName(item.getTypeId(), item.getDurability());
+				String itemName = ItemDb.getItemName(item.getTypeId(), item.getDurability());
 				String itemEnchants = MaterialUtil.Enchantment.encodeEnchantment(item);
 				if (itemEnchants != null)
 					itemName += "-" + itemEnchants;
@@ -644,11 +644,13 @@ public class Commands implements CommandExecutor {
 				amount = Math.min(invAmount, amount);
 
 				if (amount == 0) {
-					plugin.sendMessage(sender, F("sellNotEnoughItems", itemName, rawAmount));
+					ExchangeMarket.sendMessage(sender, F("sellNotEnoughItems", itemName, rawAmount));
 					return true;
 				}
 
 				double price = 0;
+				//double price = Database.getUsersLastPrice(2, sender.getName(), item.getTypeId(), item.getDurability(), itemEnchants);//plugin.getBalance(sender.getName());
+				//plugin.info("price: " + price);
 				// if (args.length > 2) {
 
 				if (args.length > 3) {
@@ -682,7 +684,7 @@ public class Commands implements CommandExecutor {
 				}
 				
 
-				int success = plugin.database.processSellOrder(sender, item.getTypeId(), item.getDurability(), itemEnchants, amount, price, dryrun);
+				int success = Database.processSellOrder(sender, item.getTypeId(), item.getDurability(), itemEnchants, amount, price, dryrun);
 
 				// if (success == 0){
 				// plugin.sendMessage(sender, F("noBuyersForSell", itemName,
