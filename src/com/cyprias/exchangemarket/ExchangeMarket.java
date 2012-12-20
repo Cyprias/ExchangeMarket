@@ -2,6 +2,7 @@ package com.cyprias.exchangemarket;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.logging.Logger;
@@ -41,6 +42,15 @@ public class ExchangeMarket extends JavaPlugin {
 		this.server = getServer();
 		
 		this.config = new Config(this);
+		
+		try {
+			Database.init();
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+			this.getPluginLoader().disablePlugin(this);
+			return;
+		}
+		
 		this.commands = new Commands(this);
 		
 		new ItemDb(this);
@@ -56,6 +66,8 @@ public class ExchangeMarket extends JavaPlugin {
 		pluginName = getDescription().getName();
 
 		loadLocales();
+		
+
 		
 		log.info(String.format("%s v%s is enabled.", pluginName, this.getDescription().getVersion()));
 

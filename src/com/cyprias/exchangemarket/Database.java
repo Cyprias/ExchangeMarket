@@ -236,4 +236,8 @@ public class Database {
 	public static double getUsersLastPrice(int type, String user, int itemID, short itemDur, String itemEnchants) throws SQLException {
 		return MySQL.getUsersLastPrice(type, user, itemID, itemDur, itemEnchants);
 	}
+	
+	public static void init() throws SQLException{
+		MySQL.init();
+	}
 }

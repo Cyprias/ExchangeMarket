@@ -63,6 +63,10 @@ public class MySQL {
 		return ExchangeMarket.L(string);
 	}
 
+	public static void init() throws SQLException{
+		 createTables();
+	}
+	
 	public static void createTables() throws SQLException {
 		Connection con = getConnection();
 
