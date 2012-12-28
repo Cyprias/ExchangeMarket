@@ -9,7 +9,7 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import com.Acrobot.Breeze.Utils.MaterialUtil;
+import com.cyprias.Utils.MaterialUtil;
 import com.cyprias.exchangemarket.Commands;
 import com.cyprias.exchangemarket.ExchangeMarket;
 import com.cyprias.exchangemarket.ItemDb;

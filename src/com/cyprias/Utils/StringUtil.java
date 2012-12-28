@@ -1,4 +1,4 @@
-package com.Acrobot.Breeze.Utils;
+package com.cyprias.Utils;
 
 import org.apache.commons.lang.WordUtils;
 
@@ -24,7 +24,7 @@ public class StringUtil {
 *
 * @param string String to reformat
 * @return Reformatted string
-* @see com.Acrobot.Breeze.Utils.StringUtil#capitalizeFirstLetter(String, char)
+* @see com.cyprias.Utils.StringUtil#capitalizeFirstLetter(String, char)
 */
     public static String capitalizeFirstLetter(String string) {
         return capitalizeFirstLetter(string, ' ');

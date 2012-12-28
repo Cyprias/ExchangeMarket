@@ -24,7 +24,7 @@ import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.Material;
 
-import com.Acrobot.Breeze.Utils.MaterialUtil;
+import com.cyprias.Utils.MaterialUtil;
 
 public class ItemDb {
 	private JavaPlugin plugin;

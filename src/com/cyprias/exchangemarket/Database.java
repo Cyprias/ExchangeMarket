@@ -8,8 +8,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import com.Acrobot.Breeze.Utils.InventoryUtil;
-import com.Acrobot.Breeze.Utils.MaterialUtil;
+import com.cyprias.Utils.InventoryUtil;
+import com.cyprias.Utils.MaterialUtil;
 import com.cyprias.exchangemarket.databases.MySQL;
 
 public class Database {

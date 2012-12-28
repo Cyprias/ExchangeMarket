@@ -1,4 +1,4 @@
-package com.Acrobot.Breeze.Utils;
+package com.cyprias.Utils;
 
 import info.somethingodd.bukkit.OddItem.OddItem;
 import org.bukkit.CoalType;

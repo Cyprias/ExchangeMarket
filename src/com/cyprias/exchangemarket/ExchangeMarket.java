@@ -18,8 +18,8 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.mcstats.Metrics;
 
-import com.Acrobot.Breeze.Utils.InventoryUtil;
-import com.Acrobot.Breeze.Utils.MaterialUtil;
+import com.cyprias.Utils.InventoryUtil;
+import com.cyprias.Utils.MaterialUtil;
 
 public class ExchangeMarket extends JavaPlugin {
 	public static String chatPrefix = "§f[§6EM§f] ";

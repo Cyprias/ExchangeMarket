@@ -19,8 +19,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.RegisteredListener;
 import org.mindrot.jbcrypt.BCrypt;
 
-import com.Acrobot.Breeze.Utils.InventoryUtil;
-import com.Acrobot.Breeze.Utils.MaterialUtil;
+import com.cyprias.Utils.InventoryUtil;
+import com.cyprias.Utils.MaterialUtil;
 import com.cyprias.exchangemarket.Utilis.Utils;
 import com.cyprias.exchangemarket.commands.BuyOrder;
 import com.cyprias.exchangemarket.commands.Collect;
