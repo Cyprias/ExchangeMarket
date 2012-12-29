@@ -1,5 +1,10 @@
 package com.cyprias.Utils;
 
+/*
+Classes copied from Acrobot's Breeze code. 
+https://github.com/Acrobot/ChestShop-3/blob/master/com/Acrobot/Breeze/
+*/
+
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 

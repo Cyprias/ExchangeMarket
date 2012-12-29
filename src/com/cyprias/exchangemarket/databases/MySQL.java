@@ -726,7 +726,11 @@ public class MySQL {
 
 		} else if (silentFail == false) {
 			if (initialAmount == buyAmount) {
+				if (buyPrice>0){
 				ExchangeMarket.sendMessage(sender, F("noSellersForBuyPrice", itemName, buyAmount, buyPrice * buyAmount, buyPrice));
+				}else{
+					ExchangeMarket.sendMessage(sender, F("noSellersForBuy", itemName, buyAmount));
+				}
 			}
 
 		}
@@ -887,7 +891,11 @@ public class MySQL {
 
 		if (silentFail == false) {
 			if (initialAmount == sellAmount) {
-				ExchangeMarket.sendMessage(sender, F("noBuyersForSellPrice", itemName, sellAmount, sellPrice * sellAmount, sellPrice));
+				if (sellPrice>0){
+					ExchangeMarket.sendMessage(sender, F("noBuyersForSellPrice", itemName, sellAmount, sellPrice * sellAmount, sellPrice));
+				}else{
+					ExchangeMarket.sendMessage(sender, F("noBuyersForSell", itemName, sellAmount));
+				}
 			}
 		}
 
