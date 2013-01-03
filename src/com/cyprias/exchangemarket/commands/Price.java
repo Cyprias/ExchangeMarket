@@ -36,7 +36,7 @@ public class Price  {
 		}
 		if (args.length < 2 && player.getItemInHand().getTypeId() == 0) {
 			
-			plugin.sendMessage(sender, " §a/" + commandLabel + " price [itemName] [amount] [sale/buy] §7- " + L("cmdPriceDesc"));
+			ExchangeMarket.sendMessage(sender, " §a/" + commandLabel + " price [itemName] [amount] [sale/buy] §7- " + L("cmdPriceDesc"));
 			return true;
 		}
 
@@ -52,7 +52,7 @@ public class Price  {
 		
 		
 		if (item == null) {
-			plugin.sendMessage(sender, F("invalidItem", args[1]));
+			ExchangeMarket.sendMessage(sender, F("invalidItem", args[1]));
 			return true;
 		}
 
@@ -63,7 +63,7 @@ public class Price  {
 			if (Utils.isInt(args[2])) {
 				amount = Integer.parseInt(args[2]);
 			} else {
-				plugin.sendMessage(sender, F("invalidAmount", args[2]));
+				ExchangeMarket.sendMessage(sender, F("invalidAmount", args[2]));
 
 				return true;
 			}
@@ -80,18 +80,18 @@ public class Price  {
 				type = 2;
 
 			} else {
-				plugin.sendMessage(sender, F("invalidType", args[3]));
+				ExchangeMarket.sendMessage(sender, F("invalidType", args[3]));
 				return true;
 			}
 		}
 
-		Database.itemStats stats = Database.getItemStats(item.getTypeId(), item.getDurability(), itemEnchants, type);
+		Database.itemStats stats = Database.getItemStats(item, type);
 		String itemName = ItemDb.getItemName(item.getTypeId(), item.getDurability());
 		if (itemEnchants != null)
 			itemName += "-" + itemEnchants;
 		
-		plugin.sendMessage(sender, F("itemShort", itemName, amount));
-		plugin.sendMessage(sender, plugin.commands.getItemStatsMsg(stats, amount));
+		ExchangeMarket.sendMessage(sender, F("itemShort", itemName, amount));
+		ExchangeMarket.sendMessage(sender, plugin.commands.getItemStatsMsg(stats, amount));
 
 		return true;
 	}

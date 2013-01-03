@@ -626,14 +626,11 @@ public class MySQL {
 		String preview = "";
 		if (dryrun == true)
 			preview = L("preview");
-		int found = 0;
 		while (qReturn.result.next()) {
 
 			amount = qReturn.result.getInt(9);
 			if (amount <= 0)
 				continue;
-
-			found += 1;
 
 			id = qReturn.result.getInt(1);
 			infinite = qReturn.result.getBoolean(3);
@@ -781,7 +778,6 @@ public class MySQL {
 
 	public static int processSellOrder(CommandSender sender, int itemID, short itemDur, String itemEnchants, int sellAmount, double sellPrice, Boolean dryrun)
 		throws SQLException {
-		Connection con = getConnection();
 		int success = 0;
 
 		// plugin.info("sellAmountA: " + sellAmount);
@@ -851,7 +847,9 @@ public class MySQL {
 			if (dryrun == true)
 				preview = L("preview");
 
-			if (dryrun == true || Database.removeItemFromPlayer(player, itemID, itemDur, itemEnchants, amount) == true) {
+			
+			
+			if (dryrun == true || Database.removeItemFromPlayer(player, ItemDb.getItemStack(itemID, itemDur, itemEnchants, amount)) == true) {
 				sellAmount -= amount;
 
 				if (dryrun == false) {

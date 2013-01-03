@@ -6,7 +6,6 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.inventory.ItemStack;
 
-import com.cyprias.Utils.MaterialUtil;
 import com.cyprias.exchangemarket.Database;
 import com.cyprias.exchangemarket.ExchangeMarket;
 import com.cyprias.exchangemarket.ItemDb;
@@ -32,7 +31,7 @@ public class Search {
 		}
 		if (args.length <= 1) {
 			// plugin.sendMessage(sender, F("invalidItem", ""));
-			plugin.sendMessage(sender, "§a/" + commandLabel + " search <itemName> §7- " + L("cmdSearchDesc"));
+			ExchangeMarket.sendMessage(sender, "§a/" + commandLabel + " search <itemName> §7- " + L("cmdSearchDesc"));
 			return true;
 		}
 		ItemStack item = null;
@@ -41,22 +40,20 @@ public class Search {
 		}
 
 		if (item == null) {
-			plugin.sendMessage(sender, F("invalidItem", args[1]));
+			ExchangeMarket.sendMessage(sender, F("invalidItem", args[1]));
 			return true;
 		}
-		String itemEnchants = MaterialUtil.Enchantment.encodeEnchantment(item);
-		
 		int page = 0;
 		if (args.length > 2) {// && args[1].equalsIgnoreCase("compact"))
 			if (Utils.isInt(args[2])) {
 				page = Math.abs(Integer.parseInt(args[2]));
 			} else {
-				plugin.sendMessage(sender, F("invalidPageNumber", args[2]));
+				ExchangeMarket.sendMessage(sender, F("invalidPageNumber", args[2]));
 				return true;
 			}
 		}
 		
-		Database.searchOrders(sender, item.getTypeId(), item.getDurability(), itemEnchants, page);
+		Database.searchOrders(sender, item, page);
 
 		return true;
 	}

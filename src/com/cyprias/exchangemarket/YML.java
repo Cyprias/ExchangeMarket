@@ -6,82 +6,58 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.HashMap;
-import java.util.logging.Logger;
-
 import org.bukkit.configuration.InvalidConfigurationException;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.plugin.java.JavaPlugin;
 
 public class YML extends YamlConfiguration {
 	private static File file = null;
-	public YML(InputStream fileStream) {
-		//load yml from resources. 
-		try {
-			load(fileStream);
-		} catch (IOException e) {e.printStackTrace();
-		} catch (InvalidConfigurationException e) {e.printStackTrace();
-		}
-	}
-	
-	public YML(File pluginDur, String fileName) {
-		//Load yml from directory.
-		this.file = new File(pluginDur, fileName);
 
-		try {
-			load(this.file);
-		} catch (FileNotFoundException e) {e.printStackTrace();
-		} catch (IOException e) {e.printStackTrace();
-		} catch (InvalidConfigurationException e) {e.printStackTrace();
-		}
+	public YML(InputStream fileStream) throws IOException, InvalidConfigurationException {
+		// load yml from resources.
+		load(fileStream);
 	}
-	
-	public YML(InputStream fileStream, File pluginDur, String fileName) {
-		//Copy yml resource to directory then load it.
 
-		this.file = new File(pluginDur, fileName);
-		if (!this.file.exists())
-			this.file = toFile(fileStream, pluginDur, fileName);
-		
-		try {
-			load(this.file);
-		} catch (FileNotFoundException e) {e.printStackTrace();
-		} catch (IOException e) {e.printStackTrace();
-		} catch (InvalidConfigurationException e) {e.printStackTrace();
-		}
+	public YML(File pluginDur, String fileName) throws FileNotFoundException, IOException, InvalidConfigurationException {
+		// Load yml from directory.
+		YML.file = new File(pluginDur, fileName);
+
+		load(YML.file);
 	}
-	
-	public YML(InputStream fileStream, File pluginDur, String fileName, Boolean noLoad) {
-		//Just copy the stream to directory, no loading as YML. 
-		this.file = new File(pluginDur, fileName);
-		if (!this.file.exists())
-			this.file = toFile(fileStream, pluginDur, fileName);
+
+	public YML(InputStream fileStream, File pluginDur, String fileName) throws FileNotFoundException, IOException, InvalidConfigurationException {
+		// Copy yml resource to directory then load it.
+
+		YML.file = new File(pluginDur, fileName);
+		if (!YML.file.exists())
+			YML.file = toFile(fileStream, pluginDur, fileName);
+
+		load(YML.file);
 	}
-	
-	//Write a stream to file on disk, return the file object.  
-	private static File toFile(InputStream in, File pluginDur, String fileName) {
+
+	public YML(InputStream fileStream, File pluginDur, String fileName, Boolean noLoad) throws IOException {
+		// Just copy the stream to directory, no loading as YML.
+		YML.file = new File(pluginDur, fileName);
+		if (!YML.file.exists())
+			YML.file = toFile(fileStream, pluginDur, fileName);
+	}
+
+	// Write a stream to file on disk, return the file object.
+	private static File toFile(InputStream in, File pluginDur, String fileName) throws IOException {
 		File file = new File(pluginDur, fileName);
 		file.getParentFile().mkdirs();
-		try {
-			OutputStream out = new FileOutputStream(file);
-			byte[] buf = new byte[1024];
-			int len;
-			while ((len = in.read(buf)) > 0) {
-				out.write(buf, 0, len);
-			}
-			out.close();
-			in.close();
-		} catch (Exception e) {e.printStackTrace();
+		OutputStream out = new FileOutputStream(file);
+		byte[] buf = new byte[1024];
+		int len;
+		while ((len = in.read(buf)) > 0) {
+			out.write(buf, 0, len);
 		}
+		out.close();
+		in.close();
 		return file;
 	}
-	
-	public void save(){
-		try {
-			save(file);
-		} catch (IOException e) {e.printStackTrace();
-		}
+
+	public void save() throws IOException {
+		save(file);
 	}
-	
+
 }

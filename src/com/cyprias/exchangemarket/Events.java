@@ -1,12 +1,12 @@
 package com.cyprias.exchangemarket;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.HashMap;
 
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.entity.ExperienceOrb;
+import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -21,7 +21,7 @@ public class Events implements Listener {
 	private ExchangeMarket plugin;
 	public static HashMap<String, String> aliases = new HashMap<String, String>();
 
-	public Events(ExchangeMarket plugin) {
+	public Events(ExchangeMarket plugin) throws FileNotFoundException, IOException, InvalidConfigurationException {
 		this.plugin = plugin;
 
 		YML yml = new YML(plugin.getResource("aliases.yml"),plugin.getDataFolder(), "aliases.yml");
@@ -36,6 +36,7 @@ public class Events implements Listener {
 		return ExchangeMarket.F(string, args);
 	}
 
+	@SuppressWarnings("unused")
 	private String L(String string) {
 		return ExchangeMarket.L(string);
 	}
@@ -60,7 +61,7 @@ public class Events implements Listener {
 		
 		
 		if (player.hasPermission("exchangemarket.loginPendingCollection")) 
-			plugin.getServer().getScheduler().scheduleAsyncDelayedTask(plugin, new Database.checkPendingBuysTask(player));
+			plugin.getServer().getScheduler().runTaskAsynchronously(plugin, new Database.checkPendingBuysTask(player));
 
 		//, 
 		
@@ -81,8 +82,8 @@ public class Events implements Listener {
 				int compare = VersionChecker.compareVersions(curVersion, info.getTitle());
 				//plugin.info("curVersion: " + curVersion +", title: " + info.getTitle() + ", compare: " + compare);
 				if (compare < 0){
-					plugin.info(F("versionAvailable", curVersion, info.getTitle()));
-					plugin.info(info.getLink());
+					ExchangeMarket.info(F("versionAvailable", curVersion, info.getTitle()));
+					ExchangeMarket.info(info.getLink());
 				}
 				return;
 			}
@@ -99,12 +100,12 @@ public class Events implements Listener {
 				int compare = VersionChecker.compareVersions(curVersion, info.getTitle());
 				//plugin.info("curVersion: " + curVersion +", title: " + info.getTitle() + ", compare: " + compare);
 				if (compare < 0){
-					plugin.sendMessage(sender, F("versionAvailable", curVersion, info.getTitle()));
+					ExchangeMarket.sendMessage(sender, F("versionAvailable", curVersion, info.getTitle()));
 				}else{
 					if (silentNewestVersion == true)
 						return;
 					
-					plugin.sendMessage(sender, F("version", curVersion));
+					ExchangeMarket.sendMessage(sender, F("version", curVersion));
 				}
 				
 				if (showChangelog == true) {
@@ -118,7 +119,7 @@ public class Events implements Listener {
 						if (compare > 0)
 							break;
 						
-						plugin.sendMessage(sender, F("versionChanges", info.getTitle()));
+						ExchangeMarket.sendMessage(sender, F("versionChanges", info.getTitle()));
 
 
 						
@@ -127,7 +128,7 @@ public class Events implements Listener {
 						changes = info.getDescription();
 
 						for (int l = 0; l < changes.length; l++) {
-							plugin.sendMessage(sender, (l + 1) + ChatColor.GRAY.toString() + ": " + ChatColor.WHITE.toString() + changes[l]);
+							ExchangeMarket.sendMessage(sender, (l + 1) + ChatColor.GRAY.toString() + ": " + ChatColor.WHITE.toString() + changes[l]);
 
 						}
 

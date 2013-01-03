@@ -2,38 +2,23 @@ package com.cyprias.exchangemarket;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
 import java.util.logging.Logger;
 
-import org.apache.commons.lang.UnhandledException;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
-import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.Item;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.Material;
-
 import com.cyprias.Utils.MaterialUtil;
 
 public class ItemDb {
-	private JavaPlugin plugin;
-
 	private File file;
 
-	public ItemDb(JavaPlugin plugin) {
-		this.plugin = plugin;
-
+	public ItemDb(JavaPlugin plugin) throws IOException {
 		file = new File(plugin.getDataFolder(), "items.csv");
 		if (!file.exists()) {
 			file.getParentFile().mkdirs();
@@ -43,19 +28,15 @@ public class ItemDb {
 		loadFile();
 	}
 
-	public void copy(InputStream in, File file) {
-		try {
-			OutputStream out = new FileOutputStream(file);
-			byte[] buf = new byte[1024];
-			int len;
-			while ((len = in.read(buf)) > 0) {
-				out.write(buf, 0, len);
-			}
-			out.close();
-			in.close();
-		} catch (Exception e) {
-			e.printStackTrace();
+	public void copy(InputStream in, File file) throws IOException {
+		OutputStream out = new FileOutputStream(file);
+		byte[] buf = new byte[1024];
+		int len;
+		while ((len = in.read(buf)) > 0) {
+			out.write(buf, 0, len);
 		}
+		out.close();
+		in.close();
 	}
 
 	public itemData getItemID(String itemName) {
@@ -87,32 +68,32 @@ public class ItemDb {
 	static HashMap<String, String> idToName = new HashMap<String, String>();
 
 	public static ItemStack getItemStack(int itemID, short itemDur, String enchants) {
-		ItemStack is = new ItemStack(itemID, 1);
-		is.setDurability(itemDur);
+		ItemStack itemStack = new ItemStack(itemID, 1);
+		itemStack.setDurability(itemDur);
 
 		if (enchants != null) {
-			// log.info("Adding enchants: " + enchants);
-
+			/*
 			Map<Enchantment, Integer> ench = MaterialUtil.Enchantment.getEnchantments(enchants);
-			// log.info("ench: " + ench);
-
 			for (Map.Entry<org.bukkit.enchantments.Enchantment, Integer> entry : ench.entrySet()) {
-				
 				if (entry.getKey().canEnchantItem(is))
 					is.addEnchantment(entry.getKey(), entry.getValue());
-				
 			}
-			
-			
-
-
-			// log.info("enchant count: " + is.getEnchantments().size());
-
+			*/
+			if (enchants != null && !enchants.equalsIgnoreCase("")) {
+				itemStack.addEnchantments(MaterialUtil.Enchantment.getEnchantments(enchants));
+			}
 		}
 
-		return is;
+		return itemStack;
 	}
 
+	public static ItemStack getItemStack(int itemID, short itemDur, String enchants, int amount) {
+		ItemStack itemStack = getItemStack(itemID, itemDur, enchants);
+		itemStack.setAmount(amount);
+		return itemStack;
+	}
+	
+	
 	public static Logger log = Logger.getLogger("Minecraft");
 
 	public static ItemStack getItemStack(String id) {
@@ -152,37 +133,27 @@ public class ItemDb {
 		return null;
 	}
 
-	private void loadFile() {
-		try {
-			@SuppressWarnings("resource")
-			BufferedReader r = new BufferedReader(new FileReader(file));
+	private void loadFile() throws NumberFormatException, IOException {
+		@SuppressWarnings("resource")
+		BufferedReader r = new BufferedReader(new FileReader(file));
 
-			String line;
+		String line;
 
-			int l = 0;
-			String sID;
-			while ((line = r.readLine()) != null) {
-				l = l + 1;
-				if (l > 3) {
-					String[] values = line.split(",");
-					nameToID.put(values[0], new itemData(values[0], Integer.parseInt(values[1]), Short.parseShort(values[2])));
+		int l = 0;
+		String sID;
+		while ((line = r.readLine()) != null) {
+			l = l + 1;
+			if (l > 3) {
+				String[] values = line.split(",");
+				nameToID.put(values[0], new itemData(values[0], Integer.parseInt(values[1]), Short.parseShort(values[2])));
 
-					sID = values[1] + ":" + values[2];
-					if (!idToName.containsKey(sID))
-						idToName.put(sID, values[0]);
+				sID = values[1] + ":" + values[2];
+				if (!idToName.containsKey(sID))
+					idToName.put(sID, values[0]);
 
-				}
 			}
-
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
 
-		// log.info("1 is " + idToName.get("1:0"));
 
 	}
 

@@ -1,16 +1,12 @@
 package com.cyprias.exchangemarket.commands;
 
 import java.sql.SQLException;
-import java.util.Map;
-
-import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import com.cyprias.Utils.InventoryUtil;
-import com.cyprias.Utils.MaterialUtil;
 import com.cyprias.exchangemarket.Config;
 import com.cyprias.exchangemarket.Database;
 import com.cyprias.exchangemarket.ExchangeMarket;
@@ -36,7 +32,7 @@ public class SellOrder {
 			return true;
 		}
 		if (args.length < 2) {
-			plugin.sendMessage(sender, "§a/" + commandLabel + " sellorder <itemName> <amount> [price] §7- " + L("cmdSellOrderDesc"));
+			ExchangeMarket.sendMessage(sender, "§a/" + commandLabel + " sellorder <itemName> <amount> [price] §7- " + L("cmdSellOrderDesc"));
 			return true;
 		}
 
@@ -47,7 +43,7 @@ public class SellOrder {
 		
 		
 		if (item == null || item.getTypeId() == 0) {
-			plugin.sendMessage(sender, F("invalidItem", args[1]));
+			ExchangeMarket.sendMessage(sender, F("invalidItem", args[1]));
 			return true;
 		}
 
@@ -64,15 +60,12 @@ public class SellOrder {
 			if (Utils.isInt(args[2])) {
 				amount = Integer.parseInt(args[2]);
 			} else {
-				plugin.sendMessage(sender, F("invalidAmount", args[2]));
+				ExchangeMarket.sendMessage(sender, F("invalidAmount", args[2]));
 				return true;
 			}
 		}
-		int rawAmount = amount;
 		item.setAmount(amount);
-		
-		String itemEnchants = MaterialUtil.Enchantment.encodeEnchantment(item);
-		
+
 		double price = 0;
 		// plugin.sendMessage(sender, "amount: " + amount);
 
@@ -90,36 +83,36 @@ public class SellOrder {
 			if (Utils.isDouble(args[3])) {
 				price = Math.abs(Double.parseDouble(args[3]));
 			} else {
-				plugin.sendMessage(sender, F("invalidPrice", args[3]));
+				ExchangeMarket.sendMessage(sender, F("invalidPrice", args[3]));
 				return true;
 			}
 			if (price == 0) {
-				plugin.sendMessage(sender, F("invalidPrice", 0));
+				ExchangeMarket.sendMessage(sender, F("invalidPrice", 0));
 				return true;
 			}
 			if (priceEach == false)
-				price = price / rawAmount;
+				price = price / amount;
 			
 		}else{
-			price = Database.getTradersLastPrice(1, sender.getName(), item.getTypeId(), item.getDurability(), itemEnchants);
+			price = Database.getTradersLastPrice(Database.sellOrder, sender.getName(), item);
 		}
 		if (price == 0) {
-			plugin.sendMessage(sender, F("invalidPrice", price));
+			ExchangeMarket.sendMessage(sender, F("invalidPrice", price));
 			return true;
 		}else if (price < Config.minOrderPrice){
-			plugin.sendMessage(sender, F("orderPriceTooLow", price, Config.minOrderPrice));
+			ExchangeMarket.sendMessage(sender, F("orderPriceTooLow", price, Config.minOrderPrice));
 			return true;
 		}
 		
 		if (Config.allowDamangedGear == false && plugin.isGear(item.getType()) && item.getDurability() > 0){
-			plugin.sendMessage(sender, F("cannotPostDamagedOrder"));
+			ExchangeMarket.sendMessage(sender, F("cannotPostDamagedOrder"));
 			return true;
 		}
 		
 		// postBuyOrder
 		
 		
-		Database.postSellOrder(sender, item.getTypeId(), item.getDurability(), itemEnchants, amount, price, false);
+		Database.postSellOrder(sender, item, price, false);
 
 		return true;
 	}

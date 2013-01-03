@@ -1,6 +1,7 @@
 package com.cyprias.exchangemarket;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
@@ -12,6 +13,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.RegisteredServiceProvider;
@@ -30,16 +32,14 @@ public class ExchangeMarket extends JavaPlugin {
 	public static String pluginName;
 	public static Economy econ = null;
 	public Logger log = Logger.getLogger("Minecraft"); // Minecraft log and
-														// console
-	private String stPluginEnabled = "§f%s §7v§f%s §7is enabled.";
 	private static Server server;
 	private static File dataFolder;
 	static JavaPlugin plugin;
 	
 	public void onEnable() {
-		this.plugin = this;
-		this.dataFolder = getDataFolder();
-		this.server = getServer();
+		ExchangeMarket.plugin = this;
+		ExchangeMarket.dataFolder = getDataFolder();
+		ExchangeMarket.server = getServer();
 		
 		this.config = new Config(this);
 		
@@ -53,19 +53,43 @@ public class ExchangeMarket extends JavaPlugin {
 		
 		this.commands = new Commands(this);
 		
-		new ItemDb(this);
+		try {
+			new ItemDb(this);
+		} catch (IOException e3) {
+			// TODO Auto-generated catch block
+			e3.printStackTrace();
+		}
 
 		if (Config.checkNewVersionOnStartup == true)
 			VersionChecker.retreiveVersionInfo(this, "http://dev.bukkit.org/server-mods/exchangemarket/files.rss");
 
-		this.events = new Events(this);
+		try {
+			this.events = new Events(this);
+		} catch (FileNotFoundException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		} catch (IOException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		} catch (InvalidConfigurationException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		}
 		getServer().getPluginManager().registerEvents(this.events, this);
 
 		getCommand("em").setExecutor(this.commands);
 
 		pluginName = getDescription().getName();
 
-		loadLocales();
+		try {
+			loadLocales();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (InvalidConfigurationException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		
 
 		
@@ -78,8 +102,8 @@ public class ExchangeMarket extends JavaPlugin {
 		}
 	}
 	public static HashMap<String, String> locales = new HashMap<String, String>();
-	static void loadLocales(){
-		String localeDir =dataFolder.separator + "locales" +dataFolder.separator;
+	static void loadLocales() throws IOException, InvalidConfigurationException{
+		String localeDir =File.separator + "locales" +File.separator;
 
 		//Copy existing locales into plugin dir, so admin knows what's available. 
 		new YML(plugin.getResource("enUS.yml"), dataFolder, localeDir + "enUS.yml", true);
@@ -195,9 +219,8 @@ public class ExchangeMarket extends JavaPlugin {
 
 		if (player != null) {
 			String itemName = ItemDb.getItemName(itemID, itemDur);
-			String preview = "";
 			if (dryrun == true)
-				preview = L("preview");
+				L("preview");
 
 			// sendMessage(player, "Your " +
 			// itemName+"x"+amount+" just sold for $" +(price*amount) +
@@ -242,11 +265,8 @@ public class ExchangeMarket extends JavaPlugin {
 
 	static public String F(String key, Object... args) {
 		String value = L(key);
-		try {
-			if (value != null || args != null)
-				value = String.format(value, args); // arg.toString()
-		} catch (Exception e) {e.printStackTrace();
-		}
+		if (value != null || args != null)
+			value = String.format(value, args); // arg.toString()
 		return value;
 	}
 
@@ -304,22 +324,16 @@ public class ExchangeMarket extends JavaPlugin {
 		if (itemEnchants != null)
 			itemName += "-" + itemEnchants;
 		
-		String sType = L("sell").toLowerCase();
-
-		if (type == 2)
-			sType = L("buy").toLowerCase();
+		//(type == Database.sellOrder)  ? "exchangemarket.announceneworder.sell" : "exchangemarket.announceneworder.buy"
+		String sType = (type == 1) ? L("sell").toLowerCase() : L("buy").toLowerCase();
+		
 
 		// info("announceNewOrder: " + type + ", " + sType);
 		String msg = F("newOrder", player.getDisplayName(), sType, itemName, amount, Round(price * amount, Config.priceRounding),
 			Round(price, Config.priceRounding));
 
 		
-		if (type == 1) {
-			permMessage("exchangemarket.announceneworder.sell", msg, sender.getName());
-		} else if (type == 2) {
-			permMessage("exchangemarket.announceneworder.buy", msg, sender.getName());
-		}
-
+		permMessage((type == Database.sellOrder)  ? "exchangemarket.announceneworder.sell" : "exchangemarket.announceneworder.buy", msg, sender.getName());
 	}
 
 	public static void permMessage(String permissionNode, String message, String excludeName) {

@@ -33,6 +33,9 @@ public class Database {
 		public double amode;
 	}
 	
+	final public static int sellOrder = 1;
+	final public static int buyOrder = 2;
+
 	public static String TypeToString(int type, boolean infinite) {
 		if (infinite == true) {
 			switch (type) {
@@ -62,22 +65,17 @@ public class Database {
 		}
 		return 0;
 	}
-	public static boolean removeItemFromPlayer(Player player, int itemID, short itemDur, String itemEnchants, int amount) {
-		ItemStack itemStack = new ItemStack(itemID, 1);
-		itemStack.setDurability(itemDur);
-		itemStack.setAmount(amount);
-
-		if (itemEnchants != null && !itemEnchants.equalsIgnoreCase("")) {
-			itemStack.addEnchantments(MaterialUtil.Enchantment.getEnchantments(itemEnchants));
-		}
-
-		if (InventoryUtil.getAmount(itemStack, player.getInventory()) >= amount) {
-			InventoryUtil.remove(itemStack, player.getInventory());
+	
+	public static boolean removeItemFromPlayer(Player player, ItemStack stock) {
+		if (InventoryUtil.getAmount(stock, player.getInventory()) >= stock.getAmount()) {
+			InventoryUtil.remove(stock, player.getInventory());
 			return true;
 		}
 
 		return false;
 	}
+	
+	
 	public static class checkPendingBuysTask implements Runnable {
 		private CommandSender sender;
 
@@ -93,6 +91,9 @@ public class Database {
 				e.printStackTrace();
 			}
 		}
+	}
+	public static void checkPendingBuys(CommandSender sender) throws SQLException {
+		MySQL.checkPendingBuys(sender);
 	}
 	
 	public static String ColourName(CommandSender sender, String name) {
@@ -143,11 +144,10 @@ public class Database {
 		return maxValue;
 	}
 	
-	public static void checkPendingBuys(CommandSender sender) throws SQLException {
-		MySQL.checkPendingBuys(sender);
-	}
-	public static int insertOrder(int type, Boolean infinite, String player, int itemID, int itemDur, String itemEnchants, double price, int amount) throws SQLException {
-		return MySQL.insertOrder(type, infinite, player, itemID, itemDur, itemEnchants, price, amount);
+
+
+	public static int insertOrder(int type, Boolean infinite, String player, ItemStack stock, double price) throws SQLException {
+		return MySQL.insertOrder(type, infinite, player, stock.getTypeId(), stock.getDurability(), MaterialUtil.Enchantment.encodeEnchantment(stock), price, stock.getAmount());
 	}
 	
 	public static int removeOrder(CommandSender sender, int orderID) throws SQLException {
@@ -158,49 +158,25 @@ public class Database {
 		return MySQL.cancelOrder(sender, orderID);
 	}
 	
-	public static int decreaseInt(String table, int rowID, String column, int amount) throws SQLException {
-		return MySQL.decreaseInt(table, rowID, column, amount);
-	}
-	public static int removeRow(String table, int rowID) throws SQLException {
-		return MySQL.removeRow(table, rowID);
-	}
 	
 	public static int cancelOrders(CommandSender sender, int cType, int ciID, short ciDur, String itemEnchants, int cAmount, Boolean dryrun) throws SQLException {
 		return MySQL.cancelOrders(sender, cType, ciID, ciDur, itemEnchants, cAmount, dryrun);
 	}
 	
-	public static int processBuyOrder(CommandSender sender, int itemID, short itemDur, String itemEnchants, int buyAmount, double buyPrice, Boolean dryrun) throws SQLException {
-		return MySQL.processBuyOrder(sender, itemID, itemDur, itemEnchants, buyAmount, buyPrice, dryrun);
+	public static int processBuyOrder(CommandSender sender, ItemStack stock, double buyPrice, Boolean dryrun) throws SQLException {
+		return MySQL.processBuyOrder(sender, stock.getTypeId(), stock.getDurability(), MaterialUtil.Enchantment.encodeEnchantment(stock), stock.getAmount(), buyPrice, dryrun);
+	}
+
+	public static int processSellOrder(CommandSender sender, ItemStack stock, double price, Boolean dryrun) throws SQLException {
+		return MySQL.processSellOrder(sender, stock.getTypeId(), stock.getDurability(), MaterialUtil.Enchantment.encodeEnchantment(stock), stock.getAmount(), price, dryrun);
+	}
+
+	public static double getTradersLastPrice(int type, String trader, ItemStack stock) throws SQLException {
+		return MySQL.getTradersLastPrice(type, trader, stock.getTypeId(), stock.getDurability(), MaterialUtil.Enchantment.encodeEnchantment(stock));
 	}
 	
-	public static int cleanSellOrders() throws SQLException {
-		return MySQL.cleanSellOrders();
-	}
-	
-	public static int insertTransaction(int type, String buyer, int itemID, int itemDur, String itemEnchants, int amount, double price, String seller) throws SQLException {
-		return MySQL.insertTransaction(type, buyer, itemID, itemDur, itemEnchants, amount, price, seller);
-	}
-	
-	public static int checkSellOrders(CommandSender sender, int itemID, short itemDur, String itemEnchants, int buyAmount, double buyPrice, Boolean dryrun,
-		Boolean silentFail) throws SQLException {
-		return MySQL.checkSellOrders(sender, itemID, itemDur, itemEnchants, buyAmount, buyPrice, dryrun, silentFail);
-	}
-	
-	public static int processSellOrder(CommandSender sender, int itemID, short itemDur, String itemEnchants, int amount, double price, Boolean dryrun) throws SQLException {
-		return MySQL.processSellOrder(sender, itemID, itemDur, itemEnchants, amount, price, dryrun);
-	}
-	
-	public static int checkBuyOrders(CommandSender sender, int itemID, short itemDur, String itemEnchants, int amount, double price, Boolean dryrun,
-		Boolean silentFail) throws SQLException {
-		return MySQL.checkBuyOrders(sender, itemID, itemDur, itemEnchants, amount, price, dryrun, silentFail);
-	}
-	
-	public static double getTradersLastPrice(int type, String trader, int itemID, short itemDur, String itemEnchants) throws SQLException {
-		return MySQL.getTradersLastPrice(type, trader, itemID, itemDur, itemEnchants);
-	}
-	
-	public static void postBuyOrder(CommandSender sender, int itemID, short itemDur, String itemEnchants, int amount, double price, Boolean dryrun) throws SQLException {
-		MySQL.postBuyOrder(sender, itemID, itemDur, itemEnchants, amount, price, dryrun);
+	public static void postBuyOrder(CommandSender sender, ItemStack stock, double price, Boolean dryrun) throws SQLException {
+		MySQL.postBuyOrder(sender, stock.getTypeId(), stock.getDurability(), MaterialUtil.Enchantment.encodeEnchantment(stock), stock.getAmount(), price, dryrun);
 	}
 	public static int collectPendingBuys(CommandSender sender) throws SQLException {
 		return MySQL.collectPendingBuys(sender);
@@ -208,33 +184,28 @@ public class Database {
 	public static int listOrders(CommandSender sender, int getType, int page) throws SQLException {
 		return MySQL.listOrders(sender, getType, page);
 	}
-	public static int getResultCount(String query, Object... args) throws SQLException {
-		return MySQL.getResultCount(query, args);
-	}
+
 	
 	public static int listPlayerOrders(CommandSender sender, String trader, int page) throws SQLException {
 		return MySQL.listPlayerOrders(sender, trader, page);
 	}
-	public static void searchOrders(CommandSender sender, int itemID, short itemDur, String itemEnchants, int page) throws SQLException {
-		MySQL.searchOrders(sender, itemID, itemDur, itemEnchants, page);
+	public static void searchOrders(CommandSender sender, ItemStack stock, int page) throws SQLException {
+		MySQL.searchOrders(sender, stock.getTypeId(), stock.getDurability(), MaterialUtil.Enchantment.encodeEnchantment(stock), page);
 	}
 	
-	public static void postSellOrder(CommandSender sender, int itemID, short itemDur, String itemEnchants, int sellAmount, double sellPrice, Boolean dryrun) throws SQLException {
-		MySQL.postSellOrder(sender, itemID, itemDur, itemEnchants, sellAmount, sellPrice, dryrun);
+	public static void postSellOrder(CommandSender sender, ItemStack stock, double sellPrice, Boolean dryrun) throws SQLException {
+		MySQL.postSellOrder(sender, stock.getTypeId(), stock.getDurability(), MaterialUtil.Enchantment.encodeEnchantment(stock), stock.getAmount(), sellPrice, dryrun);
 	}
 	
 	public static void setPassword(CommandSender sender, String password) throws SQLException {
 		MySQL.setPassword(sender, password);
 	}
 	
-	public static itemStats getItemStats(int itemID, int itemDur, String itemEnchants, int getType) throws SQLException {
-		return MySQL.getItemStats(itemID, itemDur, itemEnchants, getType);
+	public static itemStats getItemStats(ItemStack stock, int getType) throws SQLException {
+		return MySQL.getItemStats(stock.getTypeId(), stock.getDurability(), MaterialUtil.Enchantment.encodeEnchantment(stock), getType);
 	}
 	public static void listPlayerTransactions(CommandSender sender, int page) throws SQLException {
 		MySQL.listPlayerTransactions(sender, page);
-	}
-	public static double getUsersLastPrice(int type, String user, int itemID, short itemDur, String itemEnchants) throws SQLException {
-		return MySQL.getUsersLastPrice(type, user, itemID, itemDur, itemEnchants);
 	}
 	
 	public static void init() throws SQLException{

@@ -19,6 +19,7 @@ public class Transactions {
 		return ExchangeMarket.F(string, args);
 	}
 
+	@SuppressWarnings("unused")
 	private String L(String string) {
 		return ExchangeMarket.L(string);
 	}
@@ -36,7 +37,7 @@ public class Transactions {
 			if (Utils.isInt(args[1])) {
 				page = Math.abs(Integer.parseInt(args[1]));
 			} else {
-				plugin.sendMessage(sender, F("invalidPageNumber", args[1]));
+				ExchangeMarket.sendMessage(sender, F("invalidPageNumber", args[1]));
 				return true;
 			}
 		}

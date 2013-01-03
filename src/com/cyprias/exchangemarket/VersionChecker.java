@@ -16,7 +16,7 @@ import org.w3c.dom.NodeList;
 public class VersionChecker {
 	public static void retreiveVersionInfo(JavaPlugin plugin, String curseRSS, Object... args) {
 		getVersionInfoTask task = new getVersionInfoTask(plugin.getServer().getPluginManager(), plugin.getDescription().getName(), curseRSS);
-		int taskID = plugin.getServer().getScheduler().scheduleAsyncDelayedTask(plugin, task, 0L);
+		plugin.getServer().getScheduler().runTaskAsynchronously(plugin, task);
 		task.setArgs(args);
 	}
 
@@ -127,7 +127,8 @@ public class VersionChecker {
 					this.pm.callEvent(event);
 				}
 
-			} catch (Exception localException) {
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
 		}
 	}

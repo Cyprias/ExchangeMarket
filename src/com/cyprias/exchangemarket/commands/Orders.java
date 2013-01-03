@@ -4,12 +4,8 @@ import java.sql.SQLException;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-import org.bukkit.inventory.ItemStack;
-
-import com.cyprias.Utils.MaterialUtil;
 import com.cyprias.exchangemarket.Database;
 import com.cyprias.exchangemarket.ExchangeMarket;
-import com.cyprias.exchangemarket.ItemDb;
 import com.cyprias.exchangemarket.Utilis.Utils;
 
 public class Orders {
@@ -22,6 +18,7 @@ public class Orders {
 		return ExchangeMarket.F(string, args);
 	}
 
+	@SuppressWarnings("unused")
 	private String L(String string) {
 		return ExchangeMarket.L(string);
 	}
@@ -36,7 +33,7 @@ public class Orders {
 			if (Utils.isInt(args[1])) {
 				page = Math.abs(Integer.parseInt(args[1]));
 			} else {
-				plugin.sendMessage(sender, F("invalidPageNumber", args[1]));
+				ExchangeMarket.sendMessage(sender, F("invalidPageNumber", args[1]));
 				return true;
 			}
 		}

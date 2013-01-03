@@ -19,6 +19,7 @@ public class List {
 		return ExchangeMarket.F(string, args);
 	}
 
+	@SuppressWarnings("unused")
 	private String L(String string) {
 		return ExchangeMarket.L(string);
 	}
@@ -36,7 +37,7 @@ public class List {
 				type = 2;
 
 			} else {
-				plugin.sendMessage(sender, F("invalidType", args[1]));
+				ExchangeMarket.sendMessage(sender, F("invalidType", args[1]));
 				return true;
 			}
 		}
@@ -46,7 +47,7 @@ public class List {
 			if (Utils.isInt(args[2])) {
 				page = Math.abs(Integer.parseInt(args[2]));
 			} else {
-				plugin.sendMessage(sender, F("invalidPageNumber", args[2]));
+				ExchangeMarket.sendMessage(sender, F("invalidPageNumber", args[2]));
 				return true;
 			}
 		}

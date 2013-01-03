@@ -22,6 +22,7 @@ import java.util.regex.Pattern;
 /**
 * @author Acrobot
 */
+@SuppressWarnings("deprecation")
 public class MaterialUtil {
     public static final Pattern DURABILITY = Pattern.compile(":(\\d)*");
     public static final Pattern ENCHANTMENT = Pattern.compile("-([0-9a-zA-Z])*");
