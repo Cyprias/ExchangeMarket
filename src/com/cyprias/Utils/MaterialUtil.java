@@ -13,6 +13,9 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.*;
 
+import com.google.common.base.Splitter;
+import com.google.common.collect.Iterables;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -22,7 +25,6 @@ import java.util.regex.Pattern;
 /**
 * @author Acrobot
 */
-@SuppressWarnings("deprecation")
 public class MaterialUtil {
     public static final Pattern DURABILITY = Pattern.compile(":(\\d)*");
     public static final Pattern ENCHANTMENT = Pattern.compile("-([0-9a-zA-Z])*");
@@ -45,15 +47,7 @@ public class MaterialUtil {
 * @return Are they equal?
 */
     public static boolean equals(ItemStack one, ItemStack two) {
-        if (one.getType() != two.getType()) {
-            return false;
-        }
-
-        if (one.getDurability() != two.getDurability()) {
-            return false;
-        }
-
-        return one.getEnchantments().equals(two.getEnchantments());
+        return one.isSimilar(two);
     }
 
     /**
@@ -69,7 +63,7 @@ public class MaterialUtil {
             return material;
         }
 
-        name = name.replace(" ", "").toUpperCase();
+        name = name.replaceAll(" |_", "").toUpperCase();
 
         short length = Short.MAX_VALUE;
 
@@ -131,7 +125,7 @@ public class MaterialUtil {
             name.append('-').append(MaterialUtil.Enchantment.encodeEnchantment(itemStack));
         }
 
-        return name.toString();
+        return StringUtil.capitalizeFirstLetter(name.toString(), '_');
     }
 
     /**
@@ -147,21 +141,18 @@ public class MaterialUtil {
             return itemStack;
         }
 
-        String[] split = itemName.trim().split(":|-");
-
-        if (split.length == 0) {
-            return null;
-        }
+        String[] split = Iterables.toArray(Splitter.onPattern(":|-").trimResults().split(itemName), String.class);
 
         Material material = getMaterial(split[0]);
 
         boolean onlyPartiallyChecked = false;
 
         if (material == null) {
-            int index = split[0].indexOf(' ');
-            if (index == -1) {
+            if (!split[0].contains(" ")) {
                 return null;
             }
+
+            int index = split[0].indexOf(' ');
 
             material = getMaterial(split[0].substring(index + 1));
 
@@ -246,16 +237,13 @@ public class MaterialUtil {
 * @param base32 The encoded enchantment
 * @return Enchantments found
 */
-    	public static Logger log = Logger.getLogger("Minecraft"); 
-    	
         public static Map<org.bukkit.enchantments.Enchantment, Integer> getEnchantments(String base32) {
-            if (base32 == null || base32.isEmpty()) {
+            if (base32 == null || base32.isEmpty() || !NumberUtil.isEnchantment(base32)) {
                 return new HashMap<org.bukkit.enchantments.Enchantment, Integer>();
             }
 
-            Map<org.bukkit.enchantments.Enchantment, Integer> map = new HashMap<org.bukkit.enchantments.Enchantment, Integer>();
-
             StringBuilder number = new StringBuilder(Long.toString(Long.parseLong(base32, 32)));
+            Map<org.bukkit.enchantments.Enchantment, Integer> map = new HashMap<org.bukkit.enchantments.Enchantment, Integer>();
 
             while (number.length() % 3 != 0) {
                 number.insert(0, '0');
@@ -263,6 +251,7 @@ public class MaterialUtil {
 
             for (int i = 0; i < number.length() / 3; i++) {
                 String item = number.substring(i * 3, i * 3 + 3);
+
                 org.bukkit.enchantments.Enchantment enchantment = org.bukkit.enchantments.Enchantment.getById(Integer.parseInt(item.substring(0, 2)));
 
                 if (enchantment == null) {
@@ -270,6 +259,7 @@ public class MaterialUtil {
                 }
 
                 int level = Integer.parseInt(item.substring(2));
+
                 if (level > enchantment.getMaxLevel() || level < enchantment.getStartLevel()) {
                     continue;
                 }
@@ -391,7 +381,9 @@ public class MaterialUtil {
             if (data instanceof TexturedMaterial) {
                 return ((TexturedMaterial) data).getMaterial().name();
             } else if (data instanceof Colorable) {
-                return ((Colorable) data).getColor().name();
+                DyeColor color = ((Colorable) data).getColor();
+
+                return (color != null ? color.name() : null);
             } else if (data instanceof Tree) {
                 //TreeSpecies specie = TreeSpecies.getByData((byte) (data.getData() & 3)); //This works, but not as intended
                 TreeSpecies specie = ((Tree) data).getSpecies();

@@ -1,21 +1,18 @@
 package com.cyprias.Utils;
 
-/*
-Classes copied from Acrobot's Breeze code. 
-https://github.com/Acrobot/ChestShop-3/blob/master/com/Acrobot/Breeze/
-*/
-
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
-
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-/**
- * @author Acrobot
- */
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+
+/*
+Classes copied from Acrobot's Breeze code. 
+https://github.com/Acrobot/ChestShop-3/blob/master/com/Acrobot/Breeze/
+*/
+
 public class InventoryUtil {
     /**
 * Returns the amount of the item inside the inventory
@@ -148,7 +145,7 @@ public class InventoryUtil {
                 duplicate.setAmount(currentAmount + neededToAdd);
                 duplicate.addEnchantments(item.getEnchantments());
 
-                amountLeft -= duplicate.getAmount();
+                amountLeft -= neededToAdd;
 
                 inventory.setItem(currentSlot, duplicate);
             }
@@ -166,7 +163,6 @@ public class InventoryUtil {
 */
     public static int remove(ItemStack item, Inventory inventory) {
         Map<Integer, ItemStack> leftovers = inventory.removeItem(item);
-
         return countItems(leftovers);
     }
 

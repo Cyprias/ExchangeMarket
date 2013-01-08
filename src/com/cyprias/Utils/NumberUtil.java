@@ -84,6 +84,21 @@ public class NumberUtil {
     }
 
     /**
+* Checks if the string is an enchantment
+*
+* @param string String to check
+* @return Is the string an enchantment?
+*/
+    public static boolean isEnchantment(String string) {
+        try {
+            Long.parseLong(string, 32);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
+    /**
 * Rounds the number up to two decimal points (Can be inaccurate due to using decimal-points)
 *
 * @param number Number to round
@@ -110,14 +125,7 @@ public class NumberUtil {
 * @return Formatted string
 */
     public static String toTime(int number) {
-        int minutes = number / 60;
-        String seconds = Integer.toString(number % 60);
-
-        if (seconds.length() != 2) {
-            seconds = '0' + seconds;
-        }
-
-        return minutes + ":" + seconds;
+        return String.format("%02d:%02d", (number % 3600) / 60, number % 60);
     }
 
     /**

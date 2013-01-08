@@ -194,7 +194,7 @@ public class Database {
 	}
 	
 	public static void postSellOrder(CommandSender sender, ItemStack stock, double sellPrice, Boolean dryrun) throws SQLException {
-		MySQL.postSellOrder(sender, stock.getTypeId(), stock.getDurability(), MaterialUtil.Enchantment.encodeEnchantment(stock), stock.getAmount(), sellPrice, dryrun);
+		MySQL.postSellOrder(sender, stock, sellPrice, dryrun);
 	}
 	
 	public static void setPassword(CommandSender sender, String password) throws SQLException {

@@ -45,7 +45,21 @@ public class ItemDb {
 		return null;
 	}
 
-	public static String getItemName(int itemID, int itemDur) {
+
+	
+	public static String getItemName(ItemStack stock, Boolean includeEnchants) {
+		String itemName = getItemName(stock.getTypeId(), stock.getDurability());
+		if (stock.getEnchantments().size() > 0)
+			itemName += "-"+MaterialUtil.Enchantment.encodeEnchantment(stock);
+		
+		return itemName;
+	}
+	
+	public static String getItemName(ItemStack stock) {
+		return getItemName(stock, false);
+	}	
+	
+	public static String getItemName(int itemID, short itemDur) {
 		if (idToName.containsKey(itemID + ":" + itemDur))
 			return idToName.get(itemID + ":" + itemDur);
 
@@ -71,17 +85,8 @@ public class ItemDb {
 		ItemStack itemStack = new ItemStack(itemID, 1);
 		itemStack.setDurability(itemDur);
 
-		if (enchants != null) {
-			/*
-			Map<Enchantment, Integer> ench = MaterialUtil.Enchantment.getEnchantments(enchants);
-			for (Map.Entry<org.bukkit.enchantments.Enchantment, Integer> entry : ench.entrySet()) {
-				if (entry.getKey().canEnchantItem(is))
-					is.addEnchantment(entry.getKey(), entry.getValue());
-			}
-			*/
-			if (enchants != null && !enchants.equalsIgnoreCase("")) {
-				itemStack.addEnchantments(MaterialUtil.Enchantment.getEnchantments(enchants));
-			}
+		if (enchants != null && !enchants.equalsIgnoreCase("")) {
+			itemStack.addEnchantments(MaterialUtil.Enchantment.getEnchantments(enchants));
 		}
 
 		return itemStack;

@@ -63,10 +63,10 @@ public class MySQL {
 		return ExchangeMarket.L(string);
 	}
 
-	public static void init() throws SQLException{
-		 createTables();
+	public static void init() throws SQLException {
+		createTables();
 	}
-	
+
 	public static void createTables() throws SQLException {
 		Connection con = getConnection();
 
@@ -578,7 +578,6 @@ public class MySQL {
 			return 1;
 		}
 
-		
 		return success;
 	}
 
@@ -723,9 +722,12 @@ public class MySQL {
 
 		} else if (silentFail == false) {
 			if (initialAmount == buyAmount) {
-				if (buyPrice>0){
-				ExchangeMarket.sendMessage(sender, F("noSellersForBuyPrice", itemName, buyAmount, ExchangeMarket.Round(buyPrice * buyAmount, Config.priceRounding), ExchangeMarket.Round(buyPrice, Config.priceRounding)));
-				}else{
+				if (buyPrice > 0) {
+					ExchangeMarket.sendMessage(
+						sender,
+						F("noSellersForBuyPrice", itemName, buyAmount, ExchangeMarket.Round(buyPrice * buyAmount, Config.priceRounding),
+							ExchangeMarket.Round(buyPrice, Config.priceRounding)));
+				} else {
 					ExchangeMarket.sendMessage(sender, F("noSellersForBuy", itemName, buyAmount));
 				}
 			}
@@ -847,8 +849,6 @@ public class MySQL {
 			if (dryrun == true)
 				preview = L("preview");
 
-			
-			
 			if (dryrun == true || Database.removeItemFromPlayer(player, ItemDb.getItemStack(itemID, itemDur, itemEnchants, amount)) == true) {
 				sellAmount -= amount;
 
@@ -889,10 +889,13 @@ public class MySQL {
 
 		if (silentFail == false) {
 			if (initialAmount == sellAmount) {
-				if (sellPrice>0){
-					
-					ExchangeMarket.sendMessage(sender, F("noBuyersForSellPrice", itemName,  sellAmount, ExchangeMarket.Round(sellPrice * sellAmount, Config.priceRounding),  ExchangeMarket.Round(sellPrice, Config.priceRounding)));
-				}else{
+				if (sellPrice > 0) {
+
+					ExchangeMarket.sendMessage(
+						sender,
+						F("noBuyersForSellPrice", itemName, sellAmount, ExchangeMarket.Round(sellPrice * sellAmount, Config.priceRounding),
+							ExchangeMarket.Round(sellPrice, Config.priceRounding)));
+				} else {
 					ExchangeMarket.sendMessage(sender, F("noBuyersForSell", itemName, sellAmount));
 				}
 			}
@@ -1160,7 +1163,8 @@ public class MySQL {
 
 		ResultSet result = statement.executeQuery();
 
-		int type, itemID, itemDur, amount, id;
+		short itemDur;
+		int type, itemID, amount, id;
 		Boolean infinite;
 		double price;
 		String itemName, trader, itemEnchants;
@@ -1172,7 +1176,7 @@ public class MySQL {
 			infinite = result.getBoolean(3);
 			trader = result.getString(4);
 			itemID = result.getInt(5);
-			itemDur = result.getInt(6);
+			itemDur = result.getShort(6);
 			itemEnchants = result.getString(7);
 			price = result.getDouble(8);
 			amount = result.getInt(9);
@@ -1237,7 +1241,8 @@ public class MySQL {
 
 		ResultSet result = statement.executeQuery();
 
-		int id, type, itemID, itemDur, amount;
+		short itemDur;
+		int id, type, itemID, amount;
 		double price;
 		String itemName, itemEnchants;
 		Boolean infinite;
@@ -1248,7 +1253,7 @@ public class MySQL {
 			type = result.getInt(2);
 			infinite = result.getBoolean(3);
 			itemID = result.getInt(5);
-			itemDur = result.getInt(6);
+			itemDur = result.getShort(6);
 			itemEnchants = result.getString(7);
 			price = result.getDouble(8);
 			amount = result.getInt(9);
@@ -1357,58 +1362,61 @@ public class MySQL {
 		qReturn.close();
 	}
 
-	public static void postSellOrder(CommandSender sender, int itemID, short itemDur, String itemEnchants, int sellAmount, double sellPrice, Boolean dryrun)
-		throws SQLException {
+	public static void postSellOrder(CommandSender sender, ItemStack stock, double sellPrice, Boolean dryrun) throws SQLException {
+
 		int success = 0;
-		String itemName = ItemDb.getItemName(itemID, itemDur);
-		if (itemEnchants != null)
-			itemName += "-" + itemEnchants;
+		String itemName = ItemDb.getItemName(stock, true);
+
+		String itemEnchants = MaterialUtil.Enchantment.encodeEnchantment(stock);
+		
+		int amount = stock.getAmount();
 
 		Player player = (Player) sender;
 
-		if (sellAmount > 0) {
-			ItemStack itemStack = new ItemStack(itemID, 1);
-			itemStack.setDurability(itemDur);
-			itemStack.addEnchantments(MaterialUtil.Enchantment.getEnchantments(itemEnchants));
+		if (amount > 0) {
+			// ItemStack itemStack = new ItemStack(itemID, 1);
+			// itemStack.setDurability(itemDur);
+			// itemStack.addEnchantments(MaterialUtil.Enchantment.getEnchantments(itemEnchants));
 
-			if (InventoryUtil.getAmount(itemStack, player.getInventory()) <= 0) {
+			if (InventoryUtil.getAmount(stock, player.getInventory()) <= 0) {
 				ExchangeMarket.sendMessage(sender, F("noItemInInventory", itemName));
 				ExchangeMarket.sendMessage(sender, L("failedToCreateOrder"));
 				return;
 			}
 
-			sellAmount = Math.min(sellAmount, InventoryUtil.getAmount(itemStack, player.getInventory()));
-			itemStack.setAmount(sellAmount);
+			amount = Math.min(amount, InventoryUtil.getAmount(stock, player.getInventory()));
+			stock.setAmount(amount);
 
 			// int success = plugin.processSellOrder(sender,
 			// stock.getTypeId(), stock.getDurability(), amount, price, dryrun);
 
-			sellAmount = checkBuyOrders(sender, itemID, itemDur, itemEnchants, sellAmount, sellPrice, false, true);
-
-			if (sellAmount == 0)
+			amount = checkBuyOrders(sender, stock.getTypeId(), stock.getDurability(), itemEnchants, amount, sellPrice, false, true);
+			ExchangeMarket.info("C " + amount);
+			if (amount == 0)
 				return;
 
 			if (dryrun == false)
-				success = insertOrder(1, false, sender.getName(), itemID, itemDur, itemEnchants, sellPrice, sellAmount);
+				success = insertOrder(1, false, sender.getName(), stock.getTypeId(), stock.getDurability(), itemEnchants, sellPrice, amount);
 
 			if (success > 0 || dryrun == true) {
 				String preview = "";
 				if (dryrun == true)
 					preview = L("preview");
 
-				ExchangeMarket.sendMessage(sender, preview + F("withdrewItem", itemName, sellAmount));
+				ExchangeMarket.sendMessage(sender, preview + F("withdrewItem", itemName, amount));
 
 				ExchangeMarket.sendMessage(
 					sender,
 					preview
-						+ F("createdSellOrder", itemName, sellAmount, ExchangeMarket.Round(sellAmount * sellPrice, Config.priceRounding),
+						+ F("createdSellOrder", itemName, amount, ExchangeMarket.Round(amount * sellPrice, Config.priceRounding),
 							ExchangeMarket.Round(sellPrice, Config.priceRounding)));
 				// plugin.debtPlayer(sender.getName(), sellPrice * sellPrice);
-				if (dryrun == false) {
-					InventoryUtil.remove(itemStack, player.getInventory());
+				ExchangeMarket.info("E " + amount);
 
+				if (dryrun == false) {
+					InventoryUtil.remove(stock, player.getInventory());
 					if (success == 1)
-						ExchangeMarket.announceNewOrder(1, sender, itemID, itemDur, itemEnchants, sellAmount, sellPrice);
+						ExchangeMarket.announceNewOrder(1, sender, stock.getTypeId(), stock.getDurability(), itemEnchants, amount, sellPrice);
 				}
 			}
 
@@ -1418,6 +1426,11 @@ public class MySQL {
 
 	}
 
+	/*
+	 * ABC
+	 * 
+	 * v
+	 */
 	public static void setPassword(CommandSender sender, String password) throws SQLException {
 		String hash = BCrypt.hashpw(password, BCrypt.gensalt());
 		String table = Config.sqlPrefix + "Passwords";
@@ -1579,7 +1592,8 @@ public class MySQL {
 		result = statement.executeQuery();
 
 		double price;
-		int type, itemID, itemDur, amount;
+		short itemDur;
+		int type, itemID, amount;
 		String buyer, itemEnchants, itemName;
 		Timestamp timestamp;
 
@@ -1589,7 +1603,7 @@ public class MySQL {
 			type = result.getInt(2);
 			buyer = result.getString(3);
 			itemID = result.getInt(4);
-			itemDur = result.getInt(5);
+			itemDur = result.getShort(5);
 			itemEnchants = result.getString(6);
 			amount = result.getInt(7);
 			price = result.getDouble(8);

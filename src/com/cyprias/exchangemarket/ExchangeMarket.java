@@ -158,11 +158,16 @@ public class ExchangeMarket extends JavaPlugin {
 
 		return player.hasPermission(node);
 	}
-
+	
+	//static {}
+	private static final Logger logger = java.util.logging.Logger.getLogger("ExchangeMarket");
 	public static void info(String msg) {
-		server.getConsoleSender().sendMessage(chatPrefix + msg);
+		//server.getConsoleSender().sendMessage(chatPrefix + msg);
+		logger.info(ChatColor.stripColor(chatPrefix + msg));
 	}
 
+	
+	
 	public static void sendMessage(CommandSender sender, String message, Boolean showConsole, Boolean sendPrefix) {
 		if (sender instanceof Player && showConsole == true) {
 			info("§e" + sender.getName() + "->§f" + message);
@@ -214,7 +219,7 @@ public class ExchangeMarket extends JavaPlugin {
 		return null;
 	}
 
-	public static void notifyBuyerOfExchange(String buyerName, int itemID, int itemDur, int amount, double price, String trader, Boolean dryrun) {
+	public static void notifyBuyerOfExchange(String buyerName, int itemID, short itemDur, int amount, double price, String trader, Boolean dryrun) {
 		Player player = findPlayerByName(buyerName);
 
 		if (player != null) {
@@ -230,7 +235,7 @@ public class ExchangeMarket extends JavaPlugin {
 		}
 	}
 
-	public static void notifySellerOfExchange(String buyerName, int itemID, int itemDur, String itemEnchants, int amount, double price, String trader, Boolean dryrun) {
+	public static void notifySellerOfExchange(String buyerName, int itemID, short itemDur, String itemEnchants, int amount, double price, String trader, Boolean dryrun) {
 		Player player = findPlayerByName(buyerName);
 		if (player != null) {
 			String itemName = ItemDb.getItemName(itemID, itemDur);
@@ -316,7 +321,7 @@ public class ExchangeMarket extends JavaPlugin {
 		return df.format(Rval);
 	}
 
-	public static void announceNewOrder(int type, CommandSender sender, int itemID, int itemDur, String itemEnchants, int amount, double price) {
+	public static void announceNewOrder(int type, CommandSender sender, int itemID, short itemDur, String itemEnchants, int amount, double price) {
 
 		Player player = (Player) sender;
 

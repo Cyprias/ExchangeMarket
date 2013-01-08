@@ -109,9 +109,6 @@ public class SellOrder {
 			return true;
 		}
 		
-		// postBuyOrder
-		
-		
 		Database.postSellOrder(sender, item, price, false);
 
 		return true;

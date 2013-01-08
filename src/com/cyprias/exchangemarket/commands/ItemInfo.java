@@ -42,6 +42,12 @@ public class ItemInfo {
 		if (args.length>1)
 			item = ItemDb.getItemStack(args[1]);
 
+		if (item == null || item.getTypeId() == 0) {
+			ExchangeMarket.sendMessage(sender, F("invalidItem", args[1]));
+			return true;
+		}
+		
+		
 		ExchangeMarket.sendMessage(sender, F("itemInfomation"));
 		String itemName = ItemDb.getItemName(item.getTypeId(), item.getDurability());
 		String itemEnchants = MaterialUtil.Enchantment.encodeEnchantment(item);
