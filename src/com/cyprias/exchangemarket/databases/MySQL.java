@@ -696,7 +696,7 @@ public class MySQL {
 					bought = canBuy;
 				}
 
-				ExchangeMarket.info("canBuy: " + canBuy + ", bought: " + bought);
+				//ExchangeMarket.info("canBuy: " + canBuy + ", bought: " + bought);
 				if (bought > 0) {
 					tAmount += bought;
 					tPrice += price * bought;
