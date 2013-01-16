@@ -264,4 +264,24 @@ public class SQLite implements Database {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	@Override
+	public Boolean sendToMailbox(String receiver, ItemStack stock, int amount) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public boolean orderExists(int id) throws SQLException {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public int getAmount(int id) throws SQLException {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+
 }

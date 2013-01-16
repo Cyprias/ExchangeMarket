@@ -50,6 +50,7 @@ public interface Database {
 	Order findMatchingOrder(Order order) throws SQLException;
 
 	Boolean setAmount(int id, int amount) throws SQLException;
+	int getAmount(int id) throws SQLException;
 	
 	Double getLastPrice(Order order) throws SQLException;
 
@@ -60,6 +61,10 @@ public interface Database {
 	Boolean remove(int id) throws SQLException;
 	
 	Boolean cleanEmpties() throws SQLException;
+
+	Boolean sendToMailbox(String receiver, ItemStack stock, int amount) throws SQLException;
+
+	boolean orderExists(int id) throws SQLException;
 	
 	//List<Order> orders = Plugin.database.search(stock);
 	

@@ -63,6 +63,10 @@ public class Order {
 		return ChatColor.WHITE.toString() + this.id + ChatColor.RESET;
 	}
 	
+	public Boolean sendAmountToMailbox(int amount) throws SQLException{
+		return Plugin.database.sendToMailbox(player, this.stock, amount);
+	}
+	
 	public int getId(){
 		return this.id;
 	}
@@ -105,6 +109,13 @@ public class Order {
 		return "OTHER";
 	}
 	
+	public boolean exists() throws SQLException {
+		if (id>0)
+			return Plugin.database.orderExists(id);
+		
+		return false;
+	}
+	
 	public boolean isInfinite() {
 		return this.infinite;
 	}
@@ -123,7 +134,10 @@ public class Order {
 	public double getPrice(){
 		return this.price;
 	}
-	public int getAmount(){
+	public int getAmount() throws SQLException{
+		if (id > 0)
+			this.amount = Plugin.database.getAmount(id);
+		
 		return this.amount;
 	}
 	
@@ -133,6 +147,10 @@ public class Order {
 			Double tPrice = amount * this.price;
 			if (this.type == Order.SELL_ORDER){
 				ChatUtils.send(p, ChatUtils.getChatPrefix()+"You sold " + stock.getType() +"x" + amount + " for $" + Plugin.Round(tPrice, Config.getInt("properties.price-decmial-places")) + ".");
+			}else if (this.type == Order.BUY_ORDER){
+				ChatUtils.send(p, ChatUtils.getChatPrefix()+"You bought " + stock.getType() +"x" + amount + " for $" + Plugin.Round(tPrice, Config.getInt("properties.price-decmial-places")) + ".");
+					
+				
 			}
 		}
 		
@@ -183,7 +201,7 @@ public class Order {
 		return false;
 	}
 	
-	public String formatString(String format, CommandSender sender){
+	public String formatString(String format, CommandSender sender) throws SQLException{
 		String message = format.replace("<id>", String.valueOf(getId()));
 		message = message.replace("<cid>", getCId(sender));
 		message = message.replace("<otype>", getOrderTypeColouredString());

@@ -23,6 +23,8 @@ import com.cyprias.ExchangeMarket.configuration.Config;
 public class MySQL implements Database {
 	static String prefix;
 	static String order_table;
+	static String mailbox_table;
+	
 	public Boolean init() {
 		if (!canConnect()){
 			Logger.warning("Failed to connect to MySQL!");
@@ -30,7 +32,7 @@ public class MySQL implements Database {
 		}
 		prefix = Config.getString("mysql.prefix");
 		order_table = prefix+ "Orders";
-		
+		mailbox_table  = prefix+ "Mailbox"; 
 		
 		
 		try {
@@ -583,6 +585,69 @@ public class MySQL implements Database {
 	public Boolean cleanEmpties() throws SQLException {
 		int succsess = executeUpdate("DELETE FROM `"+order_table+"` WHERE `amount` = 0");
 		return (succsess > 0) ? true : false;
+	}
+
+	
+	
+	@Override
+	public Boolean sendToMailbox(String receiver, ItemStack stock, int amount) throws SQLException {
+		String query = "UPDATE `" + mailbox_table
+			+ "` SET `amount` = `amount` + ?, `time` = CURRENT_TIMESTAMP WHERE `player` = ? AND `itemId` = ? AND `itemDur` = ?";// AND `itemEnchant` = ?";
+		
+		int succsess;
+		if (stock.getEnchantments().size() > 0){
+			query += " AND `itemEnchant` = ?";
+			succsess = executeUpdate(query, amount, receiver, stock.getTypeId(), stock.getDurability(), MaterialUtil.Enchantment.encodeEnchantment(stock));
+		}else{
+			query += " AND `itemEnchant` IS NULL";
+			succsess = executeUpdate(query, amount, receiver, stock.getTypeId(), stock.getDurability());
+		}
+		
+
+		if (succsess > 0) return true;
+		
+		query = "INSERT INTO `" + mailbox_table + "` (`player`, `itemId`, `itemDur`, `itemEnchant`, `amount`, `time`) VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP);";
+		
+		succsess = executeUpdate(query, receiver, stock.getTypeId(), stock.getDurability(), ((stock.getEnchantments().size() > 0) ? MaterialUtil.Enchantment.encodeEnchantment(stock) : null), amount);
+		return (succsess > 0) ? true : false;
+	}
+
+	@Override
+	public boolean orderExists(int id) throws SQLException {
+		boolean exists = false;
+		queryReturn results = executeQuery("SELECT * FROM `"+order_table+"` WHERE `id` = ? LIMIT 0 , 1", id);
+		ResultSet r = results.result;
+
+		Order order = null;
+		while (r.next()) {
+			exists = true;
+			break;
+		}
+		
+		results.close();
+		
+		return exists;
+	}
+
+	@Override
+	public int getAmount(int id) throws SQLException {
+		int amount = 0;
+		String query = "SELECT * FROM `"+order_table+"` WHERE `id` = ? ";
+		
+		queryReturn results = executeQuery(query, id);
+	
+
+		ResultSet r = results.result;
+		
+		List<Order> orders = new ArrayList<Order>();
+		Order order;
+		while (r.next()) {
+			
+			amount = r.getInt("amount");
+			
+		}
+		
+		return amount;
 	}
 	
 }

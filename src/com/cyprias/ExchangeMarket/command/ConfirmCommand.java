@@ -54,7 +54,6 @@ public class ConfirmCommand implements Command {
 	static HashMap<String, pendingTranasction> pendingTransactions = new HashMap<String, pendingTranasction>();
 	static HashMap<String, Boolean> expiredTransactions = new HashMap<String, Boolean>();
 
-	
 	public static class pendingTranasction {
 		List<pendingOrder> pendingOrders;
 		private Player player;
@@ -68,15 +67,15 @@ public class ConfirmCommand implements Command {
 
 	}
 
-	private void removeOrderFromOthers(CommandSender sender, int oID){
+	private void removeOrderFromOthers(CommandSender sender, int oID) {
 		pendingOrder po;
 		List<pendingOrder> pending;
 		for (String playerName : pendingTransactions.keySet()) {
-			if (sender.getName().equalsIgnoreCase(playerName)){
+			if (!sender.getName().equalsIgnoreCase(playerName)) {
 				pending = pendingTransactions.get(playerName).pendingOrders;
 				for (int i = 0; i < pending.size(); i++) {
-					 po = pending.get(i);
-					if (po.order.getId() == oID){
+					po = pending.get(i);
+					if (po.order.getId() == oID) {
 						pendingTransactions.remove(playerName);
 						expiredTransactions.put(playerName, true);
 						Logger.info(sender.getName() + " has expired " + playerName + "'s previous esimite.");
@@ -86,8 +85,7 @@ public class ConfirmCommand implements Command {
 			}
 		}
 	}
-		
-	
+
 	@Override
 	public boolean execute(CommandSender sender, org.bukkit.command.Command cmd, String[] args) throws IllegalArgumentException, SQLException {
 		if (!Plugin.checkPermission(sender, Perm.CONFIRM)) {
@@ -98,8 +96,9 @@ public class ConfirmCommand implements Command {
 			getCommands(sender, cmd);
 			return true;
 		}
-		
+
 		if (expiredTransactions.containsKey(sender.getName())) {
+			expiredTransactions.remove(sender.getName());
 			ChatUtils.send(sender, "Your previous estimite has expired, start over.");
 			return true;
 		}
@@ -110,68 +109,151 @@ public class ConfirmCommand implements Command {
 
 		pendingTranasction pT = pendingTransactions.get(sender.getName());
 
-		if (pT.transactionType == Order.SELL_ORDER) {
+		List<pendingOrder> pending = pT.pendingOrders;
+		pendingOrder po;
+		//int traded;
+		int totalTraded = 0;
+		double spend, profit;
+		ItemStack stock = null;
+		double moneyTraded = 0;
+		int traded = 0;
+		if (pT.transactionType == Order.SELL_ORDER) {//Buy command
 
-			List<pendingOrder> pending = pT.pendingOrders;
-
-			pendingOrder po;
-			ItemStack stock = null;
-			int added;
-			double spend;
-			double moneySpent = 0;
-			int itemsBought = 0;
+			
+			
+			
+			
+			
+			
 			for (int i = 0; i < pending.size(); i++) {
 				po = pending.get(i);
-				removeOrderFromOthers(sender, po.order.getId());
 				
 				stock = po.order.getItemStack();
+				if (!po.order.exists())
+					break;
+				
+				//removeOrderFromOthers(sender, po.order.getId());
 
-				if (po.order.getOrderType() == Order.SELL_ORDER) {
-					added = po.amount;
-					itemsBought = +added;
-					spend = added * po.order.getPrice();
+				
 
-					stock.setAmount(added);
+				traded = po.amount;
+				
+				traded = Math.min(po.order.getAmount(), traded);
+				
+				traded = Math.min(traded, Plugin.getFitAmount(stock, 64*36, pT.player.getInventory()));
+				
+				if (traded <= 0)
+					break;
 
-					InventoryUtil.add(stock, pT.player.getInventory());
+				stock.setAmount(traded);
 
-					Econ.withdrawPlayer(pT.player.getName(), spend);
-					Econ.depositPlayer(po.order.getPlayer(), spend);
-					
-					
-					moneySpent = +spend;
+				totalTraded += traded;
+				
+				//
+				
+				
+				InventoryUtil.add(stock, pT.player.getInventory());
+				
+				spend = traded * po.order.getPrice();
+				Econ.withdrawPlayer(pT.player.getName(), spend);
+				Econ.depositPlayer(po.order.getPlayer(), spend);
 
-					po.order.reduceAmount(added);
+				moneyTraded += spend;
 
-					po.order.notifyPlayerOfTransaction(added);
-				}
+				po.order.reduceAmount(traded);
+
+				po.order.notifyPlayerOfTransaction(traded);
 
 			}
+
 			Plugin.database.cleanEmpties();
 
-			if (moneySpent > 0) {
+			if (moneyTraded > 0) {
 				ChatUtils.send(sender, String.format("§7Spent $§f%s §7buying §f%s §7items.",
-					Plugin.Round(moneySpent, Config.getInt("properties.price-decmial-places")), itemsBought));
-				
-				
+					Plugin.Round(moneyTraded, Config.getInt("properties.price-decmial-places")), totalTraded));
+
 			} else {
 				stock.setAmount(1);
 				if (!InventoryUtil.fits(stock, ((Player) sender).getInventory())) {
 					ChatUtils.send(sender, "You have no bag space available.");
 				} else {
-					ChatUtils.send(sender, "Failed to buy any items, try creating a buy order.");
+					ChatUtils.send(sender, "Failed to buy any items, start over.");
+					pendingTransactions.remove(sender.getName());
 				}
 
 			}
 
-			pendingTransactions.remove(sender.getName());
-		}
+			//pendingTransactions.remove(sender.getName());
+			
+			
+		}else if (pT.transactionType == Order.BUY_ORDER) {//Sell command
+			
+			
+			for (int i = 0; i < pending.size(); i++) {
+				po = pending.get(i);
+			//	removeOrderFromOthers(sender, po.order.getId());
+				stock = po.order.getItemStack();
+				if (!po.order.exists())
+					break;
+				
+				traded = po.amount;
+				
+				traded = Math.min(po.order.getAmount(), traded);
+				
+				
+				
+				
+				traded = Math.min(InventoryUtil.getAmount(stock, pT.player.getInventory()), traded);
+				
+				if (traded <= 0)
+					break;
+				
+				stock.setAmount(traded);
+				
+				//totalTraded = +po.amount;
+				
 
+				
+				InventoryUtil.remove(stock, pT.player.getInventory());
+				
+				Logger.info("Mailbox: " + po.order.sendAmountToMailbox(traded));
+				
+				profit = traded * po.order.getPrice();
+				Econ.depositPlayer(sender.getName(), profit);
+				
+				po.order.reduceAmount(traded);
+				po.order.notifyPlayerOfTransaction(traded);
+				
+				moneyTraded += profit;
+				
+				totalTraded += traded;
+				
+				
+				//po.order
+				
+			}
+			if (moneyTraded > 0) {
+				Plugin.database.cleanEmpties();
+				ChatUtils.send(sender, String.format("§7Made $§f%s §7selling §f%s §7items.",
+					Plugin.Round(moneyTraded, Config.getInt("properties.price-decmial-places")), totalTraded));
+
+				
+			} else if (InventoryUtil.getAmount(stock, pT.player.getInventory()) == 0) {
+				ChatUtils.send(sender, "You have no " + stock.getType() + " to sell.");
+				
+			} else {
+				ChatUtils.send(sender, "Failed to sell any items, start over.");
+				pendingTransactions.remove(sender.getName());
+			}
+			
+			//pendingTransactions.remove(sender.getName());
+			
+		}
+		
 		// Econ.withdrawPlayer(sender.getName(), spend);
 		// Econ.depositPlayer(o.getPlayer(), spend);
 		// o.reduceAmount(added);
 
 		return true;
 	}
-
 }

@@ -23,7 +23,7 @@ public class SellOrderCommand implements Command {
 			list.add("/%s sellorder - Create a sell order.");
 	}
 
-	public boolean execute(final CommandSender sender, org.bukkit.command.Command cmd, String[] args) {
+	public boolean execute(final CommandSender sender, org.bukkit.command.Command cmd, String[] args) throws SQLException {
 		if (!Plugin.checkPermission(sender, Perm.SELL_ORDER)) {
 			return false;
 		}

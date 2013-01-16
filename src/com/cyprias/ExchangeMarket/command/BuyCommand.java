@@ -100,19 +100,22 @@ public class BuyCommand implements Command {
 			ChatUtils.send(sender, "Orders: " + orders.size());
 			
 			Order o;
-			int canBuy;
+			int canTrade;
 			String format = "§7Bought §f%s§7x§f%s §7@ $§f%s §7($§f%s§7e)";
 			
 			String message;
 			int dplaces = Config.getInt("properties.price-decmial-places");
 			double moneySpent = 0;
-			int itemsBought = 0;
+			int itemsTraded = 0;
 			
 			int playerCanFit = Plugin.getFitAmount(stock, 64*36, player.getInventory());
 			
 			if (ConfirmCommand.pendingTransactions.containsKey(sender.getName()))
 				ConfirmCommand.pendingTransactions.remove(sender.getName());
 
+			if (ConfirmCommand.expiredTransactions.containsKey(sender.getName())) 
+				ConfirmCommand.expiredTransactions.remove(sender.getName());
+			
 			pendingTranasction pT = new ConfirmCommand.pendingTranasction(player, new ArrayList<pendingOrder>(), Order.SELL_ORDER);
 			ConfirmCommand.pendingTransactions.put(sender.getName(), pT);
 			
@@ -130,43 +133,43 @@ public class BuyCommand implements Command {
 				
 				o = orders.get(i);
 
-				canBuy = Math.min(o.getAmount(), amount);
-				canBuy = (int) Math.floor(Math.min(canBuy, Econ.getBalance(sender.getName()) / o.getPrice()));
+				canTrade = Math.min(o.getAmount(), amount);
+				canTrade = (int) Math.floor(Math.min(canTrade, Econ.getBalance(sender.getName()) / o.getPrice()));
 				
 
 
 				//stock.setAmount(canBuy);
-				canBuy = Math.min(canBuy, playerCanFit);
+				canTrade = Math.min(canTrade, playerCanFit);
 				
-				if (canBuy <= 0)
+				if (canTrade <= 0)
 					break;
 				
-				int added = canBuy;//(canBuy - leftover);
-				playerCanFit -= added;
+				int traded = canTrade;//(canBuy - leftover);
+				playerCanFit -= traded;
 				
-				double spend = (added*o.getPrice());
+				double spend = (traded*o.getPrice());
 				moneySpent += spend;
 				
-				pendingOrder po = new pendingOrder(o, added);
+				pendingOrder po = new pendingOrder(o, traded);
 				
 				pending.add(po);
 				
 				
 				
-				Logger.debug(o.getId() + " x" + o.getAmount() + ", canBuy: " + canBuy + " (" + (canBuy*o.getPrice())+ ") added: " + added);
+				Logger.debug(o.getId() + " x" + o.getAmount() + ", canBuy: " + canTrade + " (" + (canTrade*o.getPrice())+ ") added: " + traded);
 
 				//message = format.format(format, o.getItemType(), added, Plugin.Round((added*o.getPrice()),dplaces), Plugin.Round(o.getPrice(),dplaces));
 				//ChatUtils.send(sender, "§a[Prevew] " + message);
 				
-				itemsBought += added;
-				amount -=added;
+				itemsTraded += traded;
+				amount -=traded;
 
 			}
 			
 			if (moneySpent > 0){
 				
 				
-				ChatUtils.send(sender, String.format("§a[Estimite] §f%s§7x§f%s§7 costs $§f%s§7, type §d/em confirm §7to commit transaction.", stock.getType(), itemsBought, Plugin.Round(moneySpent, dplaces)));
+				ChatUtils.send(sender, String.format("§a[Estimite] §f%s§7x§f%s§7 costs $§f%s§7, type §d/em confirm §7to commit transaction.", stock.getType(), itemsTraded, Plugin.Round(moneySpent, dplaces)));
 				
 	
 				
@@ -182,8 +185,9 @@ public class BuyCommand implements Command {
 			
 			}
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			ChatUtils.error(sender, "An error has occured: " + e.getLocalizedMessage());
+			return true;
 		}
 		
 		
