@@ -1391,7 +1391,7 @@ public class MySQL {
 			// stock.getTypeId(), stock.getDurability(), amount, price, dryrun);
 
 			amount = checkBuyOrders(sender, stock.getTypeId(), stock.getDurability(), itemEnchants, amount, sellPrice, false, true);
-			ExchangeMarket.info("C " + amount);
+			//ExchangeMarket.info("C " + amount);
 			if (amount == 0)
 				return;
 
@@ -1411,7 +1411,7 @@ public class MySQL {
 						+ F("createdSellOrder", itemName, amount, ExchangeMarket.Round(amount * sellPrice, Config.priceRounding),
 							ExchangeMarket.Round(sellPrice, Config.priceRounding)));
 				// plugin.debtPlayer(sender.getName(), sellPrice * sellPrice);
-				ExchangeMarket.info("E " + amount);
+				//ExchangeMarket.info("E " + amount);
 
 				if (dryrun == false) {
 					InventoryUtil.remove(stock, player.getInventory());
