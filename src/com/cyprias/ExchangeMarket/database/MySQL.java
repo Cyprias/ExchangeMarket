@@ -647,6 +647,8 @@ public class MySQL implements Database {
 			
 		}
 		
+		results.close();
+		
 		return amount;
 	}
 	

@@ -169,8 +169,8 @@ public class ConfirmCommand implements Command {
 			Plugin.database.cleanEmpties();
 
 			if (moneyTraded > 0) {
-				ChatUtils.send(sender, String.format("§7Spent $§f%s §7buying §f%s §7items.",
-					Plugin.Round(moneyTraded, Config.getInt("properties.price-decmial-places")), totalTraded));
+				ChatUtils.send(sender, String.format("§7Spent $§f%s §7buying §f%s§7x§f%s§7.",
+					Plugin.Round(moneyTraded, Config.getInt("properties.price-decmial-places")), totalTraded, stock.getType(), totalTraded));
 
 			} else {
 				stock.setAmount(1);
@@ -234,8 +234,8 @@ public class ConfirmCommand implements Command {
 			}
 			if (moneyTraded > 0) {
 				Plugin.database.cleanEmpties();
-				ChatUtils.send(sender, String.format("§7Made $§f%s §7selling §f%s §7items.",
-					Plugin.Round(moneyTraded, Config.getInt("properties.price-decmial-places")), totalTraded));
+				ChatUtils.send(sender, String.format("§7Made $§f%s §7selling §f%s§7x§f%s§7.",
+					Plugin.Round(moneyTraded, Config.getInt("properties.price-decmial-places")), totalTraded, stock.getType(), totalTraded));
 
 				
 			} else if (InventoryUtil.getAmount(stock, pT.player.getInventory()) == 0) {
