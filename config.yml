@@ -1,0 +1,20 @@
+properties:
+  permission-default: op
+  db-type: sqlite
+  check-new-version: true
+  line-separator: "<newline>"
+  log-balance-changes-to-console: true
+  chat-prefix: "[EM] "
+  allow-damaged-gear: false
+  min-order-price: 0.0001
+  rows-per-page: 10
+  list-row-format: "&7[<otype>&7] &f<item>&7x&f<amount> &7@ $&f<price> &7(&f<priceeach>&7e)"
+  price-decmial-places: 4
+  debugging: false
+mysql:
+  hostname: localhost
+  username: root
+  password: CHANGEME
+  port: 3306
+  database: minecraft
+  prefix: EM_

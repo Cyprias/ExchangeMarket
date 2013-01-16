@@ -1,0 +1,9 @@
+name: ExchangeMarket
+main: com.cyprias.ExchangeMarket.Plugin
+version: 1.0.1
+depend: [Vault]
+
+commands:
+  em:
+    description: Exchange Market menu.
+    usage: /<command>
