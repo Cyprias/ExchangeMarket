@@ -103,7 +103,18 @@ public class BuyCommand implements Command {
 		
 		try {
 			List<Order> orders = Plugin.database.search(stock, Order.SELL_ORDER);
-		
+			for (Order o : orders){
+				if (sender.getName().equalsIgnoreCase(o.getPlayer()))
+					orders.remove(o);
+			}
+			
+			Order o;
+			
+			for (int i = (orders.size() - 1); i >= 0; i--) {
+				o = orders.get(i); 
+				if (sender.getName().equalsIgnoreCase(o.getPlayer()))
+					orders.remove(o);
+			}
 			
 			if (orders.size() <= 0){
 				ChatUtils.send(sender, String.format("§7There are §f%s §7sell orders for §f%s§7, try creating a sell order.", orders.size(), Plugin.getItemName(stock)) );
@@ -112,7 +123,7 @@ public class BuyCommand implements Command {
 			//	ChatUtils.send(sender, String.format("§7There are §f%s §7sell orders for §f%s§7.", orders.size(), stock.getType()) );
 			}
 			
-			Order o;
+			
 			int canTrade;
 			String format = "§7Bought §f%s§7x§f%s §7@ $§f%s §7($§f%s§7e)";
 			
@@ -142,9 +153,6 @@ public class BuyCommand implements Command {
 				
 				o = orders.get(i);
 
-				if (sender.getName().equalsIgnoreCase(o.getPlayer()))
-					continue;
-				
 				canTrade = Math.min(o.getAmount(), amount);
 				canTrade = (int) Math.floor(Math.min(canTrade, Econ.getBalance(sender.getName()) / o.getPrice()));
 				
@@ -168,7 +176,7 @@ public class BuyCommand implements Command {
 				
 				
 				
-				Logger.debug(o.getId() + " x" + o.getAmount() + ", canBuy: " + canTrade + " (" + (canTrade*o.getPrice())+ ") added: " + traded);
+				Logger.debug(o.getId() + " x" + o.getAmount() + ", canTrade: " + canTrade + " (" + (canTrade * o.getPrice()) + ") traded: " + traded + ", player: " + o.getPlayer());
 
 				//message = format.format(format, o.getItemType(), added, Plugin.Round((added*o.getPrice()),dplaces), Plugin.Round(o.getPrice(),dplaces));
 				//ChatUtils.send(sender, "§a[Prevew] " + message);

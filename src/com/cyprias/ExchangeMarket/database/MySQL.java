@@ -302,7 +302,7 @@ public class MySQL implements Database {
 		return search(stock, 0, null);
 	}
 	public List<Order> search(ItemStack stock, int orderType) throws SQLException{
-		return search(stock, 0, null);
+		return search(stock, orderType, null);
 	}
 	
 	
@@ -313,58 +313,6 @@ public class MySQL implements Database {
 		
 		String query = "SELECT * FROM `"+order_table+"` WHERE `itemID` = ? AND `itemDur` = ?";
 		
-		if (orderType > 0){
-			query += " AND `type` = " + orderType;
-		}
-
-		/*
-		if (o.hasEnchantments()){
-			query = "UPDATE "
-				+ order_table
-				+ " SET `amount` = `amount` + ? WHERE `type` = ? AND `infinite` = ? AND `player` LIKE ? AND `itemID` = ? AND `itemDur` = ? AND `itemEnchants` = ? AND `price` = ?;";
-			success = executeUpdate(query, o.getAmount(), o.getOrderType(), o.isInfinite(), o.getPlayer(), o.getItemId(), o.getDurability(), o.getEncodedEnchantments(), o.getPrice());
-		} else {
-			query = "UPDATE "
-				+ order_table
-				+ " SET `amount` = `amount` + ? WHERE `type` = ? AND `infinite` = ? AND `player` LIKE ? AND `itemID` = ? AND `itemDur` = ? AND `itemEnchants` IS NULL  AND `price` = ?;";
-
-			success = executeUpdate(query, o.getAmount(), o.getOrderType(), o.isInfinite(), o.getPlayer(), o.getItemId(), o.getDurability(), o.getPrice());
-		}
-		*/
-		
-		//List<String> sqlStrings = new ArrayList<String>();
-		
-		/*
-		ItemStack item ;
-		if (parser.items.size() > 0){
-			query +=" (`itemID` LIKE ? AND `itemDur` LIKE ?)";
-			item = parser.items.get(0);
-
-			sqlStrings.add(String.valueOf(item.getTypeId()));
-			sqlStrings.add(String.valueOf(item.getDurability()));
-			
-			
-			for (int i=1; i< parser.items.size(); i++){
-				query +=" OR (`itemID` LIKE ? AND `itemDur` LIKE ?)";
-				item = parser.items.get(i);
-				
-				
-				sqlStrings.add(String.valueOf(item.getTypeId()));
-				sqlStrings.add(String.valueOf(item.getDurability()));
-			}
-			
-		}
-
-		if (parser.players.size() > 0){
-			query +=" AND `player` LIKE ?";
-			sqlStrings.add(parser.players.get(0));
-		}
-		
-		for (int i=1; i< parser.players.size(); i++){
-			query +=" OR `player` LIKE ?";
-			sqlStrings.add(parser.players.get(i));
-		}
-		*/
 		String orderBy = " ORDER BY `price` ASC, `amount` ASC";
 
 		
@@ -393,22 +341,26 @@ public class MySQL implements Database {
 		Order order;
 		while (r.next()) {
 			
-			if (sender == null || sender.getName().equalsIgnoreCase(r.getString("player"))){
-			
-				order = new Order(
-					r.getInt("type"),
-					r.getBoolean("infinite"),
-					r.getString("player"),
-					r.getInt("itemID"),
-					r.getShort("itemDur"),
-					r.getString("itemEnchants"),
-					r.getInt("amount"),
-					r.getDouble("price")
-				);
-				order.setId(r.getInt("id"));
+			if (sender != null && !sender.getName().equalsIgnoreCase(r.getString("player")))
+				continue;
+
+			if (orderType > 0 && orderType != r.getInt("type"))
+				continue;
 				
-				orders.add(order);
-			}
+			order = new Order(
+				r.getInt("type"),
+				r.getBoolean("infinite"),
+				r.getString("player"),
+				r.getInt("itemID"),
+				r.getShort("itemDur"),
+				r.getString("itemEnchants"),
+				r.getInt("amount"),
+				r.getDouble("price")
+			);
+			order.setId(r.getInt("id"));
+			
+			orders.add(order);
+			
 			
 		}
 		
