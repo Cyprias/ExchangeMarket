@@ -283,5 +283,23 @@ public class SQLite implements Database {
 		return 0;
 	}
 
+	@Override
+	public List<Parcel> getPackages(CommandSender sender) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Boolean setPackageAmount(int id, int amount) throws SQLException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Boolean cleanMailboxEmpties() throws SQLException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 
 }

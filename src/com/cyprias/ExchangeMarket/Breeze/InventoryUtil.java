@@ -1,4 +1,4 @@
-package com.cyprias.Breeze;
+package com.cyprias.ExchangeMarket.Breeze;
 
 import java.util.HashMap;
 import java.util.LinkedList;

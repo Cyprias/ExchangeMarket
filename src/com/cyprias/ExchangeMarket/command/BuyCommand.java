@@ -9,12 +9,12 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import com.cyprias.Breeze.InventoryUtil;
 import com.cyprias.ExchangeMarket.ChatUtils;
 import com.cyprias.ExchangeMarket.Econ;
 import com.cyprias.ExchangeMarket.Logger;
 import com.cyprias.ExchangeMarket.Perm;
 import com.cyprias.ExchangeMarket.Plugin;
+import com.cyprias.ExchangeMarket.Breeze.InventoryUtil;
 import com.cyprias.ExchangeMarket.command.ConfirmCommand.pendingOrder;
 import com.cyprias.ExchangeMarket.command.ConfirmCommand.pendingTranasction;
 import com.cyprias.ExchangeMarket.configuration.Config;
@@ -88,6 +88,13 @@ public class BuyCommand implements Command {
 		}
 
 		
+		
+		if (ConfirmCommand.pendingTransactions.containsKey(sender.getName()))
+			ConfirmCommand.pendingTransactions.remove(sender.getName());
+
+		if (ConfirmCommand.expiredTransactions.containsKey(sender.getName())) 
+			ConfirmCommand.expiredTransactions.remove(sender.getName());	
+		
 	//	Order preOrder = new Order(Order.BUY_ORDER, false, sender.getName(), stock, price);
 		
 		//Double accountBalance = Econ.getBalance(sender.getName());
@@ -96,8 +103,14 @@ public class BuyCommand implements Command {
 		
 		try {
 			List<Order> orders = Plugin.database.search(stock, Order.SELL_ORDER);
+		
 			
-			ChatUtils.send(sender, "Orders: " + orders.size());
+			if (orders.size() <= 0){
+				ChatUtils.send(sender, String.format("§7There are §f%s §7sell orders for §f%s§7, try creating a sell order.", orders.size(), stock.getType()) );
+				return true;
+			//}else{
+			//	ChatUtils.send(sender, String.format("§7There are §f%s §7sell orders for §f%s§7.", orders.size(), stock.getType()) );
+			}
 			
 			Order o;
 			int canTrade;
@@ -110,11 +123,7 @@ public class BuyCommand implements Command {
 			
 			int playerCanFit = Plugin.getFitAmount(stock, 64*36, player.getInventory());
 			
-			if (ConfirmCommand.pendingTransactions.containsKey(sender.getName()))
-				ConfirmCommand.pendingTransactions.remove(sender.getName());
 
-			if (ConfirmCommand.expiredTransactions.containsKey(sender.getName())) 
-				ConfirmCommand.expiredTransactions.remove(sender.getName());
 			
 			pendingTranasction pT = new ConfirmCommand.pendingTranasction(player, new ArrayList<pendingOrder>(), Order.SELL_ORDER);
 			ConfirmCommand.pendingTransactions.put(sender.getName(), pT);
@@ -150,7 +159,7 @@ public class BuyCommand implements Command {
 				double spend = (traded*o.getPrice());
 				moneySpent += spend;
 				
-				pendingOrder po = new pendingOrder(o, traded);
+				pendingOrder po = new pendingOrder(o.getId(), traded);
 				
 				pending.add(po);
 				
@@ -169,7 +178,7 @@ public class BuyCommand implements Command {
 			if (moneySpent > 0){
 				
 				
-				ChatUtils.send(sender, String.format("§a[Estimite] §f%s§7x§f%s§7 costs $§f%s§7, type §d/em confirm §7to commit transaction.", stock.getType(), itemsTraded, Plugin.Round(moneySpent, dplaces)));
+				ChatUtils.send(sender, String.format("§a[Estimite] §f%s§7x§f%s§7 will cost $§f%s§7, type §d/em confirm §7to commit transaction.", stock.getType(), itemsTraded, Plugin.Round(moneySpent, dplaces)));
 				
 	
 				

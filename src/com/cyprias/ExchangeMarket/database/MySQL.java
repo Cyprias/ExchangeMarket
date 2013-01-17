@@ -6,6 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,10 +14,9 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.inventory.ItemStack;
 
 
-import com.cyprias.Breeze.MaterialUtil;
 import com.cyprias.ExchangeMarket.ChatUtils;
 import com.cyprias.ExchangeMarket.Logger;
-import com.cyprias.ExchangeMarket.SearchParser;
+import com.cyprias.ExchangeMarket.Breeze.MaterialUtil;
 import com.cyprias.ExchangeMarket.configuration.Config;
 
 
@@ -77,11 +77,10 @@ public class MySQL implements Database {
 
 		}
 
-		if (tableExists(prefix + "Mailbox") == false) {
+		if (tableExists(mailbox_table) == false) {
 			con.prepareStatement(
 				"CREATE TABLE `"
-					+ prefix
-					+ "Mailbox"
+					+ mailbox_table
 					+ "` (`id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY, `player` VARCHAR(32) NOT NULL, `itemId` INT NOT NULL, `itemDur` INT NOT NULL, `itemEnchant` VARCHAR(16) NULL, `amount` INT NOT NULL, `time` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP) ENGINE = InnoDB")
 				.executeUpdate();
 		}
@@ -95,7 +94,7 @@ public class MySQL implements Database {
 	}
 
 	private static void migrateExchangedToMailbox() throws SQLException {
-		queryReturn results = executeQuery("SELECT * FROM `" + prefix + "Orders" + "` WHERE `type` =2 AND `exchanged` >0");
+		queryReturn results = executeQuery("SELECT * FROM `" + order_table + "` WHERE `type` =2 AND `exchanged` >0");
 		ResultSet r = results.result;
 		
 		String playerName, itemEnchant;
@@ -114,11 +113,11 @@ public class MySQL implements Database {
 		results.close();
 	}
 	private static int insertIntoMailbox(String player, int itemID, int itemDur, String itemEnchant, int amount) throws SQLException {
-		int success = executeUpdate("UPDATE `" + prefix + "Mailbox"
+		int success = executeUpdate("UPDATE `" + mailbox_table
 			+ "` SET `amount` = `amount` + ?, `time` = CURRENT_TIMESTAMP WHERE `player` = ? AND `itemId` = ? AND `itemDur` = ? AND `itemEnchant` = ?", amount, player, itemID, itemDur, ((itemEnchant != null) ? itemEnchant : null));
 
 		if (success == 0) 
-			success = executeUpdate("INSERT INTO `" + prefix + "Mailbox"
+			success = executeUpdate("INSERT INTO `" + mailbox_table
 				+ "` (`id`, `player`, `itemId`, `itemDur`, `itemEnchant`, `amount`, `time`) VALUES (NULL, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP);", player, itemID, itemDur, ((itemEnchant != null)?itemEnchant : null), amount);
 
 		
@@ -148,6 +147,7 @@ public class MySQL implements Database {
 		return found;
 	}
 	
+	@SuppressWarnings("rawtypes")
 	public static queryReturn executeQuery(String query, Object... args) throws SQLException {
 		Connection con = getConnection();
 		queryReturn myreturn = null;// = new queryReturn();
@@ -498,12 +498,10 @@ public class MySQL implements Database {
 
 	@Override
 	public Boolean setAmount(int id, int amount) throws SQLException {
-		int succsess = executeUpdate("UPDATE `"+order_table+"` SET `amount` = ? WHERE `id` = ?;", amount, id);
-		return (succsess > 0) ? true : false;
+		return (executeUpdate("UPDATE `"+order_table+"` SET `amount` = ? WHERE `id` = ?;", amount, id) > 0) ? true : false;
 	}
 	public boolean setPrice(int id, double price) throws SQLException {
-		int succsess = executeUpdate("UPDATE `"+order_table+"` SET `price` = ? WHERE `id` = ?;", price, id);
-		return (succsess > 0) ? true : false;
+		return (executeUpdate("UPDATE `"+order_table+"` SET `price` = ? WHERE `id` = ?;", price, id) > 0) ? true : false;
 	}
 	
 	
@@ -577,14 +575,12 @@ public class MySQL implements Database {
 	}
 
 	public Boolean remove(int id) throws SQLException {
-		int succsess = executeUpdate("DELETE FROM `"+order_table+"` WHERE `id` = ?", id);
-		return (succsess > 0) ? true : false;
+		return (executeUpdate("DELETE FROM `"+order_table+"` WHERE `id` = ?", id) > 0) ? true : false;
 	}
 
 	@Override
 	public Boolean cleanEmpties() throws SQLException {
-		int succsess = executeUpdate("DELETE FROM `"+order_table+"` WHERE `amount` = 0");
-		return (succsess > 0) ? true : false;
+		return (executeUpdate("DELETE FROM `"+order_table+"` WHERE `amount` = 0") > 0) ? true : false;
 	}
 
 	
@@ -618,7 +614,7 @@ public class MySQL implements Database {
 		queryReturn results = executeQuery("SELECT * FROM `"+order_table+"` WHERE `id` = ? LIMIT 0 , 1", id);
 		ResultSet r = results.result;
 
-		Order order = null;
+		//Order order = null;
 		while (r.next()) {
 			exists = true;
 			break;
@@ -640,16 +636,45 @@ public class MySQL implements Database {
 		ResultSet r = results.result;
 		
 		List<Order> orders = new ArrayList<Order>();
-		Order order;
+		//Order order;
 		while (r.next()) {
-			
 			amount = r.getInt("amount");
-			
 		}
 		
 		results.close();
 		
 		return amount;
+	}
+
+	@Override
+	public List<Parcel> getPackages(CommandSender sender) throws SQLException {
+		// TODO Auto-generated method stub
+		List<Parcel> packages = new ArrayList<Parcel>();
+		
+		queryReturn results = executeQuery("SELECT * FROM `"+mailbox_table+"` WHERE `player` LIKE ?", sender.getName());
+		
+		ResultSet r = results.result;
+		Timestamp timestamp;
+		while (r.next()) {
+			
+			
+			packages.add(new Parcel(r.getInt("id"), r.getString("player"), r.getInt("itemId"), r.getShort("itemDur"), r.getString("itemEnchant"), r.getInt("amount"), r.getTimestamp("time")));
+		}
+		
+		results.close();
+		
+		return packages;
+	}
+
+	@Override
+	public Boolean setPackageAmount(int id, int amount) throws SQLException {
+		return (executeUpdate("UPDATE `"+mailbox_table+"` SET `amount` = ? WHERE `id` = ?;", amount, id) > 0) ? true : false;
+	}
+	
+
+	@Override
+	public Boolean cleanMailboxEmpties() throws SQLException {
+		return (executeUpdate("DELETE FROM `"+mailbox_table+"` WHERE `amount` = 0") > 0) ? true : false;
 	}
 	
 }

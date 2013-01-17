@@ -8,12 +8,12 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import com.cyprias.Breeze.InventoryUtil;
 import com.cyprias.ExchangeMarket.ChatUtils;
 import com.cyprias.ExchangeMarket.Econ;
 import com.cyprias.ExchangeMarket.Logger;
 import com.cyprias.ExchangeMarket.Perm;
 import com.cyprias.ExchangeMarket.Plugin;
+import com.cyprias.ExchangeMarket.Breeze.InventoryUtil;
 import com.cyprias.ExchangeMarket.configuration.Config;
 import com.cyprias.ExchangeMarket.database.Order;
 
@@ -39,14 +39,14 @@ public class ConfirmCommand implements Command {
 	// static HashMap<String, List<pendingOrder>> pendingOrders = new
 	// HashMap<String, List<pendingOrder>>();
 	public static class pendingOrder {
-		public pendingOrder(Order o, int amount) {
+		public pendingOrder(int oId, int amount) {
 			// this.player = player;
-			this.order = o;
+			this.orderId = oId;
 			this.amount = amount;
 		}
 
 		// private Player player;
-		private Order order;
+		private int orderId;
 		private int amount;
 
 	}
@@ -67,15 +67,18 @@ public class ConfirmCommand implements Command {
 
 	}
 
-	private void removeOrderFromOthers(CommandSender sender, int oID) {
+	private void removeOrderFromOthers(CommandSender sender, int oID) throws SQLException {
 		pendingOrder po;
 		List<pendingOrder> pending;
+		Order order;
 		for (String playerName : pendingTransactions.keySet()) {
 			if (!sender.getName().equalsIgnoreCase(playerName)) {
 				pending = pendingTransactions.get(playerName).pendingOrders;
 				for (int i = 0; i < pending.size(); i++) {
 					po = pending.get(i);
-					if (po.order.getId() == oID) {
+					
+					order = Plugin.database.getOrder(po.orderId);
+					if (order.getId() == oID) {
 						pendingTransactions.remove(playerName);
 						expiredTransactions.put(playerName, true);
 						Logger.info(sender.getName() + " has expired " + playerName + "'s previous esimite.");
@@ -117,6 +120,7 @@ public class ConfirmCommand implements Command {
 		ItemStack stock = null;
 		double moneyTraded = 0;
 		int traded = 0;
+		Order order;
 		if (pT.transactionType == Order.SELL_ORDER) {//Buy command
 
 			
@@ -128,9 +132,13 @@ public class ConfirmCommand implements Command {
 			for (int i = 0; i < pending.size(); i++) {
 				po = pending.get(i);
 				
-				stock = po.order.getItemStack();
-				if (!po.order.exists())
+				order = Plugin.database.getOrder(po.orderId);
+				
+				
+				if (order == null || !order.exists())
 					break;
+				
+				stock = order.getItemStack();
 				
 				//removeOrderFromOthers(sender, po.order.getId());
 
@@ -138,7 +146,7 @@ public class ConfirmCommand implements Command {
 
 				traded = po.amount;
 				
-				traded = Math.min(po.order.getAmount(), traded);
+				traded = Math.min(order.getAmount(), traded);
 				
 				traded = Math.min(traded, Plugin.getFitAmount(stock, 64*36, pT.player.getInventory()));
 				
@@ -154,15 +162,15 @@ public class ConfirmCommand implements Command {
 				
 				InventoryUtil.add(stock, pT.player.getInventory());
 				
-				spend = traded * po.order.getPrice();
+				spend = traded * order.getPrice();
 				Econ.withdrawPlayer(pT.player.getName(), spend);
-				Econ.depositPlayer(po.order.getPlayer(), spend);
+				Econ.depositPlayer(order.getPlayer(), spend);
 
 				moneyTraded += spend;
 
-				po.order.reduceAmount(traded);
+				order.reduceAmount(traded);
 
-				po.order.notifyPlayerOfTransaction(traded);
+				order.notifyPlayerOfTransaction(traded);
 
 			}
 
@@ -191,14 +199,15 @@ public class ConfirmCommand implements Command {
 			
 			for (int i = 0; i < pending.size(); i++) {
 				po = pending.get(i);
-			//	removeOrderFromOthers(sender, po.order.getId());
-				stock = po.order.getItemStack();
-				if (!po.order.exists())
+
+				order = Plugin.database.getOrder(po.orderId);
+				stock = order.getItemStack();
+				if (!order.exists())
 					break;
 				
 				traded = po.amount;
 				
-				traded = Math.min(po.order.getAmount(), traded);
+				traded = Math.min(order.getAmount(), traded);
 				
 				
 				
@@ -216,13 +225,13 @@ public class ConfirmCommand implements Command {
 				
 				InventoryUtil.remove(stock, pT.player.getInventory());
 				
-				Logger.info("Mailbox: " + po.order.sendAmountToMailbox(traded));
+				Logger.info("Mailbox: " + order.sendAmountToMailbox(traded));
 				
-				profit = traded * po.order.getPrice();
+				profit = traded * order.getPrice();
 				Econ.depositPlayer(sender.getName(), profit);
 				
-				po.order.reduceAmount(traded);
-				po.order.notifyPlayerOfTransaction(traded);
+				order.reduceAmount(traded);
+				order.notifyPlayerOfTransaction(traded);
 				
 				moneyTraded += profit;
 				
@@ -235,7 +244,7 @@ public class ConfirmCommand implements Command {
 			if (moneyTraded > 0) {
 				Plugin.database.cleanEmpties();
 				ChatUtils.send(sender, String.format("§7Made $§f%s §7selling §f%s§7x§f%s§7.",
-					Plugin.Round(moneyTraded, Config.getInt("properties.price-decmial-places")), totalTraded, stock.getType(), totalTraded));
+					Plugin.Round(moneyTraded, Config.getInt("properties.price-decmial-places")), stock.getType(), totalTraded));
 
 				
 			} else if (InventoryUtil.getAmount(stock, pT.player.getInventory()) == 0) {

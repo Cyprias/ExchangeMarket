@@ -26,13 +26,15 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.mcstats.Metrics;
 import org.xml.sax.SAXException;
 
-import com.cyprias.Breeze.InventoryUtil;
-import com.cyprias.Breeze.MaterialUtil;
+import com.cyprias.ExchangeMarket.Breeze.InventoryUtil;
+import com.cyprias.ExchangeMarket.Breeze.MaterialUtil;
 import com.cyprias.ExchangeMarket.command.BuyCommand;
 import com.cyprias.ExchangeMarket.command.BuyOrderCommand;
+import com.cyprias.ExchangeMarket.command.CollectCommand;
 import com.cyprias.ExchangeMarket.command.CommandManager;
 import com.cyprias.ExchangeMarket.command.ConfirmCommand;
 import com.cyprias.ExchangeMarket.command.ListCommand;
+import com.cyprias.ExchangeMarket.command.PriceCommand;
 import com.cyprias.ExchangeMarket.command.ReloadCommand;
 import com.cyprias.ExchangeMarket.command.SearchCommand;
 import com.cyprias.ExchangeMarket.command.SellCommand;
@@ -94,7 +96,8 @@ public class Plugin extends JavaPlugin {
 		cm.registerCommand("buy", new BuyCommand());
 		cm.registerCommand("confirm", new ConfirmCommand());
 		cm.registerCommand("sell", new SellCommand());
-		
+		cm.registerCommand("collect", new CollectCommand());
+		cm.registerCommand("price", new PriceCommand());
 		
 		this.getCommand("em").setExecutor(cm);
 

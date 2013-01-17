@@ -56,11 +56,11 @@ public class CommandManager implements CommandExecutor, Listable {
 				try {
 					args = (String[]) ArrayUtils.remove(args, 0);
 					if (args.length == 0) {
-						if (!command.hasValues()) {
+						//if (!command.hasValues()) {
 							return command.execute(sender, cmd, args);
-						}
-						this.getCommands(sender, command, cmd);
-						return true;
+						//}
+						//this.getCommands(sender, command, cmd);
+						//return true;
 					} else {
 						if (args[0].equals("?")) {
 							this.getCommands(sender, command, cmd);

@@ -9,9 +9,6 @@ import java.util.List;
 import org.bukkit.command.CommandSender;
 import org.bukkit.inventory.ItemStack;
 
-import com.cyprias.ExchangeMarket.Plugin;
-import com.cyprias.ExchangeMarket.SearchParser;
-
 public interface Database {
 
 	public static class queryReturn {
@@ -65,8 +62,12 @@ public interface Database {
 	Boolean sendToMailbox(String receiver, ItemStack stock, int amount) throws SQLException;
 
 	boolean orderExists(int id) throws SQLException;
+
+	List<Parcel> getPackages(CommandSender sender) throws SQLException;
 	
-	//List<Order> orders = Plugin.database.search(stock);
+	Boolean setPackageAmount(int id, int amount) throws SQLException;
+	
+	public Boolean cleanMailboxEmpties() throws SQLException;
 	
 	
 }

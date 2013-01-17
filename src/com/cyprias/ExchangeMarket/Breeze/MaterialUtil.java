@@ -1,4 +1,4 @@
-package com.cyprias.Breeze;
+package com.cyprias.ExchangeMarket.Breeze;
 /*
 Classes copied from Acrobot's Breeze code. 
 https://github.com/Acrobot/ChestShop-3/blob/master/com/Acrobot/Breeze/

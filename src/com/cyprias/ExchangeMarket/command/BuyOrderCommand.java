@@ -9,12 +9,12 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import com.cyprias.Breeze.InventoryUtil;
 import com.cyprias.ExchangeMarket.ChatUtils;
 import com.cyprias.ExchangeMarket.Econ;
 import com.cyprias.ExchangeMarket.Logger;
 import com.cyprias.ExchangeMarket.Perm;
 import com.cyprias.ExchangeMarket.Plugin;
+import com.cyprias.ExchangeMarket.Breeze.InventoryUtil;
 import com.cyprias.ExchangeMarket.configuration.Config;
 import com.cyprias.ExchangeMarket.database.Order;
 

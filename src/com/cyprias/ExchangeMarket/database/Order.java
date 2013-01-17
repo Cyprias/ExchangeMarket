@@ -10,9 +10,9 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import com.cyprias.Breeze.MaterialUtil;
 import com.cyprias.ExchangeMarket.ChatUtils;
 import com.cyprias.ExchangeMarket.Plugin;
+import com.cyprias.ExchangeMarket.Breeze.MaterialUtil;
 import com.cyprias.ExchangeMarket.configuration.Config;
 
 public class Order {
@@ -76,6 +76,7 @@ public class Order {
 	}
 	
 	public ItemStack getItemStack(){
+		this.stock.setAmount(amount);
 		return this.stock;
 	}
 
@@ -135,8 +136,8 @@ public class Order {
 		return this.price;
 	}
 	public int getAmount() throws SQLException{
-		if (id > 0)
-			this.amount = Plugin.database.getAmount(id);
+		//if (id > 0)
+		//	this.amount = Plugin.database.getAmount(id);
 		
 		return this.amount;
 	}
@@ -146,10 +147,15 @@ public class Order {
 		if (p != null && p.isOnline()){
 			Double tPrice = amount * this.price;
 			if (this.type == Order.SELL_ORDER){
-				ChatUtils.send(p, ChatUtils.getChatPrefix()+"You sold " + stock.getType() +"x" + amount + " for $" + Plugin.Round(tPrice, Config.getInt("properties.price-decmial-places")) + ".");
+				
+				ChatUtils.notify(p, String.format("§7You sold §f%s§7x§f%s §7for $§f%s (§f%s§7e).",
+					stock.getType(), amount, Plugin.Round(tPrice, Config.getInt("properties.price-decmial-places"))));
+				
+				//ChatUtils.send(p, ChatUtils.getChatPrefix()+"You sold " + stock.getType() +"x" + amount + " for $" + Plugin.Round(tPrice, Config.getInt("properties.price-decmial-places")) + ".");
 			}else if (this.type == Order.BUY_ORDER){
-				ChatUtils.send(p, ChatUtils.getChatPrefix()+"You bought " + stock.getType() +"x" + amount + " for $" + Plugin.Round(tPrice, Config.getInt("properties.price-decmial-places")) + ".");
-					
+				//ChatUtils.send(p, ChatUtils.getChatPrefix()+"You bought " + stock.getType() +"x" + amount + " for $" + Plugin.Round(tPrice, Config.getInt("properties.price-decmial-places")) + ".");
+				ChatUtils.notify(p, String.format("§7You bought §f%s§7x§f%s §7for $§f%s.",
+					stock.getType(), amount, Plugin.Round(tPrice, Config.getInt("properties.price-decmial-places"))));
 				
 			}
 		}
@@ -171,11 +177,9 @@ public class Order {
 		if (id>0){
 			if (Plugin.database.setAmount(id, amount)){
 				this.amount = amount;
-				this.stock.setAmount(amount);
 				return true;
 			}
 		}else{
-			this.stock.setAmount(amount);
 			this.amount = amount;
 			return true;
 		}

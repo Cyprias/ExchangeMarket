@@ -32,55 +32,23 @@ public class SearchCommand implements Command {
 			return true;
 		}
 		
-		/*
-		// Parse arguments
-		SearchParser parser = null;
-		try {
-			parser = new SearchParser(sender, args);
-		} catch (IllegalArgumentException e) {
-			ChatUtils.error(sender, e.getMessage());
-			return true;
-		}
-		
-		if (parser.items.size() == 0){
-			ChatUtils.error(sender, "You need to add an item to search for.");
-			return true;
-		}
-		*/
-		
-		
-		
-		
-		//new SearchQuery(new SearchCallback(session), parser, SearchDir.DESC);
-		
-		/*
-		List<Note> notes = Plugin.database.search(parser);
-		
-		if (notes.size() == 0){
-			ChatUtils.send(sender, "No results for " +ChatColor.WHITE + parser.searchString);
-			return;
-		}
-		
-		Note note;
-		for (int i=0; i<notes.size(); i++){
-			note = notes.get(i);
-			ChatUtils.send(sender, String.format((ChatColor.GRAY+"[%s"+ChatColor.GRAY+"] "+ChatColor.WHITE+"%s"+ChatColor.GRAY+": "+ChatColor.WHITE+"%s"), note.getColouredId(), note.getColouredPlayer(), note.getText()));
-		}*/
 		
 		ItemStack stock = Plugin.getItemStack(args[0]);
 		if (stock == null || stock.getTypeId() == 0) {
 			ChatUtils.error(sender, "Unknown item: " + args[0]);
 			return true;
 		}
-		
-		
-	//	String serach = args[1];
-		
+
 		
 		try {
 			List<Order> orders = Plugin.database.search(stock);
 			
-			ChatUtils.send(sender, "Orders: " + orders.size());
+			
+			
+			ChatUtils.send(sender, String.format("§7There are §f%s §7orders for §f%s§7.", orders.size(), stock.getType()) );
+			
+			if (orders.size() < 0)
+				return true;
 			
 			Order order;
 			String format = Config.getColouredString("properties.list-row-format");
@@ -120,8 +88,4 @@ public class SearchCommand implements Command {
 		
 	}
 
-	@Override
-	public boolean hasValues() {
-		return false;
-	}
 }

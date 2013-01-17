@@ -51,6 +51,10 @@ public class ChatUtils {
 		Bukkit.getConsoleSender().sendMessage(messages);
 	}
 
+	public static void notify(CommandSender sender, String message) {
+		send(sender, getChatPrefix() + message);
+	}
+	
 	public static void send(CommandSender sender, String message) {
 		message = replaceColorCodes(message);
 		String[] messages = message.split(Config.getString("properties.line-separator"));

@@ -1,4 +1,4 @@
-package com.cyprias.Breeze;
+package com.cyprias.ExchangeMarket.Breeze;
 /*
 Classes copied from Acrobot's Breeze code. 
 https://github.com/Acrobot/ChestShop-3/blob/master/com/Acrobot/Breeze/
@@ -28,7 +28,7 @@ public class StringUtil {
 *
 * @param string String to reformat
 * @return Reformatted string
-* @see com.cyprias.Breeze.StringUtil#capitalizeFirstLetter(String, char)
+* @see com.cyprias.ExchangeMarket.Breeze.StringUtil#capitalizeFirstLetter(String, char)
 */
     public static String capitalizeFirstLetter(String string) {
         return capitalizeFirstLetter(string, ' ');

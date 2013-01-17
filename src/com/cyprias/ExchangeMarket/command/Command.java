@@ -13,6 +13,6 @@ public interface Command extends Listable {
 	void getCommands(CommandSender sender, org.bukkit.command.Command cmd);
 
 	// Temprary work around for commands that run with 0 args
-	boolean hasValues();
+	//boolean hasValues();
 
 }
