@@ -436,7 +436,7 @@ public class MySQL implements Database {
 		}
 
 
-		ChatUtils.send(sender, "Page: " + (page+1) + "/" + (max+1));
+		ChatUtils.send(sender, "§7Page: §f" + (page+1) + "§7/§f" + (max+1));
 		
 		
 		
@@ -675,6 +675,68 @@ public class MySQL implements Database {
 	@Override
 	public Boolean cleanMailboxEmpties() throws SQLException {
 		return (executeUpdate("DELETE FROM `"+mailbox_table+"` WHERE `amount` = 0") > 0) ? true : false;
+	}
+
+	@Override
+	public List<Order> getPlayerOrders(CommandSender sender, int page) throws SQLException {
+		
+		
+		int rows = getResultCount("SELECT COUNT(*) FROM " + order_table + " WHERE `player` LIKE ?", sender.getName());
+
+
+		
+		//Logger.info("rows: " + rows);
+		
+		int perPage = Config.getInt("properties.rows-per-page");
+		
+		//Logger.info("page1: " + page);
+		int max = (rows / perPage);// + 1;
+		
+		if (rows % perPage == 0)
+			max--;
+		
+		//Logger.info("max: " + max);
+		if (page < 0){
+			page = max - (Math.abs(page) - 1);
+		}else{
+			if (page > max)
+				page = max;
+			
+		}
+
+
+		ChatUtils.send(sender, "§7Page: §f" + (page+1) + "§7/§f" + (max+1));
+		
+		
+		
+		
+		List<Order> orders = new ArrayList<Order>();
+		
+		queryReturn results = executeQuery("SELECT * FROM `" + order_table + "` WHERE `player` LIKE ? LIMIT "+(perPage * page)+" , " + perPage, sender.getName());
+
+		ResultSet r = results.result;
+		
+		
+		Order order;
+		while (r.next()) {
+			
+			order = new Order(
+				r.getInt("type"),
+				r.getBoolean("infinite"),
+				r.getString("player"),
+				r.getInt("itemID"),
+				r.getShort("itemDur"),
+				r.getString("itemEnchants"),
+				r.getInt("amount"),
+				r.getDouble("price")
+			);
+			order.setId(r.getInt("id"));
+			
+			orders.add(order);
+			
+		}
+		
+		return orders;
 	}
 	
 }

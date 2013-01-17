@@ -29,7 +29,7 @@ public class ConfirmCommand implements Command {
 	}
 
 	public void getCommands(CommandSender sender, org.bukkit.command.Command cmd) {
-		ChatUtils.sendCommandHelp(sender, Perm.BUY, "/%s confirm", cmd);
+		ChatUtils.sendCommandHelp(sender, Perm.CONFIRM, "/%s confirm", cmd);
 	}
 
 	public boolean hasValues() {
@@ -178,7 +178,7 @@ public class ConfirmCommand implements Command {
 
 			if (moneyTraded > 0) {
 				ChatUtils.send(sender, String.format("§7Spent $§f%s §7buying §f%s§7x§f%s§7.",
-					Plugin.Round(moneyTraded, Config.getInt("properties.price-decmial-places")), totalTraded, stock.getType(), totalTraded));
+					Plugin.Round(moneyTraded, Config.getInt("properties.price-decmial-places")), totalTraded, Plugin.getItemName(stock), totalTraded));
 
 			} else {
 				stock.setAmount(1);
@@ -244,11 +244,11 @@ public class ConfirmCommand implements Command {
 			if (moneyTraded > 0) {
 				Plugin.database.cleanEmpties();
 				ChatUtils.send(sender, String.format("§7Made $§f%s §7selling §f%s§7x§f%s§7.",
-					Plugin.Round(moneyTraded, Config.getInt("properties.price-decmial-places")), stock.getType(), totalTraded));
+					Plugin.Round(moneyTraded, Config.getInt("properties.price-decmial-places")), Plugin.getItemName(stock), totalTraded));
 
 				
 			} else if (InventoryUtil.getAmount(stock, pT.player.getInventory()) == 0) {
-				ChatUtils.send(sender, "You have no " + stock.getType() + " to sell.");
+				ChatUtils.send(sender, "You have no " + Plugin.getItemName(stock) + " to sell.");
 				
 			} else {
 				ChatUtils.send(sender, "Failed to sell any items, start over.");

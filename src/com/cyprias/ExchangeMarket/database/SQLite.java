@@ -13,7 +13,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.inventory.ItemStack;
 
 import com.cyprias.ExchangeMarket.Plugin;
-import com.cyprias.ExchangeMarket.SearchParser;
 import com.cyprias.ExchangeMarket.database.Database.queryReturn;
 
 public class SQLite implements Database {
@@ -297,6 +296,12 @@ public class SQLite implements Database {
 
 	@Override
 	public Boolean cleanMailboxEmpties() throws SQLException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<Order> getPlayerOrders(CommandSender sender, int page) throws SQLException {
 		// TODO Auto-generated method stub
 		return null;
 	}

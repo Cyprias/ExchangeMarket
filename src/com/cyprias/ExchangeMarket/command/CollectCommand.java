@@ -73,7 +73,7 @@ public class CollectCommand  implements Command {
 				//ChatUtils.send(sender, "Received " + stock.getType() + "x" + (canTake - leftover) + ", you have " + parcel.getAmount() +" left in your inbox.");
 				
 				ChatUtils.send(sender, String.format("§7Received §f%s§7x§f%s§7, you have §f%x §7remaining in your inbox.",
-					stock.getType(), (canTake - leftover), parcel.getAmount()));
+					Plugin.getItemName(stock), (canTake - leftover), parcel.getAmount()));
 				
 				noFound = false;
 			}

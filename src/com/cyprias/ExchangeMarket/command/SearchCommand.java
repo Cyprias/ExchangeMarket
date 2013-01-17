@@ -10,7 +10,6 @@ import org.bukkit.inventory.ItemStack;
 import com.cyprias.ExchangeMarket.ChatUtils;
 import com.cyprias.ExchangeMarket.Perm;
 import com.cyprias.ExchangeMarket.Plugin;
-import com.cyprias.ExchangeMarket.SearchParser;
 import com.cyprias.ExchangeMarket.configuration.Config;
 import com.cyprias.ExchangeMarket.database.Order;
 
@@ -45,7 +44,7 @@ public class SearchCommand implements Command {
 			
 			
 			
-			ChatUtils.send(sender, String.format("§7There are §f%s §7orders for §f%s§7.", orders.size(), stock.getType()) );
+			ChatUtils.send(sender, String.format("§7There are §f%s §7orders for §f%s§7.", orders.size(), Plugin.getItemName(stock)) );
 			
 			if (orders.size() < 0)
 				return true;

@@ -39,14 +39,14 @@ public class SellOrderCommand implements Command {
 			return true;
 		}
 
-		Logger.debug( "item: " + stock.getType());
+		//Logger.debug( "item: " + stock.getType());
 
 		Player player = (Player) sender;
 
 		int intAmount = InventoryUtil.getAmount(stock, player.getInventory());
 
 		if (intAmount == 0) {
-			ChatUtils.error(sender, "You do not have any " + stock.getType());
+			ChatUtils.error(sender, "You do not have any " + Plugin.getItemName(stock));
 			return true;
 		}
 
@@ -92,16 +92,16 @@ public class SellOrderCommand implements Command {
 			}
 		}
 
-		Order order = new Order(Order.SELL_ORDER, false, sender.getName(), stock, price);
+		Order preOrder = new Order(Order.SELL_ORDER, false, sender.getName(), stock, price);
 		
 		
 		if (price == 0) {
 			
 			try {
-				Double lastPrice = Plugin.database.getLastPrice(order);
+				Double lastPrice = Plugin.database.getLastPrice(preOrder);
 				if (lastPrice > 0){
 					price = lastPrice;
-					order.setPrice(price);
+					preOrder.setPrice(price);
 				}else{
 					ChatUtils.error(sender, "Invalid price: " + 0);
 					return true;
@@ -130,10 +130,10 @@ public class SellOrderCommand implements Command {
 
 		
 		
-		Logger.debug("amount2: " + amount +", " + order.getAmount());
+		Logger.debug("amount2: " + amount +", " + preOrder.getAmount());
 		stock.setAmount(amount);
 		try {
-			order.setAmount(amount);
+			preOrder.setAmount(amount);
 		} catch (SQLException e) {
 			e.printStackTrace();
 			ChatUtils.error(sender, "An error has occured: " + e.getLocalizedMessage());
@@ -152,24 +152,44 @@ public class SellOrderCommand implements Command {
 
 		try {
 
-			Order matchingOrder = Plugin.database.findMatchingOrder(order);
+			Order matchingOrder = Plugin.database.findMatchingOrder(preOrder);
 			if (matchingOrder != null) {
-				ChatUtils.send(sender, "Found matching order " + matchingOrder.getId());
+				//ChatUtils.send(sender, "Found matching order " + matchingOrder.getId());
 
-				int mAmount = matchingOrder.getAmount();
-
-				if (matchingOrder.setAmount(mAmount + amount)) {
-					ChatUtils.send(sender, "Increased amount " + mAmount + "+" + amount + "=" + matchingOrder.getAmount());
+				//int mAmount = matchingOrder.getAmount();
+				//stock.setAmount(mAmount)
+				if (matchingOrder.increaseAmount(amount)) {
+					//ChatUtils.send(sender, "Increased amount " + mAmount + "+" + amount + "=" + matchingOrder.getAmount());
+					
+					ChatUtils.send(sender, String.format("§7Increased your existing sell order #§f%s §7of §f%s §7to §f%s§7.", matchingOrder.getId(), Plugin.getItemName(stock), matchingOrder.getAmount())); //amount
+					
+					
 					InventoryUtil.remove(stock, player.getInventory());
+					
+					if (stock.getAmount() != amount)
+						Logger.warning("(A) We removed the wrong "+Plugin.getItemName(stock) +" amount from " + sender.getName() + "'s inventory. stock: " + stock.getAmount() + ", inserted: " + amount);
+
+					sender.sendMessage(String.format("§f%sx§7%s §7has been withdrawnfrom your inventory.", Plugin.getItemName(stock), stock.getAmount()));
+					
 				}
 			} else {
 
-				if (Plugin.database.insert(order)) {
-					InventoryUtil.remove(stock, player.getInventory());
+				if (Plugin.database.insert(preOrder)) {
+					
 					int id = Plugin.database.getLastId();
 
-					ChatUtils.send(sender, "Created sell order " + id);
+					//ChatUtils.send(sender, "Created sell order " + id);
 
+					int pl = Config.getInt("properties.price-decmial-places");
+					ChatUtils.send(sender,String.format("§7Created sell order #§f%s §7for §f%s§7x§f%s §7@ §f%s §7(§f%s§7e)", id, Plugin.getItemName(stock), preOrder.getAmount(), Plugin.Round(preOrder.getPrice()*preOrder.getAmount(),pl), Plugin.Round(preOrder.getPrice(),pl)));
+
+					InventoryUtil.remove(stock, player.getInventory());
+					
+					if (stock.getAmount() != (preOrder.getAmount()))
+						Logger.warning("(B) We removed the wrong "+Plugin.getItemName(stock) +" amount from " + sender.getName() + "'s inventory. stock: " + stock.getAmount() + ", inserted: " + (preOrder.getAmount()));
+
+					sender.sendMessage(String.format("§f%sx§7%s §7has been withdrawnfrom your inventory.", Plugin.getItemName(stock), stock.getAmount()));
+					
 				}
 			}
 		} catch (SQLException e) {

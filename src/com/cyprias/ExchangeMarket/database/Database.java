@@ -68,6 +68,8 @@ public interface Database {
 	Boolean setPackageAmount(int id, int amount) throws SQLException;
 	
 	public Boolean cleanMailboxEmpties() throws SQLException;
+
+	List<Order> getPlayerOrders(CommandSender sender, int page) throws SQLException;
 	
 	
 }

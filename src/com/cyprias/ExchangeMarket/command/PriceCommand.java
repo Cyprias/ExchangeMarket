@@ -94,7 +94,8 @@ public class PriceCommand implements Command {
 				
 				Logger.debug("totalAmount: " + totalAmount + ", totalPrice: " + totalPrice);
 				
-				ChatUtils.send(sender, String.format("§7There are §f%s §7orders containing §f%s %s§7.", orders.size(), totalAmount, stock.getType()));
+				
+				ChatUtils.send(sender, String.format("§7There are §f%s §7orders containing §f%s %s§7.", orders.size(), totalAmount, Plugin.getItemName(stock)));
 				
 				
 				
@@ -112,11 +113,11 @@ public class PriceCommand implements Command {
 				String median = Plugin.Round(median(dPrices)*amount,dplaces);
 				String mode = Plugin.Round(mode(dPrices)*amount,dplaces);
 				
-				ChatUtils.send(sender, String.format("§7Average: $§f%s §7(mean:$§f%s§7, med:$§f%s§7, mod:$§f%s§7)", Plugin.Round(average*amount,dplaces), mean, median, mode));
+				ChatUtils.send(sender, String.format("§7Average: $§f%s§7, mean:$§f%s§7, med:$§f%s§7, mod:$§f%s§7.", Plugin.Round(average*amount,dplaces), mean, median, mode));
 				
 				
 			}else{
-				ChatUtils.send(sender, String.format("§7There are no orders containing §f%s§7.", stock.getType()));
+				ChatUtils.send(sender, String.format("§7There are no orders containing §f%s§7.", Plugin.getItemName(stock)));
 			}
 			
 			

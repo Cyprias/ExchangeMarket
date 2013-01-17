@@ -34,6 +34,7 @@ import com.cyprias.ExchangeMarket.command.CollectCommand;
 import com.cyprias.ExchangeMarket.command.CommandManager;
 import com.cyprias.ExchangeMarket.command.ConfirmCommand;
 import com.cyprias.ExchangeMarket.command.ListCommand;
+import com.cyprias.ExchangeMarket.command.OrdersCommand;
 import com.cyprias.ExchangeMarket.command.PriceCommand;
 import com.cyprias.ExchangeMarket.command.ReloadCommand;
 import com.cyprias.ExchangeMarket.command.SearchCommand;
@@ -98,6 +99,7 @@ public class Plugin extends JavaPlugin {
 		cm.registerCommand("sell", new SellCommand());
 		cm.registerCommand("collect", new CollectCommand());
 		cm.registerCommand("price", new PriceCommand());
+		cm.registerCommand("orders", new OrdersCommand());
 		
 		this.getCommand("em").setExecutor(cm);
 
@@ -336,6 +338,7 @@ public class Plugin extends JavaPlugin {
 	}
 	//static HashMap<String, String> idToName = new HashMap<String, String>();
 	static HashMap<String, ItemStack> nameToStack = new HashMap<String, ItemStack>();
+	static HashMap<String, String> stockToName = new HashMap<String, String>();
 	
 	private void loadItemIds() throws NumberFormatException, IOException {
 		
@@ -351,6 +354,7 @@ public class Plugin extends JavaPlugin {
 
 		int l = 0;
 		ItemStack stock;
+		String id_dur;
 		while ((line = r.readLine()) != null) {
 			l = l + 1;
 			if (l > 3) {
@@ -358,6 +362,12 @@ public class Plugin extends JavaPlugin {
 				stock = getItemStack(Integer.parseInt(values[1]), Short.parseShort(values[2]));
 				nameToStack.put(values[0], stock);
 
+				id_dur = String.valueOf(stock.getTypeId());
+				if (stock.getDurability() > 0)
+					id_dur += ";" + stock.getDurability();
+				
+				if (!stockToName.containsKey(id_dur))
+					stockToName.put(id_dur, values[0]);
 				/*
 				sID = values[1];// + ":" + values[2];
 				if (!values[2].equalsIgnoreCase("0"))
@@ -371,6 +381,18 @@ public class Plugin extends JavaPlugin {
 
 
 	}
+	
+	public static String getItemName(ItemStack stock){
+		String id_dur = String.valueOf(stock.getTypeId());
+		if (stock.getDurability() > 0)
+			id_dur += ";" + stock.getDurability();
+		
+		if (stockToName.containsKey(id_dur))
+			return stockToName.get(id_dur);
+		
+		return stock.getType().name();
+	}
+	
 	public void copy(InputStream in, File file) throws IOException {
 		OutputStream out = new FileOutputStream(file);
 		byte[] buf = new byte[1024];

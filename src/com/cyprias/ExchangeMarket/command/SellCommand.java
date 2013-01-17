@@ -57,7 +57,7 @@ public class SellCommand implements Command {
 		int intAmount = InventoryUtil.getAmount(stock, player.getInventory());
 
 		if (intAmount == 0) {
-			ChatUtils.error(sender, "You do not have any " + stock.getType());
+			ChatUtils.error(sender, "§7You do not have any " + stock.getType());
 			return true;
 		}
 		
@@ -121,7 +121,7 @@ public class SellCommand implements Command {
 
 
 			if (orders.size() <= 0){
-				ChatUtils.send(sender, String.format("§7There are §f%s §7buy orders for §f%s§7, try creating a sell order.", orders.size(), stock.getType()) );
+				ChatUtils.send(sender, String.format("§7There are §f%s §7buy orders for §f%s§7, try creating a sell order.", orders.size(),Plugin.getItemName(stock)) );
 				return true;
 			//}else{
 			//	ChatUtils.send(sender, String.format("§7There are §f%s §7buy orders for §f%s§7.", orders.size(), stock.getType()) );

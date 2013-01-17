@@ -71,6 +71,13 @@ public class Order {
 		return this.id;
 	}
 	
+	public String getName(CommandSender sender){
+		if (sender.getName().equalsIgnoreCase(player))
+			return ChatColor.AQUA +Plugin.getItemName(stock)+ChatColor.RESET;
+			
+		return ChatColor.WHITE+Plugin.getItemName(stock)+ChatColor.RESET;
+	}
+	
 	public Material getItemType(){
 		return this.stock.getType();
 	}
@@ -209,7 +216,7 @@ public class Order {
 		String message = format.replace("<id>", String.valueOf(getId()));
 		message = message.replace("<cid>", getCId(sender));
 		message = message.replace("<otype>", getOrderTypeColouredString());
-		message = message.replace("<item>", getItemType().toString());
+		message = message.replace("<item>", getName(sender));
 		message = message.replace("<player>", getPlayer());
 		message = message.replace("<amount>", String.valueOf(getAmount()));
 		int dplaces = Config.getInt("properties.price-decmial-places");

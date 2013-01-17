@@ -45,7 +45,7 @@ public class ListCommand implements Command {
 		try {
 			List<Order> orders = Plugin.database.list(sender, page);
 			
-			ChatUtils.send(sender, "Orders: " + orders.size());
+			//ChatUtils.send(sender, "Orders: " + orders.size());
 			
 			Order order;
 			ItemStack stock;
@@ -56,16 +56,6 @@ public class ListCommand implements Command {
 				order = orders.get(i);
 				stock = order.getItemStack();
 
-				/*
-				message = format.replace("<id>", String.valueOf(order.getId()));
-				message = message.replace("<cid>", order.getCId(sender));
-				message = message.replace("<otype>", order.getOrderTypeColouredString());
-				message = message.replace("<item>", order.getItemType().toString());
-				message = message.replace("<player>", order.getPlayer());
-				message = message.replace("<amount>", String.valueOf(order.getAmount()));
-				message = message.replace("<price>", Plugin.Round(order.getPrice() * order.getAmount(), dplaces));
-				message = message.replace("<priceeach>", Plugin.Round(order.getPrice(),dplaces));
-				*/
 				message = order.formatString(format, sender);
 				
 				ChatUtils.send(sender, message);
