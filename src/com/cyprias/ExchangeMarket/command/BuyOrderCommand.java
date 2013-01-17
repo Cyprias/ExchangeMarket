@@ -176,9 +176,9 @@ public class BuyOrderCommand implements Command {
 					EconomyResponse r = Econ.withdrawPlayer(sender.getName(), (price * amount));
 					
 		            if(r.transactionSuccess()) {
-		                sender.sendMessage(String.format("$§f%s §7has been withdrawnfrom your account, you now have $§f%s§7.", r.amount, r.balance));
+		            	ChatUtils.send(sender, String.format("$§f%s §7has been withdrawnfrom your account, you now have $§f%s§7.", r.amount, r.balance));
 		            } else {
-		                sender.sendMessage(String.format("An error occured: %s", r.errorMessage));
+		            	ChatUtils.send(sender, String.format("An error occured: %s", r.errorMessage));
 		            }
 					
 				}
@@ -196,9 +196,9 @@ public class BuyOrderCommand implements Command {
 					
 					
 		            if(r.transactionSuccess()) {
-		                sender.sendMessage(String.format("$§f%s §7has been withdrawnfrom your account, you now have $§f%s§7.", r.amount, r.balance));
+		            	ChatUtils.send(sender, String.format("$§f%s §7has been withdrawnfrom your account, you now have $§f%s§7.", r.amount, r.balance));
 				           } else {
-		                sender.sendMessage(String.format("An error occured: %s", r.errorMessage));
+				      	   ChatUtils.send(sender, String.format("An error occured: %s", r.errorMessage));
 		            }
 					
 				}

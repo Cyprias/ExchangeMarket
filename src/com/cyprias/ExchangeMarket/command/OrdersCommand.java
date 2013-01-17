@@ -70,17 +70,16 @@ public class OrdersCommand implements Command {
 			return true;
 		
 		Order order;
-		ItemStack stock;
+		//ItemStack stock;
 		String format = Config.getColouredString("properties.orders-row-format");
 		String message;
-		int dplaces = Config.getInt("properties.price-decmial-places");
+		//int dplaces = Config.getInt("properties.price-decmial-places");
 		for (int i=0; i<orders.size();i++){
 			order = orders.get(i);
-			stock = order.getItemStack();
 
 			message = order.formatString(format, sender);
 			
-			ChatUtils.send(sender, message);
+			ChatUtils.sendSpam(sender, message);
 			
 		}
 		

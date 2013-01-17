@@ -58,7 +58,7 @@ public class SearchCommand implements Command {
 				
 				message = order.formatString(format, sender);
 				
-				ChatUtils.send(sender, message);
+				ChatUtils.sendSpam(sender, message);
 				
 			}
 			return true;

@@ -299,12 +299,15 @@ public class MySQL implements Database {
 
 	@Override
 	public List<Order> search(ItemStack stock) throws SQLException {
-		return search(stock, 0);
+		return search(stock, 0, null);
+	}
+	public List<Order> search(ItemStack stock, int orderType) throws SQLException{
+		return search(stock, 0, null);
 	}
 	
 	
 	@Override
-	public List<Order> search(ItemStack stock, int orderType) throws SQLException {
+	public List<Order> search(ItemStack stock, int orderType, CommandSender sender) throws SQLException {
 	//	queryReturn results = executeQuery("SELECT * FROM `"+order_table+"` WHERE `player` LIKE ?", parser.players.get(i));
 		List<Order> orders = new ArrayList<Order>();
 		
@@ -390,19 +393,22 @@ public class MySQL implements Database {
 		Order order;
 		while (r.next()) {
 			
-			order = new Order(
-				r.getInt("type"),
-				r.getBoolean("infinite"),
-				r.getString("player"),
-				r.getInt("itemID"),
-				r.getShort("itemDur"),
-				r.getString("itemEnchants"),
-				r.getInt("amount"),
-				r.getDouble("price")
-			);
-			order.setId(r.getInt("id"));
+			if (sender == null || sender.getName().equalsIgnoreCase(r.getString("player"))){
 			
-			orders.add(order);
+				order = new Order(
+					r.getInt("type"),
+					r.getBoolean("infinite"),
+					r.getString("player"),
+					r.getInt("itemID"),
+					r.getShort("itemDur"),
+					r.getString("itemEnchants"),
+					r.getInt("amount"),
+					r.getDouble("price")
+				);
+				order.setId(r.getInt("id"));
+				
+				orders.add(order);
+			}
 			
 		}
 		

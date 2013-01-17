@@ -30,6 +30,7 @@ import com.cyprias.ExchangeMarket.Breeze.InventoryUtil;
 import com.cyprias.ExchangeMarket.Breeze.MaterialUtil;
 import com.cyprias.ExchangeMarket.command.BuyCommand;
 import com.cyprias.ExchangeMarket.command.BuyOrderCommand;
+import com.cyprias.ExchangeMarket.command.CancelCommand;
 import com.cyprias.ExchangeMarket.command.CollectCommand;
 import com.cyprias.ExchangeMarket.command.CommandManager;
 import com.cyprias.ExchangeMarket.command.ConfirmCommand;
@@ -37,6 +38,7 @@ import com.cyprias.ExchangeMarket.command.ListCommand;
 import com.cyprias.ExchangeMarket.command.OrdersCommand;
 import com.cyprias.ExchangeMarket.command.PriceCommand;
 import com.cyprias.ExchangeMarket.command.ReloadCommand;
+import com.cyprias.ExchangeMarket.command.ReturnCommand;
 import com.cyprias.ExchangeMarket.command.SearchCommand;
 import com.cyprias.ExchangeMarket.command.SellCommand;
 import com.cyprias.ExchangeMarket.command.SellOrderCommand;
@@ -100,6 +102,8 @@ public class Plugin extends JavaPlugin {
 		cm.registerCommand("collect", new CollectCommand());
 		cm.registerCommand("price", new PriceCommand());
 		cm.registerCommand("orders", new OrdersCommand());
+		cm.registerCommand("cancel", new CancelCommand());
+		cm.registerCommand("return", new ReturnCommand());
 		
 		this.getCommand("em").setExecutor(cm);
 

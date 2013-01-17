@@ -38,8 +38,11 @@ public interface Database {
 	
 	public int getLastId() throws SQLException;
 	
+	List<Order> search(ItemStack stock, int orderType, CommandSender sender) throws SQLException;
 	List<Order> search(ItemStack stock, int orderType) throws SQLException;
 	List<Order> search(ItemStack stock) throws SQLException;
+	
+	
 	
 	public List<Order> list(CommandSender sender, int page) throws SQLException;
 	

@@ -55,10 +55,17 @@ public class ChatUtils {
 		send(sender, getChatPrefix() + message);
 	}
 	
-	public static void send(CommandSender sender, String message) {
+	public static void sendSpam(CommandSender sender, String message) {
 		message = replaceColorCodes(message);
 		String[] messages = message.split(Config.getString("properties.line-separator"));
 		sender.sendMessage(messages);
+	}
+	
+	public static void send(CommandSender sender, String message) {
+		sendSpam(sender, message);
+		if (Config.getBoolean("properties.show-plugin-replies"))
+			Logger.infoRaw( getChatPrefix()+ sender.getName() + " > "+ChatColor.stripColor(message));
+
 	}
 
 	public static void send(CommandSender sender, ChatColor color, String format, Object... args) {

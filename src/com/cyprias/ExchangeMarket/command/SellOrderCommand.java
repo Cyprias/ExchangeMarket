@@ -24,9 +24,9 @@ public class SellOrderCommand implements Command {
 	}
 
 	public boolean execute(final CommandSender sender, org.bukkit.command.Command cmd, String[] args) throws SQLException {
-		if (!Plugin.checkPermission(sender, Perm.SELL_ORDER)) {
+		if (!Plugin.checkPermission(sender, Perm.SELL_ORDER)) 
 			return false;
-		}
+		
 
 		if (args.length <= 0 || args.length >= 4) {
 			getCommands(sender, cmd);
@@ -126,7 +126,7 @@ public class SellOrderCommand implements Command {
 			amount = Math.min(amount, intAmount);
 		}
 		
-		Logger.debug( "price1: " + price);
+		//Logger.debug( "price1: " + price);
 
 		
 		
@@ -144,7 +144,7 @@ public class SellOrderCommand implements Command {
 		
 		if (!Config.getBoolean("properties.allow-damaged-gear") && Plugin.isGear(stock.getType()) && stock.getDurability() > 0) {
 			// ExchangeMarket.sendMessage(sender, F("cannotPostDamagedOrder"));
-			ChatUtils.send(sender, "You cannot sell damaged gear.");
+			ChatUtils.error(sender, "You cannot sell damaged gear.");
 			return true;
 		}
 
@@ -169,7 +169,7 @@ public class SellOrderCommand implements Command {
 					if (stock.getAmount() != amount)
 						Logger.warning("(A) We removed the wrong "+Plugin.getItemName(stock) +" amount from " + sender.getName() + "'s inventory. stock: " + stock.getAmount() + ", inserted: " + amount);
 
-					sender.sendMessage(String.format("§f%sx§7%s §7has been withdrawnfrom your inventory.", Plugin.getItemName(stock), stock.getAmount()));
+					ChatUtils.send(sender, String.format("§f%sx§7%s §7has been withdrawnfrom your inventory.", Plugin.getItemName(stock), stock.getAmount()));
 					
 				}
 			} else {
@@ -188,7 +188,7 @@ public class SellOrderCommand implements Command {
 					if (stock.getAmount() != (preOrder.getAmount()))
 						Logger.warning("(B) We removed the wrong "+Plugin.getItemName(stock) +" amount from " + sender.getName() + "'s inventory. stock: " + stock.getAmount() + ", inserted: " + (preOrder.getAmount()));
 
-					sender.sendMessage(String.format("§f%sx§7%s §7has been withdrawnfrom your inventory.", Plugin.getItemName(stock), stock.getAmount()));
+					ChatUtils.send(sender, String.format("§f%sx§7%s §7has been withdrawnfrom your inventory.", Plugin.getItemName(stock), stock.getAmount()));
 					
 				}
 			}

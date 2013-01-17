@@ -306,5 +306,11 @@ public class SQLite implements Database {
 		return null;
 	}
 
+	@Override
+	public List<Order> search(ItemStack stock, int orderType, CommandSender sender) throws SQLException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 
 }

@@ -12,6 +12,7 @@ properties:
   orders-row-format: "&7[<otype>&7] &f<id>&7: &f<item>&7x&f<amount> &7@ $&f<price> &7(&f<priceeach>&7e)"
   price-decmial-places: 4
   debugging: false
+  show-plugin-replies: true
 mysql:
   hostname: localhost
   username: root

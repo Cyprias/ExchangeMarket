@@ -42,12 +42,12 @@ public class VersionCommand implements Command {
 						if (info != null) {
 
 							if (VersionChecker.compareVersions(curVersion, info.getTitle()) < 0) {
-								ChatUtils.send(sender, "We're running v" + curVersion + ", v" + info.getTitle() + " is available");
+								ChatUtils.send(sender, "§7We're running v" + curVersion + ", v" + info.getTitle() + " is available");
 							} else {
-								ChatUtils.send(sender, "We're running the latest version v" + curVersion);
+								ChatUtils.send(sender, "§7We're running the latest version v" + curVersion);
 							}
 						} else {
-							ChatUtils.send(sender, "We're running version v" + curVersion);
+							ChatUtils.send(sender, "§7We're running version v" + curVersion);
 						}
 					} catch (SAXException e) {
 						e.printStackTrace();
@@ -60,7 +60,7 @@ public class VersionCommand implements Command {
 				}
 			});
 		} else {
-			ChatUtils.send(sender, "We're running version v" + instance.getDescription().getVersion());
+			ChatUtils.send(sender, "§7We're running version v" + instance.getDescription().getVersion());
 		}
 
 		return true;

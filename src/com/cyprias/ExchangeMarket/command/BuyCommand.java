@@ -142,6 +142,9 @@ public class BuyCommand implements Command {
 				
 				o = orders.get(i);
 
+				if (sender.getName().equalsIgnoreCase(o.getPlayer()))
+					continue;
+				
 				canTrade = Math.min(o.getAmount(), amount);
 				canTrade = (int) Math.floor(Math.min(canTrade, Econ.getBalance(sender.getName()) / o.getPrice()));
 				
@@ -178,7 +181,7 @@ public class BuyCommand implements Command {
 			if (moneySpent > 0){
 				
 				
-				ChatUtils.send(sender, String.format("§a[Estimite] §f%s§7x§f%s§7 will cost $§f%s§7, type §d/em confirm §7to commit transaction.", stock.getType(), itemsTraded, Plugin.Round(moneySpent, dplaces)));
+				ChatUtils.send(sender, String.format("§a[Estimate] §f%s§7x§f%s§7 will cost $§f%s§7, type §d/em confirm §7to confirm transaction.", stock.getType(), itemsTraded, Plugin.Round(moneySpent, dplaces)));
 				
 	
 				

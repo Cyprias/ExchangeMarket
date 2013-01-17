@@ -102,11 +102,11 @@ public class ConfirmCommand implements Command {
 
 		if (expiredTransactions.containsKey(sender.getName())) {
 			expiredTransactions.remove(sender.getName());
-			ChatUtils.send(sender, "Your previous estimite has expired, start over.");
+			ChatUtils.send(sender, "§7Your previous estimite has expired, start over.");
 			return true;
 		}
 		if (!pendingTransactions.containsKey(sender.getName())) {
-			ChatUtils.send(sender, "You have no transaction to confirm.");
+			ChatUtils.send(sender, "§7You have no transaction to confirm.");
 			return true;
 		}
 
@@ -178,7 +178,7 @@ public class ConfirmCommand implements Command {
 
 			if (moneyTraded > 0) {
 				ChatUtils.send(sender, String.format("§7Spent $§f%s §7buying §f%s§7x§f%s§7.",
-					Plugin.Round(moneyTraded, Config.getInt("properties.price-decmial-places")), totalTraded, Plugin.getItemName(stock), totalTraded));
+					Plugin.Round(moneyTraded, Config.getInt("properties.price-decmial-places")), Plugin.getItemName(stock), totalTraded));
 
 			} else {
 				stock.setAmount(1);
