@@ -162,7 +162,7 @@ public class Order {
 
 				ChatUtils.notify(
 					p,
-					String.format("§7You sold §f%s§7x§f%s §7for $§f%s (§f%s§7e).", Plugin.getItemName(stock), amount,
+					String.format("§7You sold §f%s§7x§f%s §7for $§f%s.", Plugin.getItemName(stock), amount,
 						Plugin.Round(tPrice, Config.getInt("properties.price-decmial-places"))));
 
 
