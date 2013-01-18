@@ -2,10 +2,7 @@ package com.cyprias.ExchangeMarket.command;
 
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Map;
-
 import org.bukkit.command.CommandSender;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -70,12 +67,7 @@ public class SellOrderCommand implements Command {
 
 		if (args.length > 2) {
 
-			// if (args.length > 2) {
-
-			Boolean priceEach = false;
-
 			if (args[2].substring(args[2].length() - 1, args[2].length()).equalsIgnoreCase("e")) {
-				priceEach = true;
 				price = Math.abs(Double.parseDouble(args[2].substring(0, args[2].length() - 1)));
 			} else {
 

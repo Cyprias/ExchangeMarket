@@ -19,7 +19,6 @@ import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.configuration.InvalidConfigurationException;
-import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
@@ -55,7 +54,6 @@ import com.cyprias.ExchangeMarket.database.Database;
 import com.cyprias.ExchangeMarket.database.MySQL;
 import com.cyprias.ExchangeMarket.database.SQLite;
 import com.cyprias.ExchangeMarket.listeners.PlayerListener;
-import com.cyprias.ExchangeMarket.listeners.ServerListener;
 
 
 public class Plugin extends JavaPlugin {
@@ -96,7 +94,7 @@ public class Plugin extends JavaPlugin {
 
 		loadPermissions();
 
-		registerListeners(new ServerListener());
+		registerListeners(new PlayerListener());
 
 		
 		CommandManager cm = new CommandManager().registerCommand("reload", new ReloadCommand());
@@ -216,8 +214,7 @@ public class Plugin extends JavaPlugin {
 		
 		instance.getServer().getScheduler().cancelAllTasks();
 		
-		ServerListener.unregisterEvents(instance);
-		//PlayerListener.unregisterEvents(instance);
+		PlayerListener.unregisterEvents(instance);
 
 		instance = null;
 		Logger.info("disabled.");

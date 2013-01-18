@@ -3,11 +3,8 @@ package com.cyprias.ExchangeMarket.command;
 import java.sql.SQLException;
 import java.util.List;
 
-import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
-import org.bukkit.inventory.ItemStack;
-
 import com.cyprias.ExchangeMarket.ChatUtils;
 import com.cyprias.ExchangeMarket.Perm;
 import com.cyprias.ExchangeMarket.Plugin;
@@ -21,10 +18,6 @@ public class ListCommand implements Command {
 			list.add("/%s list - List all notes.");
 	}
 
-	private void DBQuery(CommandSender sender, int page){
-
-	}
-	
 	public boolean execute(final CommandSender sender, org.bukkit.command.Command cmd, String[] args) {
 		if (!Plugin.checkPermission(sender, Perm.LIST)) 
 			return false;
@@ -54,13 +47,10 @@ public class ListCommand implements Command {
 			//ChatUtils.send(sender, "Orders: " + orders.size());
 			
 			Order order;
-			ItemStack stock;
 			String format = Config.getColouredString("properties.list-row-format");
 			String message;
-			int dplaces = Config.getInt("properties.price-decmial-places");
 			for (int i=0; i<orders.size();i++){
 				order = orders.get(i);
-				stock = order.getItemStack();
 
 				message = order.formatString(format, sender);
 				

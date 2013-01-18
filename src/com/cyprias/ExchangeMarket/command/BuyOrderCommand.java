@@ -6,15 +6,12 @@ import java.util.List;
 import net.milkbowl.vault.economy.EconomyResponse;
 
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import com.cyprias.ExchangeMarket.ChatUtils;
 import com.cyprias.ExchangeMarket.Econ;
-import com.cyprias.ExchangeMarket.Logger;
 import com.cyprias.ExchangeMarket.Perm;
 import com.cyprias.ExchangeMarket.Plugin;
-import com.cyprias.ExchangeMarket.Breeze.InventoryUtil;
 import com.cyprias.ExchangeMarket.configuration.Config;
 import com.cyprias.ExchangeMarket.database.Order;
 
@@ -40,9 +37,6 @@ public class BuyOrderCommand implements Command {
 			return true;
 		}
 
-		//Logger.debug( "item: " + stock.getType());
-
-		Player player = (Player) sender;
 
 		int amount = 0;// InventoryUtil.getAmount(item, player.getInventory());
 		if (args.length > 1) {
@@ -64,12 +58,8 @@ public class BuyOrderCommand implements Command {
 
 		if (args.length > 2) {
 
-			// if (args.length > 2) {
-
-			Boolean priceEach = false;
 
 			if (args[2].substring(args[2].length() - 1, args[2].length()).equalsIgnoreCase("e")) {
-				priceEach = true;
 				price = Math.abs(Double.parseDouble(args[2].substring(0, args[2].length() - 1)));
 			} else {
 

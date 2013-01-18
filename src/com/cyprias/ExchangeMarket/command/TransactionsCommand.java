@@ -66,14 +66,7 @@ public class TransactionsCommand implements Command {
 				ChatUtils.sendSpam(sender, String.format("§7Sold §f%s§7x§f%s §7to §f%s §7on §f%s§7.", transaction.getItemName(), transaction.getAmount(), transaction.getOrderer(), date));
 				
 			}
-			
-			
-			
 		}
-		
-		
-		
-		
 		return true;
 	}
 	

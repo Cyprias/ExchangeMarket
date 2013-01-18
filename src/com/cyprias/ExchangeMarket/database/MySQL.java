@@ -6,7 +6,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -372,17 +371,13 @@ public class MySQL implements Database {
 
 		int rows = getResultCount("SELECT COUNT(*) FROM " + order_table);
 
-		//Logger.info("rows: " + rows);
-		
 		int perPage = Config.getInt("properties.rows-per-page");
-		
-		//Logger.info("page1: " + page);
+
 		int max = (rows / perPage);// + 1;
 		
 		if (rows % perPage == 0)
 			max--;
 		
-		//Logger.info("max: " + max);
 		if (page < 0){
 			page = max - (Math.abs(page) - 1);
 		}else{
@@ -393,9 +388,6 @@ public class MySQL implements Database {
 			return null;
 		
 		ChatUtils.send(sender, "§7Page: §f" + (page+1) + "§7/§f" + (max+1));
-
-		List<Order> notes = new ArrayList<Order>();
-		
 
 		
 		queryReturn results = executeQuery("SELECT * FROM `"+order_table+"` LIMIT "+(perPage * page)+" , " + perPage);
@@ -428,9 +420,7 @@ public class MySQL implements Database {
 		Order foundOrder = null;
 		queryReturn results = executeQuery("SELECT * FROM `"+order_table+"` WHERE `type` = ? AND `player` = ? AND `itemID` = ? AND `itemDur` = ? AND `price` = ? LIMIT 0 , 1", order.getOrderType(), order.getPlayer(), order.getItemId(), order.getDurability(), order.getPrice());
 		ResultSet r = results.result;
-		
-		
-		
+
 		if (r.next()) {
 		
 			foundOrder = new Order(
@@ -588,7 +578,6 @@ public class MySQL implements Database {
 
 		ResultSet r = results.result;
 		
-		List<Order> orders = new ArrayList<Order>();
 		//Order order;
 		while (r.next()) {
 			amount = r.getInt("amount");
@@ -607,7 +596,6 @@ public class MySQL implements Database {
 		queryReturn results = executeQuery("SELECT * FROM `"+mailbox_table+"` WHERE `player` LIKE ?", sender.getName());
 		
 		ResultSet r = results.result;
-		Timestamp timestamp;
 		while (r.next()) {
 			
 			
@@ -632,14 +620,8 @@ public class MySQL implements Database {
 
 	@Override
 	public List<Order> getPlayerOrders(CommandSender sender, int page) throws SQLException {
-		
-		
 		int rows = getResultCount("SELECT COUNT(*) FROM " + order_table + " WHERE `player` LIKE ?", sender.getName());
 
-
-		
-		//Logger.debug("rows: " + rows);
-		
 		int perPage = Config.getInt("properties.rows-per-page");
 		
 		//Logger.info("page1: " + page);

@@ -4,7 +4,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -123,9 +122,9 @@ public class BuyCommand implements Command {
 			
 			
 			
-			String format = "§7Bought §f%s§7x§f%s §7@ $§f%s §7($§f%s§7e)";
+		//	String format = "§7Bought §f%s§7x§f%s §7@ $§f%s §7($§f%s§7e)";
 			
-			String message;
+			//String message;
 			int dplaces = Config.getInt("properties.price-decmial-places");
 			double moneySpent = 0;
 			int itemsTraded = 0;

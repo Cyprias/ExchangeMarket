@@ -1,7 +1,6 @@
 package com.cyprias.ExchangeMarket.command;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.bukkit.command.CommandSender;
@@ -66,8 +65,6 @@ public class PriceCommand implements Command {
 		//	ChatUtils.send(sender, "Orders: " + orders.size());
 
 			Order order;
-			String format = Config.getColouredString("properties.list-row-format");
-			String message;
 			int totalAmount = 0;
 			double totalPrice = 0;
 

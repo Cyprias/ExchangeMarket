@@ -7,19 +7,24 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.bukkit.command.CommandSender;
 import org.bukkit.inventory.ItemStack;
 
+import com.cyprias.ExchangeMarket.ChatUtils;
 import com.cyprias.ExchangeMarket.Plugin;
-import com.cyprias.ExchangeMarket.database.Database.queryReturn;
+import com.cyprias.ExchangeMarket.Breeze.MaterialUtil;
+import com.cyprias.ExchangeMarket.configuration.Config;
 
 public class SQLite implements Database {
 	private static String sqlDB;
 	
 	static String order_table = "Orders";
 	static String prefix = ""; //empty
+	static String mailbox_table  = "Mailbox"; 
+	static String transaction_table = "Transactions";
 	
 	@Override
 	public Boolean init() {
@@ -204,125 +209,437 @@ public class SQLite implements Database {
 	}
 
 
-	@Override
 	public List<Order> list(CommandSender sender, int page) throws SQLException {
-		// TODO Auto-generated method stub
-		return null;
+
+		int rows = getResultCount("SELECT COUNT(*) FROM " + order_table);
+
+		int perPage = Config.getInt("properties.rows-per-page");
+
+		int max = (rows / perPage);// + 1;
+		
+		if (rows % perPage == 0)
+			max--;
+		
+		if (page < 0){
+			page = max - (Math.abs(page) - 1);
+		}else{
+			if (page > max)
+				page = max;
+		}
+		if (rows == 0)
+			return null;
+		
+		ChatUtils.send(sender, "§7Page: §f" + (page+1) + "§7/§f" + (max+1));
+
+		queryReturn results = executeQuery("SELECT * FROM `"+order_table+"` LIMIT "+(perPage * page)+" , " + perPage);
+		ResultSet r = results.result;
+		
+		List<Order> orders = new ArrayList<Order>();
+		Order order;
+		while (r.next()) {
+		//	Logger.info("id: " + r.getInt(1));
+			order = new Order(
+				r.getInt("type"),
+				r.getBoolean("infinite"),
+				r.getString("player"),
+				r.getInt("itemID"),
+				r.getShort("itemDur"),
+				r.getString("itemEnchants"),
+				r.getInt("amount"),
+				r.getDouble("price")
+			);
+			order.setId(r.getInt("id"));
+			orders.add(order);
+		}
+
+		results.close();
+		return orders;
 	}
 
-	@Override
-	public Order findMatchingOrder(Order order) {
-		// TODO Auto-generated method stub
-		return null;
+	public Order findMatchingOrder(Order order) throws SQLException {
+		Order foundOrder = null;
+		queryReturn results = executeQuery("SELECT * FROM `"+order_table+"` WHERE `type` = ? AND `player` = ? AND `itemID` = ? AND `itemDur` = ? AND `price` = ? LIMIT 0 , 1", order.getOrderType(), order.getPlayer(), order.getItemId(), order.getDurability(), order.getPrice());
+		ResultSet r = results.result;
+
+		if (r.next()) {
+		
+			foundOrder = new Order(
+				r.getInt("type"),
+				r.getBoolean("infinite"),
+				r.getString("player"),
+				r.getInt("itemID"),
+				r.getShort("itemDur"),
+				r.getString("itemEnchants"),
+				r.getInt("amount"),
+				r.getDouble("price")
+			);
+			foundOrder.setId(r.getInt("id"));
+		}
+		
+		return foundOrder;
 	}
 
-	@Override
 	public Boolean setAmount(int id, int amount) throws SQLException {
-		// TODO Auto-generated method stub
-		return null;
+		return (executeUpdate("UPDATE `"+order_table+"` SET `amount` = ? WHERE `id` = ?;", amount, id) > 0) ? true : false;
 	}
-
+	public boolean setPrice(int id, double price) throws SQLException {
+		return (executeUpdate("UPDATE `"+order_table+"` SET `price` = ? WHERE `id` = ?;", price, id) > 0) ? true : false;
+	}
 	@Override
 	public Double getLastPrice(Order order) throws SQLException {
-		// TODO Auto-generated method stub
-		return null;
+		double price = 0.0;
+		
+		String query;
+		
+		queryReturn results;
+		if (order.hasEnchantments()){
+			query = "SELECT * FROM " + order_table
+				+ " WHERE `type` = ? AND `player` LIKE ? AND `itemID` = ? AND `itemDur` = ?  AND `itemEnchants` = ? ORDER BY `id` DESC LIMIT 0 , 1";
+			results = executeQuery(query, order.getOrderType(), order.getPlayer(), order.getItemId(), order.getDurability(), order.getEncodedEnchantments());
+		}else{
+			query = "SELECT * FROM " + order_table
+				+ " WHERE `type` = ? AND `player` LIKE ? AND `itemID` = ? AND `itemDur` = ?  AND `itemEnchants` IS NULL ORDER BY `id` DESC LIMIT 0 , 1";
+			results = executeQuery(query, order.getOrderType(), order.getPlayer(), order.getItemId(), order.getDurability());
+		}
+		while (results.result.next()) {
+			price = results.result.getDouble("price");
+			break;
+		}
+		results.close();
+		
+		return price;
 	}
 
-	@Override
-	public boolean setPrice(int id, double price) throws SQLException {
-		// TODO Auto-generated method stub
-		return false;
-	}
 
-	@Override
 	public List<Order> search(ItemStack stock) throws SQLException {
-		// TODO Auto-generated method stub
-		return null;
+		return search(stock, 0, null);
 	}
-
+	public List<Order> search(ItemStack stock, int orderType) throws SQLException{
+		return search(stock, orderType, null);
+	}
+	
+	
 	@Override
-	public List<Order> search(ItemStack stock, int orderType) throws SQLException {
-		// TODO Auto-generated method stub
-		return null;
+	public List<Order> search(ItemStack stock, int orderType, CommandSender sender) throws SQLException {
+	//	queryReturn results = executeQuery("SELECT * FROM `"+order_table+"` WHERE `player` LIKE ?", parser.players.get(i));
+		List<Order> orders = new ArrayList<Order>();
+		
+		String query = "SELECT * FROM `"+order_table+"` WHERE `itemID` = ? AND `itemDur` = ?";
+		
+		String orderBy = " ORDER BY `price` ASC, `amount` ASC";
+
+		
+		queryReturn results;
+		if (stock.getEnchantments().size() > 0){
+			query += " AND `itemEnchants` = ?";
+			results = executeQuery(query + orderBy, stock.getTypeId(),stock.getDurability(), MaterialUtil.Enchantment.encodeEnchantment(stock));
+		}else{
+			query += " AND `itemEnchants` IS NULL";
+			results = executeQuery(query + orderBy, stock.getTypeId(),stock.getDurability());
+		}
+		
+		// ORDER BY `price` ASC, `amount` ASC;
+		
+
+
+		
+		
+	//	Logger.debug("query: " + query);
+		
+		
+		
+		ResultSet r = results.result;
+		
+		
+		Order order;
+		while (r.next()) {
+			
+			if (sender != null && !sender.getName().equalsIgnoreCase(r.getString("player")))
+				continue;
+
+			if (orderType > 0 && orderType != r.getInt("type"))
+				continue;
+				
+			order = new Order(
+				r.getInt("type"),
+				r.getBoolean("infinite"),
+				r.getString("player"),
+				r.getInt("itemID"),
+				r.getShort("itemDur"),
+				r.getString("itemEnchants"),
+				r.getInt("amount"),
+				r.getDouble("price")
+			);
+			order.setId(r.getInt("id"));
+			
+			orders.add(order);
+			
+			
+		}
+		
+		return orders;
 	}
 
 	@Override
 	public List<Order> findOrders(int orderType, ItemStack stock) throws SQLException {
-		// TODO Auto-generated method stub
-		return null;
+		String query = "SELECT * FROM `"+order_table+"` WHERE `type` = ? AND `itemID` = ? AND `itemDur` = ? ";
+		
+		queryReturn results;
+		if (stock.getEnchantments().size() > 0){
+			query += "AND `itemEnchants` = ?";
+			results = executeQuery(query, orderType, stock.getTypeId(),stock.getDurability(), MaterialUtil.Enchantment.encodeEnchantment(stock));
+		}else{
+			query += "AND `itemEnchants` IS NULL";
+			results = executeQuery(query, orderType, stock.getTypeId(),stock.getDurability());
+		}
+		
+		
+		
+		//Logger.info("query: " + query);
+		
+		
+		
+		ResultSet r = results.result;
+		
+		List<Order> orders = new ArrayList<Order>();
+		Order order;
+		while (r.next()) {
+			
+			order = new Order(
+				r.getInt("type"),
+				r.getBoolean("infinite"),
+				r.getString("player"),
+				r.getInt("itemID"),
+				r.getShort("itemDur"),
+				r.getString("itemEnchants"),
+				r.getInt("amount"),
+				r.getDouble("price")
+			);
+			order.setId(r.getInt("id"));
+			
+			orders.add(order);
+			
+		}
+		
+		return orders;
 	}
 
-	@Override
 	public Boolean remove(int id) throws SQLException {
-		// TODO Auto-generated method stub
-		return null;
+		return (executeUpdate("DELETE FROM `"+order_table+"` WHERE `id` = ?", id) > 0) ? true : false;
 	}
 
-	@Override
 	public Boolean cleanEmpties() throws SQLException {
-		// TODO Auto-generated method stub
-		return null;
+		return (executeUpdate("DELETE FROM `"+order_table+"` WHERE `amount` = 0") > 0) ? true : false;
 	}
 
-	@Override
-	public Boolean sendToMailbox(String receiver, ItemStack stock, int amount) {
-		// TODO Auto-generated method stub
-		return null;
+	public Boolean sendToMailbox(String receiver, ItemStack stock, int amount) throws SQLException {
+		String query = "UPDATE `" + mailbox_table
+			+ "` SET `amount` = `amount` + ?, `time` = CURRENT_TIMESTAMP WHERE `player` = ? AND `itemId` = ? AND `itemDur` = ?";// AND `itemEnchant` = ?";
+		
+		int succsess;
+		if (stock.getEnchantments().size() > 0){
+			query += " AND `itemEnchant` = ?";
+			succsess = executeUpdate(query, amount, receiver, stock.getTypeId(), stock.getDurability(), MaterialUtil.Enchantment.encodeEnchantment(stock));
+		}else{
+			query += " AND `itemEnchant` IS NULL";
+			succsess = executeUpdate(query, amount, receiver, stock.getTypeId(), stock.getDurability());
+		}
+		
+
+		if (succsess > 0) return true;
+		
+		query = "INSERT INTO `" + mailbox_table + "` (`player`, `itemId`, `itemDur`, `itemEnchant`, `amount`, `time`) VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP);";
+		
+		succsess = executeUpdate(query, receiver, stock.getTypeId(), stock.getDurability(), ((stock.getEnchantments().size() > 0) ? MaterialUtil.Enchantment.encodeEnchantment(stock) : null), amount);
+		return (succsess > 0) ? true : false;
 	}
 
-	@Override
 	public boolean orderExists(int id) throws SQLException {
-		// TODO Auto-generated method stub
-		return false;
+		boolean exists = false;
+		queryReturn results = executeQuery("SELECT * FROM `"+order_table+"` WHERE `id` = ? LIMIT 0 , 1", id);
+		ResultSet r = results.result;
+
+		//Order order = null;
+		while (r.next()) {
+			exists = true;
+			break;
+		}
+		
+		results.close();
+		
+		return exists;
 	}
 
-	@Override
 	public int getAmount(int id) throws SQLException {
-		// TODO Auto-generated method stub
-		return 0;
+		int amount = 0;
+		String query = "SELECT * FROM `"+order_table+"` WHERE `id` = ? ";
+		
+		queryReturn results = executeQuery(query, id);
+	
+
+		ResultSet r = results.result;
+		
+		//Order order;
+		while (r.next()) {
+			amount = r.getInt("amount");
+		}
+		
+		results.close();
+		
+		return amount;
 	}
 
 	@Override
-	public List<Parcel> getPackages(CommandSender sender) {
+	public List<Parcel> getPackages(CommandSender sender) throws SQLException {
 		// TODO Auto-generated method stub
-		return null;
+		List<Parcel> packages = new ArrayList<Parcel>();
+		
+		queryReturn results = executeQuery("SELECT * FROM `"+mailbox_table+"` WHERE `player` LIKE ?", sender.getName());
+		
+		ResultSet r = results.result;
+		while (r.next()) {
+			
+			
+			packages.add(new Parcel(r.getInt("id"), r.getString("player"), r.getInt("itemId"), r.getShort("itemDur"), r.getString("itemEnchant"), r.getInt("amount"), r.getTimestamp("time")));
+		}
+		
+		results.close();
+		
+		return packages;
 	}
 
 	@Override
 	public Boolean setPackageAmount(int id, int amount) throws SQLException {
-		// TODO Auto-generated method stub
-		return null;
+		return (executeUpdate("UPDATE `"+mailbox_table+"` SET `amount` = ? WHERE `id` = ?;", amount, id) > 0) ? true : false;
 	}
 
 	@Override
 	public Boolean cleanMailboxEmpties() throws SQLException {
-		// TODO Auto-generated method stub
-		return null;
+		return (executeUpdate("DELETE FROM `"+mailbox_table+"` WHERE `amount` = 0") > 0) ? true : false;
 	}
-
 	@Override
 	public List<Order> getPlayerOrders(CommandSender sender, int page) throws SQLException {
-		// TODO Auto-generated method stub
-		return null;
+		int rows = getResultCount("SELECT COUNT(*) FROM " + order_table + " WHERE `player` LIKE ?", sender.getName());
+
+		int perPage = Config.getInt("properties.rows-per-page");
+		
+		//Logger.info("page1: " + page);
+		int max = (rows / perPage);// + 1;
+		
+		if (rows % perPage == 0)
+			max--;
+		
+		//Logger.info("max: " + max);
+		if (page < 0){
+			page = max - (Math.abs(page) - 1);
+		}else{
+			if (page > max)
+				page = max;
+			
+		}
+
+
+		ChatUtils.send(sender, "§7Page: §f" + (page+1) + "§7/§f" + (max+1));
+		
+		if (rows <= 0)
+			return null;
+		
+		
+		List<Order> orders = new ArrayList<Order>();
+		
+		queryReturn results = executeQuery("SELECT * FROM `" + order_table + "` WHERE `player` LIKE ? LIMIT "+(perPage * page)+" , " + perPage, sender.getName());
+
+		ResultSet r = results.result;
+		
+		
+		Order order;
+		while (r.next()) {
+			
+			order = new Order(
+				r.getInt("type"),
+				r.getBoolean("infinite"),
+				r.getString("player"),
+				r.getInt("itemID"),
+				r.getShort("itemDur"),
+				r.getString("itemEnchants"),
+				r.getInt("amount"),
+				r.getDouble("price")
+			);
+			order.setId(r.getInt("id"));
+			
+			orders.add(order);
+			
+		}
+		
+		return orders;
 	}
 
-	@Override
-	public List<Order> search(ItemStack stock, int orderType, CommandSender sender) throws SQLException {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 	@Override
-	public Boolean insertTransaction(int type, String buyer, int itemID, int itemDur, String itemEnchants, int amount, double price, String seller)
-		throws SQLException {
-		// TODO Auto-generated method stub
-		return null;
+	public Boolean insertTransaction(int type, String buyer, int itemID, int itemDur, String itemEnchants, int amount, double price, String seller) throws SQLException {
+		if (itemEnchants == null)
+			itemEnchants = "";
+		return (executeUpdate("INSERT INTO "+ transaction_table+ " (`type`, `buyer`, `itemID`, `itemDur`, `itemEnchants`, `amount`, `price`, `seller`, `timestamp`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP);", type, buyer, itemID, itemDur, itemEnchants, amount, price, seller) > 0) ? true : false;
 	}
 
-	@Override
 	public List<Transaction> listTransactions(CommandSender sender, int page) throws SQLException {
-		// TODO Auto-generated method stub
-		return null;
+
+		int rows = getResultCount("SELECT COUNT(*) FROM " + transaction_table);
+
+		//Logger.info("rows: " + rows);
+		
+		int perPage = Config.getInt("properties.rows-per-page");
+		
+		//Logger.info("page1: " + page);
+		int max = (rows / perPage);// + 1;
+		
+		if (rows % perPage == 0)
+			max--;
+		
+		//Logger.info("max: " + max);
+		if (page < 0){
+			page = max - (Math.abs(page) - 1);
+		}else{
+			if (page > max)
+				page = max;
+		}
+		if (rows == 0)
+			return null;
+		
+		
+		ChatUtils.send(sender, "§7Page: §f" + (page+1) + "§7/§f" + (max+1));
+
+
+		
+		List<Transaction> transactions = new ArrayList<Transaction>();
+		
+
+		
+		queryReturn results = executeQuery("SELECT * FROM `"+transaction_table+"` LIMIT "+(perPage * page)+" , " + perPage);
+		ResultSet r = results.result;
+		
+		//List<Order> orders = new ArrayList<Order>();
+		Transaction transaction;
+		while (r.next()) {
+		//	Logger.info("id: " + r.getInt(1));
+			transaction = new Transaction(
+				r.getInt("id"),
+				r.getInt("type"),
+				r.getString("buyer"),
+				r.getInt("itemID"),
+				r.getShort("itemDur"),
+				r.getString("itemEnchants"),
+				r.getInt("amount"),
+				r.getDouble("price"),
+				r.getString("seller"),
+				r.getTimestamp("timestamp")
+			);
+
+			transactions.add(transaction);
+		}
+
+		results.close();
+		return transactions;
 	}
 
 

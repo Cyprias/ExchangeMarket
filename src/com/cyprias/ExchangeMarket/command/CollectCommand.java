@@ -12,8 +12,6 @@ import com.cyprias.ExchangeMarket.Logger;
 import com.cyprias.ExchangeMarket.Perm;
 import com.cyprias.ExchangeMarket.Plugin;
 import com.cyprias.ExchangeMarket.Breeze.InventoryUtil;
-import com.cyprias.ExchangeMarket.configuration.Config;
-import com.cyprias.ExchangeMarket.database.Order;
 import com.cyprias.ExchangeMarket.database.Parcel;
 
 public class CollectCommand  implements Command {
