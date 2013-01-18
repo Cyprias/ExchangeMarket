@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.inventory.ItemStack;
 
 import com.cyprias.ExchangeMarket.ChatUtils;
@@ -58,7 +59,10 @@ public class ListCommand implements Command {
 
 				message = order.formatString(format, sender);
 				
-				ChatUtils.sendSpam(sender, message);
+				if (sender instanceof ConsoleCommandSender){
+					ChatUtils.sendSpam(sender, order.getId() + ": "+message);
+				}else
+					ChatUtils.sendSpam(sender, message);
 				
 			}
 			

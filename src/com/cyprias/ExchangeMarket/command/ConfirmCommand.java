@@ -66,7 +66,7 @@ public class ConfirmCommand implements Command {
 		}
 
 	}
-
+	/*
 	private void removeOrderFromOthers(CommandSender sender, int oID) throws SQLException {
 		pendingOrder po;
 		List<pendingOrder> pending;
@@ -88,7 +88,8 @@ public class ConfirmCommand implements Command {
 			}
 		}
 	}
-
+	 */
+	
 	@Override
 	public boolean execute(CommandSender sender, org.bukkit.command.Command cmd, String[] args) throws IllegalArgumentException, SQLException {
 		if (!Plugin.checkPermission(sender, Perm.CONFIRM)) {

@@ -27,12 +27,9 @@ public class CancelCommand implements Command {
 	}
 
 	public void getCommands(CommandSender sender, org.bukkit.command.Command cmd) {
-		ChatUtils.sendCommandHelp(sender, Perm.ORDERS, "/%s cancel <id> [amount]", cmd);
+		ChatUtils.sendCommandHelp(sender, Perm.CANCEL, "/%s cancel <id> [amount]", cmd);
 	}
 
-	public boolean hasValues() {
-		return false;
-	}
 
 	public boolean execute(final CommandSender sender, org.bukkit.command.Command cmd, String[] args) throws SQLException {
 		if (!Plugin.checkPermission(sender, Perm.CANCEL)) 

@@ -12,33 +12,34 @@ import com.cyprias.ExchangeMarket.configuration.Config;
 public enum Perm {
 	
 	SEARCH("exchangemarket.search"),
-	SELL("exchangemarket.sell"),
-	BUY("exchangemarket.buy"),
-	SELL_ORDER("exchangemarket.sellorder"),
-	BUY_ORDER("exchangemarket.buyorder"),
 	PRICE("exchangemarket.price"),
 	ORDERS("exchangemarket.orders"),
-	COLLECT("exchangemarket.collect"),
 	LIST("exchangemarket.list"),
-	SELL_HAND("exchangemarket.sellhand"),
-	CANCEL("exchangemarket.cancel"),
 	TRANSACTIONS("exchangemarket.transactions"),
-	CONFIRM("exchangemarket.confirm"),
 	LOGIN_PENDING_COLLECT("exchangemarket.loginPendingCollection"),
 	ITEM_INFO("exchangemarket.iteminfo"),
 	PASSWORD("exchangemarket.password"),
 	VERSION("exchangemarket.version"),
 	NOTIFIED_SELLORDER("exchangemarket.announceneworder.sell"),
 	NOTIFIED_BUYORDER("exchangemarket.announceneworder.buy"),
-	PARENT_USER("exchangemarket.user", NOTIFIED_SELLORDER, NOTIFIED_BUYORDER, VERSION, SEARCH,SELL,BUY,SELL_ORDER,BUY_ORDER,PRICE,ORDERS,COLLECT,LIST,SELL_HAND,CANCEL,TRANSACTIONS,CONFIRM,LOGIN_PENDING_COLLECT,ITEM_INFO, PASSWORD),
+	PARENT_INFO("exchangemarket.user-safe", NOTIFIED_SELLORDER, NOTIFIED_BUYORDER, VERSION, SEARCH, PRICE,ORDERS, TRANSACTIONS, LIST, LOGIN_PENDING_COLLECT, ITEM_INFO,PASSWORD),
+	
+	SELL("exchangemarket.sell"),
+	BUY("exchangemarket.buy"),
+	SELL_ORDER("exchangemarket.sellorder"),
+	BUY_ORDER("exchangemarket.buyorder"),
+	COLLECT("exchangemarket.collect"),
+	SELL_HAND("exchangemarket.sellhand"),
+	CANCEL("exchangemarket.cancel"),
+	CONFIRM("exchangemarket.confirm"),
+	PARENT_USER("exchangemarket.user", PARENT_INFO, SELL,BUY,SELL_ORDER,BUY_ORDER,COLLECT,SELL_HAND,CANCEL,CONFIRM),
+	
 	INF_BUY("exchangemarket.infbuy"),
 	INF_SELL("exchangemarket.infsell"),
 	RELOAD("exchangemarket.reload"),
-	WHATS_NEW("exchangemarket.whatsnew"),
 	REMOVE("exchangemarket.remove"),
 	LOGIN_NEW_VERSION("exchangemarket.loginNewVersion"),
-	
-	PARENT_ADMIN("exchangemarket.admin", PARENT_USER, INF_BUY,INF_SELL,RELOAD,WHATS_NEW,REMOVE,LOGIN_NEW_VERSION),
+	PARENT_ADMIN("exchangemarket.admin", PARENT_USER, INF_BUY,INF_SELL,RELOAD,REMOVE,LOGIN_NEW_VERSION),
 	
 	PARENT_ALL("exchangemarket.*", PARENT_ADMIN);
 
