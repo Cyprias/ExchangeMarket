@@ -95,9 +95,6 @@ public class Plugin extends JavaPlugin {
 
 		loadPermissions();
 
-		registerListeners(new PlayerListener());
-
-		
 		CommandManager cm = new CommandManager().registerCommand("reload", new ReloadCommand());
 		cm.registerCommand("version", new VersionCommand());
 		cm.registerCommand("sellorder", new SellOrderCommand());
