@@ -78,10 +78,12 @@ public class ReturnCommand implements Command {
 		}
 		
 		int receive;
-		for (Order order: orders){
+		Order order;
+		for (int i = (orders.size() - 1); i >= 0; i--) {
 			
 			if (amount <= 0)
 				break;
+			order = orders.get(i);
 			
 			//stock = order.getItemStack();
 			
