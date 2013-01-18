@@ -68,6 +68,7 @@ public class Plugin extends JavaPlugin {
 		instance = this;
 
 		getConfig().options().copyDefaults(true);
+		Config.migrateConfig();
 		saveConfig();
 
         if (!Econ.setupEconomy() ) {

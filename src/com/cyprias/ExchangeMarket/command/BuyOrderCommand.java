@@ -6,6 +6,7 @@ import java.util.List;
 import net.milkbowl.vault.economy.EconomyResponse;
 
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import com.cyprias.ExchangeMarket.ChatUtils;
@@ -25,7 +26,12 @@ public class BuyOrderCommand implements Command {
 		if (!Plugin.checkPermission(sender, Perm.BUY_ORDER)) {
 			return false;
 		}
-
+		Player player = (Player) sender;
+		if (Config.getBoolean("properties.block-usage-in-creative") == true && player.getGameMode().getValue() == 1) {
+			ChatUtils.send(sender, "Cannot use ExchangeMarket while in creative mode.");
+			return true;
+		}
+		
 		if (args.length <= 0 || args.length >= 4) {
 			getCommands(sender, cmd);
 			return true;

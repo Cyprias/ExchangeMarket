@@ -24,7 +24,12 @@ public class SellOrderCommand implements Command {
 		if (!Plugin.checkPermission(sender, Perm.SELL_ORDER)) 
 			return false;
 		
-
+		Player player = (Player) sender;
+		if (Config.getBoolean("properties.block-usage-in-creative") == true && player.getGameMode().getValue() == 1) {
+			ChatUtils.send(sender, "Cannot use ExchangeMarket while in creative mode.");
+			return true;
+		}
+		
 		if (args.length <= 0 || args.length >= 4) {
 			getCommands(sender, cmd);
 			return true;
@@ -36,9 +41,6 @@ public class SellOrderCommand implements Command {
 			return true;
 		}
 
-		//Logger.debug( "item: " + stock.getType());
-
-		Player player = (Player) sender;
 
 		int intAmount = InventoryUtil.getAmount(stock, player.getInventory());
 

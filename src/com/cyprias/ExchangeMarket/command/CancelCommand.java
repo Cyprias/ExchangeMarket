@@ -35,6 +35,12 @@ public class CancelCommand implements Command {
 		if (!Plugin.checkPermission(sender, Perm.CANCEL)) 
 			return false;
 		
+		Player player = (Player) sender;
+		if (Config.getBoolean("properties.block-usage-in-creative") == true && player.getGameMode().getValue() == 1) {
+			ChatUtils.send(sender, "Cannot use ExchangeMarket while in creative mode.");
+			return true;
+		}
+		
 		if (args.length <= 0 || args.length >= 3){
 			getCommands(sender, cmd);
 			return true;
@@ -78,7 +84,6 @@ public class CancelCommand implements Command {
 		if (order.getOrderType() == Order.SELL_ORDER){
 		
 			ItemStack stock = order.getItemStack();
-			Player player = (Player) sender;
 			
 			int receive = Plugin.getFitAmount(stock, order.getAmount(), player.getInventory());
 			

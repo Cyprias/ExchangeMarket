@@ -15,6 +15,8 @@ properties:
   show-plugin-replies: true
   trade-to-yourself: false
   notify-owner-of-transaction: true
+  log-transactions-to-db: true
+  block-usage-in-creative: true
 mysql:
   hostname: localhost
   username: root

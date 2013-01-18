@@ -12,6 +12,7 @@ import com.cyprias.ExchangeMarket.Logger;
 import com.cyprias.ExchangeMarket.Perm;
 import com.cyprias.ExchangeMarket.Plugin;
 import com.cyprias.ExchangeMarket.Breeze.InventoryUtil;
+import com.cyprias.ExchangeMarket.configuration.Config;
 import com.cyprias.ExchangeMarket.database.Parcel;
 
 public class CollectCommand  implements Command {
@@ -37,7 +38,11 @@ public class CollectCommand  implements Command {
 		if (!Plugin.checkPermission(sender, Perm.CONFIRM)) {
 			return false;
 		}
-		
+		Player player = (Player) sender;
+		if (Config.getBoolean("properties.block-usage-in-creative") == true && player.getGameMode().getValue() == 1) {
+			ChatUtils.send(sender, "Cannot use ExchangeMarket while in creative mode.");
+			return true;
+		}
 		
 		List<Parcel> packages = Plugin.database.getPackages(sender);
 		
@@ -46,7 +51,6 @@ public class CollectCommand  implements Command {
 			return true;
 		}
 		
-		Player player = (Player) sender;
 		ItemStack stock;
 		int leftover, canTake;
 		boolean noFound = true;

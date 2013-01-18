@@ -30,10 +30,16 @@ public class BuyCommand implements Command {
 	
 	@Override
 	public boolean execute(CommandSender sender, org.bukkit.command.Command cmd, String[] args) {
-		if (!Plugin.checkPermission(sender, Perm.BUY)) {
+		if (!Plugin.checkPermission(sender, Perm.BUY)) 
 			return false;
-		}
+		
 
+		Player player = (Player) sender;
+		if (Config.getBoolean("properties.block-usage-in-creative") == true && player.getGameMode().getValue() == 1) {
+			ChatUtils.send(sender, "Cannot use ExchangeMarket while in creative mode.");
+			return true;
+		}
+		
 		if (args.length <= 0 || args.length >= 4) {
 			getCommands(sender, cmd);
 			return true;
@@ -45,9 +51,6 @@ public class BuyCommand implements Command {
 			return true;
 		}
 
-	//	Logger.debug( "item: " + stock.getType());
-
-		//Player player = (Player) sender;
 		
 		int amount = 1;// InventoryUtil.getAmount(item, player.getInventory());
 		if (args.length > 1) {
@@ -97,9 +100,7 @@ public class BuyCommand implements Command {
 	//	Order preOrder = new Order(Order.BUY_ORDER, false, sender.getName(), stock, price);
 		
 		//Double accountBalance = Econ.getBalance(sender.getName());
-		
-		Player player = (Player) sender;
-		
+	
 		try {
 			List<Order> orders = Plugin.database.search(stock, Order.SELL_ORDER);
 			

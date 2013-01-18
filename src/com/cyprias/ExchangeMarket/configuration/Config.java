@@ -30,4 +30,39 @@ public class Config {
 		return plugin.getConfig().getString(property).replaceAll("(?i)&([a-k0-9])", "\u00A7$1");
 	}
 	
+	static public void migrateConfig(){
+		//Migrate options from pre v1.1.0;
+		migrateBoolean("logTransactionsToDB", "properties.log-transactions-to-db");
+		migrateBoolean("blockUsageInCreativeMode", "properties.block-usage-in-creative");
+		migrateBoolean("checkNewVersionOnStartup", "properties.check-new-version");
+		migrateBoolean("allowDamangedGear", "properties.allow-damaged-gear");
+		
+		migrateDouble("minOrderPrice", "properties.min-order-price");
+		
+		migrateInt("priceRounding", "properties.price-decmial-places");
+		migrateInt("transactionsPerPage", "properties.rows-per-page");
+	}
+	
+	public static void migrateBoolean(String oldPath, String newPath){
+		if (plugin.getConfig().contains(oldPath)){
+			plugin.getConfig().set(newPath, plugin.getConfig().getBoolean(oldPath));
+			plugin.getConfig().set(oldPath, null);
+		}
+	}
+	
+	public static void migrateDouble(String oldPath, String newPath){
+		if (plugin.getConfig().contains(oldPath)){
+			plugin.getConfig().set(newPath, plugin.getConfig().getDouble(oldPath));
+			plugin.getConfig().set(oldPath, null);
+		}
+	}
+	
+	public static void migrateInt(String oldPath, String newPath){
+		if (plugin.getConfig().contains(oldPath)){
+			plugin.getConfig().set(newPath, plugin.getConfig().getInt(oldPath));
+			plugin.getConfig().set(oldPath, null);
+		}
+	}
+	
 }
+
