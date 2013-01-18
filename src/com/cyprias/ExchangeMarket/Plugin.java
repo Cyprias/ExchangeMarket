@@ -34,6 +34,7 @@ import com.cyprias.ExchangeMarket.command.CancelCommand;
 import com.cyprias.ExchangeMarket.command.CollectCommand;
 import com.cyprias.ExchangeMarket.command.CommandManager;
 import com.cyprias.ExchangeMarket.command.ConfirmCommand;
+import com.cyprias.ExchangeMarket.command.InfSellCommand;
 import com.cyprias.ExchangeMarket.command.ListCommand;
 import com.cyprias.ExchangeMarket.command.OrdersCommand;
 import com.cyprias.ExchangeMarket.command.PriceCommand;
@@ -106,6 +107,7 @@ public class Plugin extends JavaPlugin {
 		cm.registerCommand("cancel", new CancelCommand());
 		cm.registerCommand("return", new ReturnCommand());
 		cm.registerCommand("remove", new RemoveCommand());
+		cm.registerCommand("infsell", new InfSellCommand());
 		
 		this.getCommand("em").setExecutor(cm);
 

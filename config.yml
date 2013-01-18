@@ -4,7 +4,7 @@ properties:
   check-new-version: true
   line-separator: "<newline>"
   log-balance-changes-to-console: true
-  chat-prefix: "[EM] "
+  chat-prefix: "&f[&6EM&f] "
   allow-damaged-gear: false
   min-order-price: 0.0001
   rows-per-page: 10

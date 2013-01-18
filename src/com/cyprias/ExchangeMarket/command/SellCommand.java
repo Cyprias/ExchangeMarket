@@ -141,7 +141,7 @@ public class SellCommand implements Command {
 			List<pendingOrder> pending = pT.pendingOrders; // ConfirmCommand.pendingOrders.get(sender.getName());
 
 			
-			int canTrade;
+			
 			double moneyProfited = 0.0;
 			int itemsTraded = 0;
 			for (int i = (orders.size() - 1); i >= 0; i--) {
@@ -151,8 +151,10 @@ public class SellCommand implements Command {
 				o = orders.get(i);
 				
 				
-
-				canTrade = Math.min(o.getAmount(), amount);
+				int canTrade = amount;
+				if (!o.isInfinite())
+					canTrade = Math.min(o.getAmount(), amount);
+				
 				Logger.debug("sell " + i + ", id: " + o.getId() + ", price: " + o.getPrice() + ", canTrade: " + canTrade);
 				if (canTrade <= 0)
 					break;

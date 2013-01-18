@@ -32,7 +32,11 @@ public class Order {
 	public Order(int type, boolean infinite, String player, int itemId, short itemDur, String itemEnchants, int amount, double price) {
 		this.type = type;
 		this.infinite = infinite;
-		this.player = player;
+		if (infinite){
+			this.player = Plugin.getInstance().getName();
+		}else{
+			this.player = player;
+		}
 		this.itemId = itemId;
 		this.itemDur = itemDur;
 		this.itemEnchants = itemEnchants;
@@ -72,9 +76,12 @@ public class Order {
 	}
 	
 	public String getName(CommandSender sender){
+		if (infinite == true)
+			return ChatColor.GOLD +Plugin.getItemName(stock)+ChatColor.RESET;
+		
 		if (sender.getName().equalsIgnoreCase(player))
 			return ChatColor.AQUA +Plugin.getItemName(stock)+ChatColor.RESET;
-			
+
 		return ChatColor.WHITE+Plugin.getItemName(stock)+ChatColor.RESET;
 	}
 	
