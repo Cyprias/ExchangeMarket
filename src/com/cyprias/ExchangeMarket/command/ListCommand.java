@@ -46,6 +46,11 @@ public class ListCommand implements Command {
 		try {
 			List<Order> orders = Plugin.database.list(sender, page);
 			
+			if (orders == null || orders.size() <= 0){
+				ChatUtils.send(sender, "§7There are no orders present.");
+				return true;
+			}
+			
 			//ChatUtils.send(sender, "Orders: " + orders.size());
 			
 			Order order;

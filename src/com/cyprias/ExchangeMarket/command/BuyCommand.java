@@ -103,18 +103,16 @@ public class BuyCommand implements Command {
 		
 		try {
 			List<Order> orders = Plugin.database.search(stock, Order.SELL_ORDER);
-			for (Order o : orders){
-				if (sender.getName().equalsIgnoreCase(o.getPlayer()))
-					orders.remove(o);
-			}
 			
 			Order o;
 			
-			for (int i = (orders.size() - 1); i >= 0; i--) {
-				o = orders.get(i); 
-				if (sender.getName().equalsIgnoreCase(o.getPlayer()))
-					orders.remove(o);
-			}
+			if (!Config.getBoolean("properties.trade-to-yourself"))
+				for (int i = (orders.size() - 1); i >= 0; i--) {
+					o = orders.get(i); 
+					if (sender.getName().equalsIgnoreCase(o.getPlayer()))
+						orders.remove(o);
+				}
+			
 			
 			if (orders.size() <= 0){
 				ChatUtils.send(sender, String.format("§7There are §f%s §7sell orders for §f%s§7, try creating a sell order.", orders.size(), Plugin.getItemName(stock)) );

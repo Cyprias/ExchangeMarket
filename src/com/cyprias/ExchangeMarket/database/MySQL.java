@@ -24,6 +24,7 @@ public class MySQL implements Database {
 	static String prefix;
 	static String order_table;
 	static String mailbox_table;
+	static String transaction_table;
 	
 	public Boolean init() {
 		if (!canConnect()){
@@ -33,7 +34,7 @@ public class MySQL implements Database {
 		prefix = Config.getString("mysql.prefix");
 		order_table = prefix+ "Orders";
 		mailbox_table  = prefix+ "Mailbox"; 
-		
+		transaction_table = prefix 	+ "Transactions";
 		
 		try {
 			createTables();
@@ -368,12 +369,9 @@ public class MySQL implements Database {
 	}
 
 	public List<Order> list(CommandSender sender, int page) throws SQLException {
-		
-		
+
 		int rows = getResultCount("SELECT COUNT(*) FROM " + order_table);
 
-
-		
 		//Logger.info("rows: " + rows);
 		
 		int perPage = Config.getInt("properties.rows-per-page");
@@ -390,18 +388,15 @@ public class MySQL implements Database {
 		}else{
 			if (page > max)
 				page = max;
-			
 		}
-
-
+		if (rows == 0)
+			return null;
+		
 		ChatUtils.send(sender, "§7Page: §f" + (page+1) + "§7/§f" + (max+1));
-		
-		
-		
+
 		List<Order> notes = new ArrayList<Order>();
 		
-		if (rows == 0)
-			return notes;
+
 		
 		queryReturn results = executeQuery("SELECT * FROM `"+order_table+"` LIMIT "+(perPage * page)+" , " + perPage);
 		ResultSet r = results.result;
@@ -696,6 +691,74 @@ public class MySQL implements Database {
 		}
 		
 		return orders;
+	}
+
+	@Override
+	public Boolean insertTransaction(int type, String buyer, int itemID, int itemDur, String itemEnchants, int amount, double price, String seller) throws SQLException {
+		if (itemEnchants == null)
+			itemEnchants = "";
+		return (executeUpdate("INSERT INTO "+ transaction_table+ " (`type`, `buyer`, `itemID`, `itemDur`, `itemEnchants`, `amount`, `price`, `seller`, `timestamp`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP);", type, buyer, itemID, itemDur, itemEnchants, amount, price, seller) > 0) ? true : false;
+	}
+
+	@Override
+	public List<Transaction> listTransactions(CommandSender sender, int page) throws SQLException {
+
+		int rows = getResultCount("SELECT COUNT(*) FROM " + transaction_table);
+
+		//Logger.info("rows: " + rows);
+		
+		int perPage = Config.getInt("properties.rows-per-page");
+		
+		//Logger.info("page1: " + page);
+		int max = (rows / perPage);// + 1;
+		
+		if (rows % perPage == 0)
+			max--;
+		
+		//Logger.info("max: " + max);
+		if (page < 0){
+			page = max - (Math.abs(page) - 1);
+		}else{
+			if (page > max)
+				page = max;
+		}
+		if (rows == 0)
+			return null;
+		
+		
+		ChatUtils.send(sender, "§7Page: §f" + (page+1) + "§7/§f" + (max+1));
+
+
+		
+		List<Transaction> transactions = new ArrayList<Transaction>();
+		
+
+		
+		queryReturn results = executeQuery("SELECT * FROM `"+transaction_table+"` LIMIT "+(perPage * page)+" , " + perPage);
+		ResultSet r = results.result;
+		
+		//List<Order> orders = new ArrayList<Order>();
+		Transaction transaction;
+		while (r.next()) {
+		//	Logger.info("id: " + r.getInt(1));
+			transaction = new Transaction(
+				r.getInt("id"),
+				r.getInt("type"),
+				r.getString("buyer"),
+				r.getInt("itemID"),
+				r.getShort("itemDur"),
+				r.getString("itemEnchants"),
+				r.getInt("amount"),
+				r.getDouble("price"),
+				r.getString("seller"),
+				r.getTimestamp("timestamp")
+			);
+
+			transactions.add(transaction);
+		}
+
+		results.close();
+		return transactions;
 	}
 	
 }

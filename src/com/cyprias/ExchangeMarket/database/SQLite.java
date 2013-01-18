@@ -312,5 +312,18 @@ public class SQLite implements Database {
 		return null;
 	}
 
+	@Override
+	public Boolean insertTransaction(int type, String buyer, int itemID, int itemDur, String itemEnchants, int amount, double price, String seller)
+		throws SQLException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<Transaction> listTransactions(CommandSender sender, int page) throws SQLException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 
 }

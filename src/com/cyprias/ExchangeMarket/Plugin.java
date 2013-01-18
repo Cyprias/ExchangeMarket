@@ -2,6 +2,7 @@ package com.cyprias.ExchangeMarket;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
@@ -17,6 +18,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
+import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
@@ -45,13 +47,16 @@ import com.cyprias.ExchangeMarket.command.ReturnCommand;
 import com.cyprias.ExchangeMarket.command.SearchCommand;
 import com.cyprias.ExchangeMarket.command.SellCommand;
 import com.cyprias.ExchangeMarket.command.SellOrderCommand;
+import com.cyprias.ExchangeMarket.command.TransactionsCommand;
 import com.cyprias.ExchangeMarket.command.VersionCommand;
 import com.cyprias.ExchangeMarket.configuration.Config;
+import com.cyprias.ExchangeMarket.configuration.YML;
 import com.cyprias.ExchangeMarket.database.Database;
 import com.cyprias.ExchangeMarket.database.MySQL;
 import com.cyprias.ExchangeMarket.database.SQLite;
 import com.cyprias.ExchangeMarket.listeners.PlayerListener;
 import com.cyprias.ExchangeMarket.listeners.ServerListener;
+
 
 public class Plugin extends JavaPlugin {
 	private static Plugin instance = null;
@@ -59,7 +64,8 @@ public class Plugin extends JavaPlugin {
 	//public void onLoad() {}
 
 	public static Database database;
-
+	public static HashMap<String, String> aliases = new HashMap<String, String>();
+	
 	public void onEnable() {
 		instance = this;
 
@@ -110,9 +116,21 @@ public class Plugin extends JavaPlugin {
 		cm.registerCommand("remove", new RemoveCommand());
 		cm.registerCommand("infsell", new InfSellCommand());
 		cm.registerCommand("infbuy", new InfBuyCommand());
+		cm.registerCommand("transactions", new TransactionsCommand());
 		
 		this.getCommand("em").setExecutor(cm);
 
+		try {
+			YML yml = new YML(getResource("aliases.yml"),getDataFolder(), "aliases.yml");
+			for (String key : yml.getKeys(false)) {
+				aliases.put(key, yml.getString(key));
+			}
+		} catch (FileNotFoundException e2) {e2.printStackTrace();
+		} catch (IOException e2) {e2.printStackTrace();
+		} catch (InvalidConfigurationException e2) {e2.printStackTrace();
+		}
+
+		
 		try {
 			loadItemIds();
 		} catch (NumberFormatException e1) {e1.printStackTrace();
@@ -393,6 +411,7 @@ public class Plugin extends JavaPlugin {
 	}
 	
 	public static String getItemName(ItemStack stock){
+		/*
 		String id_dur = String.valueOf(stock.getTypeId());
 		if (stock.getDurability() > 0)
 			id_dur += ";" + stock.getDurability();
@@ -400,7 +419,34 @@ public class Plugin extends JavaPlugin {
 		if (stockToName.containsKey(id_dur))
 			return stockToName.get(id_dur);
 		
-		return stock.getType().name();
+		return stock.getType().name();*/
+		return getItemName(stock.getTypeId(), stock.getDurability(), MaterialUtil.Enchantment.encodeEnchantment(stock));
+	}
+	
+	public static String getItemName(int itemId, short itemDur, String itemEnchant){
+		String id_dur = String.valueOf(itemId);
+		if (itemDur > 0)
+			id_dur += ";" + itemDur;
+		
+		String name = null;
+		if (stockToName.containsKey(id_dur))
+			name =  stockToName.get(id_dur);
+
+		if (name != null){
+			if (itemEnchant != null && !itemEnchant.equals(""))
+				name += "-" + itemEnchant;
+			return name;
+		}
+		
+		return id_dur + ((itemEnchant != null) ? itemEnchant : "");
+	}
+	
+	public static String getItemName(int itemId, short itemDur){
+		return getItemName(itemId, itemDur, null);
+	}
+	
+	public static String getItemName(int itemId){
+		return getItemName(itemId, (short) 0);
 	}
 	
 	public void copy(InputStream in, File file) throws IOException {

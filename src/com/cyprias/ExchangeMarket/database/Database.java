@@ -32,11 +32,11 @@ public interface Database {
 	
 	Boolean init();
 	
-	public Order getOrder(int id) throws SQLException;
+	Order getOrder(int id) throws SQLException;
 	
 	Boolean insert(Order order) throws SQLException;
 	
-	public int getLastId() throws SQLException;
+	int getLastId() throws SQLException;
 	
 	List<Order> search(ItemStack stock, int orderType, CommandSender sender) throws SQLException;
 	List<Order> search(ItemStack stock, int orderType) throws SQLException;
@@ -44,7 +44,7 @@ public interface Database {
 	
 	
 	
-	public List<Order> list(CommandSender sender, int page) throws SQLException;
+	List<Order> list(CommandSender sender, int page) throws SQLException;
 	
 	
 	Order findMatchingOrder(Order order) throws SQLException;
@@ -70,9 +70,13 @@ public interface Database {
 	
 	Boolean setPackageAmount(int id, int amount) throws SQLException;
 	
-	public Boolean cleanMailboxEmpties() throws SQLException;
+	Boolean cleanMailboxEmpties() throws SQLException;
 
 	List<Order> getPlayerOrders(CommandSender sender, int page) throws SQLException;
+	
+	Boolean insertTransaction(int type, String buyer, int itemID, int itemDur, String itemEnchants, int amount, double price, String seller) throws SQLException;
+
+	List<Transaction> listTransactions(CommandSender sender, int page) throws SQLException;
 	
 	
 }

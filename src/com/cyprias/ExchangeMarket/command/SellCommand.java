@@ -116,11 +116,12 @@ public class SellCommand implements Command {
 			List<Order> orders = Plugin.database.search(stock, Order.BUY_ORDER);
 			Order o;
 			
-			for (int i = (orders.size() - 1); i >= 0; i--) {
-				o = orders.get(i); 
-				if (sender.getName().equalsIgnoreCase(o.getPlayer()))
-					orders.remove(o);
-			}
+			if (!Config.getBoolean("properties.trade-to-yourself"))
+				for (int i = (orders.size() - 1); i >= 0; i--) {
+					o = orders.get(i); 
+					if (sender.getName().equalsIgnoreCase(o.getPlayer()))
+						orders.remove(o);
+				}
 			
 			Logger.debug( "Orders: " + orders.size());
 

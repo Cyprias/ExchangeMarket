@@ -13,6 +13,8 @@ properties:
   price-decmial-places: 4
   debugging: false
   show-plugin-replies: true
+  trade-to-yourself: false
+  notify-owner-of-transaction: true
 mysql:
   hostname: localhost
   username: root

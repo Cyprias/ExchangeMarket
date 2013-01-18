@@ -167,14 +167,17 @@ public class ConfirmCommand implements Command {
 				Econ.withdrawPlayer(pT.player.getName(), spend);
 				Econ.depositPlayer(order.getPlayer(), spend);
 
-				moneyTraded += spend;
+				
 
 				if (!order.isInfinite()){
 					order.reduceAmount(traded);
-
 					order.notifyPlayerOfTransaction(traded);
 				}
 
+				order.insertTransaction(sender, traded);
+				
+				
+				moneyTraded += spend;
 			}
 
 			Plugin.database.cleanEmpties();
@@ -231,7 +234,7 @@ public class ConfirmCommand implements Command {
 				
 				if (!order.isInfinite())
 					order.sendAmountToMailbox(traded);
-				
+
 				profit = traded * order.getPrice();
 				Econ.depositPlayer(sender.getName(), profit);
 				
@@ -240,8 +243,9 @@ public class ConfirmCommand implements Command {
 					order.notifyPlayerOfTransaction(traded);
 				}
 				
-				moneyTraded += profit;
+				order.insertTransaction(sender, traded);
 				
+				moneyTraded += profit;
 				totalTraded += traded;
 				
 				
