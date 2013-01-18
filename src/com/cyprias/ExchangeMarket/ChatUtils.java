@@ -3,6 +3,7 @@ package com.cyprias.ExchangeMarket;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 
 import com.cyprias.ExchangeMarket.configuration.Config;
@@ -63,7 +64,7 @@ public class ChatUtils {
 	
 	public static void send(CommandSender sender, String message) {
 		sendSpam(sender, message);
-		if (Config.getBoolean("properties.show-plugin-replies"))
+		if (Config.getBoolean("properties.show-plugin-replies") && !(sender instanceof ConsoleCommandSender))
 			Logger.infoRaw( getChatPrefix()+ sender.getName() + " > "+ChatColor.stripColor(message));
 
 	}

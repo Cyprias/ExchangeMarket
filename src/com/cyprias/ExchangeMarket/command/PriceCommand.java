@@ -22,7 +22,7 @@ public class PriceCommand implements Command {
 	}
 
 	public CommandAccess getAccess() {
-		return CommandAccess.PLAYER;
+		return CommandAccess.BOTH;
 	}
 
 	public void getCommands(CommandSender sender, org.bukkit.command.Command cmd) {

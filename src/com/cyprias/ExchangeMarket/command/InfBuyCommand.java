@@ -4,22 +4,20 @@ import java.sql.SQLException;
 import java.util.List;
 
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import com.cyprias.ExchangeMarket.ChatUtils;
 import com.cyprias.ExchangeMarket.Logger;
 import com.cyprias.ExchangeMarket.Perm;
 import com.cyprias.ExchangeMarket.Plugin;
-import com.cyprias.ExchangeMarket.Breeze.InventoryUtil;
 import com.cyprias.ExchangeMarket.configuration.Config;
 import com.cyprias.ExchangeMarket.database.Order;
 
-public class InfSellCommand implements Command {
+public class InfBuyCommand implements Command {
 
 	public void listCommands(CommandSender sender, List<String> list) {
-		if (Plugin.hasPermission(sender, Perm.INF_SELL))
-			list.add("/%s infsell - Create an infinite sell order (spawns items)");
+		if (Plugin.hasPermission(sender, Perm.INF_BUY))
+			list.add("/%s infbuy - Create an infinite buy order (spawns money)");
 	}
 
 	public CommandAccess getAccess() {
@@ -27,11 +25,11 @@ public class InfSellCommand implements Command {
 	}
 
 	public void getCommands(CommandSender sender, org.bukkit.command.Command cmd) {
-		ChatUtils.sendCommandHelp(sender, Perm.INF_SELL, "/%s infsell <item> <amount> <price>", cmd);
+		ChatUtils.sendCommandHelp(sender, Perm.INF_BUY, "/%s infbuy <item> <amount> <price>", cmd);
 	}
 
 	public boolean execute(final CommandSender sender, org.bukkit.command.Command cmd, String[] args) throws SQLException {
-		if (!Plugin.checkPermission(sender, Perm.INF_SELL)) 
+		if (!Plugin.checkPermission(sender, Perm.INF_BUY)) 
 			return false;
 		
 		if (args.length < 3 || args.length > 3) {
@@ -96,7 +94,7 @@ public class InfSellCommand implements Command {
 		}
 
 		stock.setAmount(amount);
-		Order preOrder = new Order(Order.SELL_ORDER, true, sender.getName(), stock, price);
+		Order preOrder = new Order(Order.BUY_ORDER, true, sender.getName(), stock, price);
 
 		if (!Config.getBoolean("properties.allow-damaged-gear") && Plugin.isGear(stock.getType()) && stock.getDurability() > 0) {
 			// ExchangeMarket.sendMessage(sender, F("cannotPostDamagedOrder"));
@@ -109,7 +107,7 @@ public class InfSellCommand implements Command {
 			int id = Plugin.database.getLastId();
 			
 			int pl = Config.getInt("properties.price-decmial-places");
-			ChatUtils.send(sender,String.format("§7Created infinite sell order #§f%s §7for §f%s§7x§f%s §7@ §f%s §7(§f%s§7e)", id, Plugin.getItemName(stock), preOrder.getAmount(), Plugin.Round(preOrder.getPrice()*preOrder.getAmount(),pl), Plugin.Round(preOrder.getPrice(),pl)));
+			ChatUtils.send(sender,String.format("§7Created infinite buy order #§f%s §7for §f%s§7x§f%s §7@ §f%s §7(§f%s§7e)", id, Plugin.getItemName(stock), preOrder.getAmount(), Plugin.Round(preOrder.getPrice()*preOrder.getAmount(),pl), Plugin.Round(preOrder.getPrice(),pl)));
 		}
 		
 		

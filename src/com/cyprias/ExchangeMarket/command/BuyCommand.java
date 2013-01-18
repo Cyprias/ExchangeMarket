@@ -193,7 +193,7 @@ public class BuyCommand implements Command {
 			}
 			
 			if (moneySpent > 0){
-				ChatUtils.send(sender, String.format("§a[Estimate] §f%s§7x§f%s§7 will cost $§f%s§7, type §d/em confirm §7to confirm transaction.", stock.getType(), itemsTraded, Plugin.Round(moneySpent, dplaces)));
+				ChatUtils.send(sender, String.format("§a[Estimate] §f%s§7x§f%s§7 will cost $§f%s§7, type §d/em confirm §7to confirm transaction.", Plugin.getItemName(stock), itemsTraded, Plugin.Round(moneySpent, dplaces)));
 			}else{
 				stock.setAmount(1);
 				if (!InventoryUtil.fits(stock, player.getInventory())){

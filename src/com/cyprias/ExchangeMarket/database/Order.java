@@ -32,11 +32,11 @@ public class Order {
 	public Order(int type, boolean infinite, String player, int itemId, short itemDur, String itemEnchants, int amount, double price) {
 		this.type = type;
 		this.infinite = infinite;
-		if (infinite){
-			this.player = Plugin.getInstance().getName();
-		}else{
+		//if (infinite){
+		//	this.player = Plugin.getInstance().getName();
+		//}else{
 			this.player = player;
-		}
+		//}
 		this.itemId = itemId;
 		this.itemDur = itemDur;
 		this.itemEnchants = itemEnchants;
@@ -106,20 +106,19 @@ public class Order {
 		return this.type;
 	}
 
-	public String getOrderTypeString() {
-		if (this.type == SELL_ORDER){
-			return "SELL";
-		}else if (this.type == BUY_ORDER){
-			return "BUY";
-		}
-		return "OTHER";
-	}
-	
 	public String getOrderTypeColouredString() {
-		if (this.type == SELL_ORDER){
-			return ChatColor.RED+"Sell" + ChatColor.RESET;
-		}else if (this.type == BUY_ORDER){
-			return ChatColor.GREEN+"Buy" + ChatColor.RESET;
+		if (infinite){
+			if (this.type == SELL_ORDER){
+				return ChatColor.RED+"InfSell" + ChatColor.RESET;
+			}else if (this.type == BUY_ORDER){
+				return ChatColor.GREEN+"InfBuy" + ChatColor.RESET;
+			}
+		}else{
+			if (this.type == SELL_ORDER){
+				return ChatColor.RED+"Sell" + ChatColor.RESET;
+			}else if (this.type == BUY_ORDER){
+				return ChatColor.GREEN+"Buy" + ChatColor.RESET;
+			}	
 		}
 		return "OTHER";
 	}

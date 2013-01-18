@@ -52,6 +52,7 @@ public class CommandManager implements CommandExecutor, Listable {
 			CommandAccess access = command.getAccess();
 			if (!access.hasAccess(sender)) {
 				ChatUtils.error(sender, "You do not have access to this command.");
+				return true;
 			} else {
 				try {
 					args = (String[]) ArrayUtils.remove(args, 0);

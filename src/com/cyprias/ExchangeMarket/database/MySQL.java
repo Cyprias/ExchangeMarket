@@ -643,7 +643,7 @@ public class MySQL implements Database {
 
 
 		
-		//Logger.info("rows: " + rows);
+		//Logger.debug("rows: " + rows);
 		
 		int perPage = Config.getInt("properties.rows-per-page");
 		
@@ -665,7 +665,8 @@ public class MySQL implements Database {
 
 		ChatUtils.send(sender, "§7Page: §f" + (page+1) + "§7/§f" + (max+1));
 		
-		
+		if (rows <= 0)
+			return null;
 		
 		
 		List<Order> orders = new ArrayList<Order>();

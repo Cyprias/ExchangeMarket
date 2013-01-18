@@ -183,7 +183,7 @@ public class SellCommand implements Command {
 			if (itemsTraded > 0) {
 
 				ChatUtils.send(sender, String.format("§a[Estimate] §f%s§7x§f%s§7 will earn $§f%s§7, type §d/em confirm §7to confirm transaction.",
-					stock.getType(), itemsTraded, Plugin.Round(moneyProfited, Config.getInt("properties.price-decmial-places"))));
+					Plugin.getItemName(stock), itemsTraded, Plugin.Round(moneyProfited, Config.getInt("properties.price-decmial-places"))));
 
 			} else {
 

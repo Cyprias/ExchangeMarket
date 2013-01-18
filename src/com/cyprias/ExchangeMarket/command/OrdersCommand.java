@@ -20,7 +20,7 @@ public class OrdersCommand implements Command {
 	}
 
 	public CommandAccess getAccess() {
-		return CommandAccess.PLAYER;
+		return CommandAccess.BOTH;
 	}
 
 	public void getCommands(CommandSender sender, org.bukkit.command.Command cmd) {
@@ -66,7 +66,7 @@ public class OrdersCommand implements Command {
 		List<Order> orders = Plugin.database.getPlayerOrders(sender, page);
 		//ChatUtils.send(sender, "§7You have §f" + orders.size() + " §7orders.");
 		
-		if (orders.size() == 0)
+		if (orders == null || orders.size() == 0)
 			return true;
 		
 		Order order;
