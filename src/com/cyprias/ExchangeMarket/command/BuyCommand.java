@@ -40,7 +40,7 @@ public class BuyCommand implements Command {
 			return true;
 		}
 		
-		if (args.length <= 0 || args.length >= 4) {
+		if (args.length < 1 || args.length > 2) {
 			getCommands(sender, cmd);
 			return true;
 		}
@@ -64,32 +64,6 @@ public class BuyCommand implements Command {
 			}
 		}
 
-		
-		//Logger.debug("amount1: " + amount);
-
-		double price = 0;
-		// plugin.sendMessage(sender, "amount: " + amount);
-
-		if (args.length > 2) {
-
-			if (args[2].substring(args[2].length() - 1, args[2].length()).equalsIgnoreCase("e")) {
-				price = Math.abs(Double.parseDouble(args[2].substring(0, args[2].length() - 1)));
-			} else {
-
-				if (Plugin.isDouble(args[2])) {
-					price = Math.abs(Double.parseDouble(args[2]));
-				} else {
-					// ExchangeMarket.sendMessage(sender, F("invalidPrice",
-					// args[3]));
-					ChatUtils.error(sender, "Invalid price: " + args[2]);
-					return true;
-				}
-				price = price / amount;
-
-			}
-		}
-
-		
 		
 		if (ConfirmCommand.pendingTransactions.containsKey(sender.getName()))
 			ConfirmCommand.pendingTransactions.remove(sender.getName());
