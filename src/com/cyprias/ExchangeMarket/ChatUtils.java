@@ -65,7 +65,7 @@ public class ChatUtils {
 	public static void send(CommandSender sender, String message) {
 		sendSpam(sender, message);
 		if (Config.getBoolean("properties.show-plugin-replies") && !(sender instanceof ConsoleCommandSender))
-			Logger.infoRaw( getChatPrefix()+ sender.getName() + " > "+ChatColor.stripColor(message));
+			Logger.infoRaw( ChatColor.stripColor(getChatPrefix()+ sender.getName() + " > "+message));
 
 	}
 
