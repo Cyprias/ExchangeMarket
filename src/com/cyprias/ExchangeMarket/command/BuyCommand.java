@@ -91,7 +91,7 @@ public class BuyCommand implements Command {
 			
 			
 			if (orders.size() <= 0){
-				ChatUtils.send(sender, String.format("§7There are §f%s §7sell orders for §f%s§7, try creating a sell order.", orders.size(), Plugin.getItemName(stock)) );
+				ChatUtils.send(sender, String.format("§7There are §f%s §7sell orders for §f%s§7, try creating a buy order.", orders.size(), Plugin.getItemName(stock)) );
 				return true;
 			//}else{
 			//	ChatUtils.send(sender, String.format("§7There are §f%s §7sell orders for §f%s§7.", orders.size(), stock.getType()) );

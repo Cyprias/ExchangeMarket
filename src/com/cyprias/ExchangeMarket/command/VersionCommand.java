@@ -10,6 +10,7 @@ import org.bukkit.configuration.InvalidConfigurationException;
 import org.xml.sax.SAXException;
 
 import com.cyprias.ExchangeMarket.ChatUtils;
+import com.cyprias.ExchangeMarket.Logger;
 import com.cyprias.ExchangeMarket.Perm;
 import com.cyprias.ExchangeMarket.Plugin;
 import com.cyprias.ExchangeMarket.VersionChecker;
@@ -41,14 +42,14 @@ public class VersionCommand implements Command {
 						versionInfo info = (version.versions.size() > 0) ? version.versions.get(0) : null;
 						String curVersion = instance.getDescription().getVersion();
 						if (info != null) {
-
+							Logger.info("compare " + VersionChecker.compareVersions(curVersion, info.getTitle()));
 							if (VersionChecker.compareVersions(curVersion, info.getTitle()) < 0) {
-								ChatUtils.send(sender, "§7We're running v" + curVersion + ", v" + info.getTitle() + " is available");
-							} else {
-								ChatUtils.send(sender, "§7We're running the latest version v" + curVersion);
+								ChatUtils.send(sender, "§7We're running v§f" + curVersion + "§7, v§f" + info.getTitle() + " §7is available");
+							} else if (VersionChecker.compareVersions(curVersion, info.getTitle()) == 1) {
+								ChatUtils.send(sender, "§7We're running the latest version v§f" + curVersion);
 							}
 						} else {
-							ChatUtils.send(sender, "§7We're running version v" + curVersion);
+							ChatUtils.send(sender, "§7We're running version v§f" + curVersion);
 						}
 					} catch (SAXException e) {
 						e.printStackTrace();
@@ -61,7 +62,7 @@ public class VersionCommand implements Command {
 				}
 			});
 		} else {
-			ChatUtils.send(sender, "§7We're running version v" + instance.getDescription().getVersion());
+			ChatUtils.send(sender, "§7We're running version v§f" + instance.getDescription().getVersion());
 		}
 
 		return true;
