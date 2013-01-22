@@ -1,10 +1,12 @@
 package com.cyprias.ExchangeMarket.command;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -29,7 +31,7 @@ public class BuyCommand implements Command {
 
 	
 	@Override
-	public boolean execute(CommandSender sender, org.bukkit.command.Command cmd, String[] args) {
+	public boolean execute(CommandSender sender, org.bukkit.command.Command cmd, String[] args) throws IOException, InvalidConfigurationException {
 		if (!Plugin.checkPermission(sender, Perm.BUY)) 
 			return false;
 		
@@ -114,6 +116,11 @@ public class BuyCommand implements Command {
 			List<pendingOrder> pending = pT.pendingOrders; //ConfirmCommand.pendingOrders.get(sender.getName());
 			
 			//ConfirmCommand.pendingOrders.put(sender.getName(), value)
+			
+			if (Econ.getBalance(sender.getName()) <= 0){
+				ChatUtils.send(sender, String.format("§7You have no money in your account."));
+				return true;
+			}
 			
 			for (int i=0; i<orders.size();i++){
 				if (amount <= 0)

@@ -1,11 +1,13 @@
 package com.cyprias.ExchangeMarket.database;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Map;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -75,7 +77,7 @@ public class Order {
 		return ChatColor.WHITE.toString() + this.id + ChatColor.RESET;
 	}
 
-	public Boolean sendAmountToMailbox(int amount) throws SQLException {
+	public Boolean sendAmountToMailbox(int amount) throws SQLException, IOException, InvalidConfigurationException {
 		return Plugin.database.sendToMailbox(player, this.stock, amount);
 	}
 
@@ -123,7 +125,7 @@ public class Order {
 		return "OTHER";
 	}
 
-	public boolean exists() throws SQLException {
+	public boolean exists() throws SQLException, IOException, InvalidConfigurationException {
 		if (id > 0)
 			return Plugin.database.orderExists(id);
 
@@ -157,7 +159,7 @@ public class Order {
 		return this.amount;
 	}
 
-	public void notifyPlayerOfTransaction(int amount) {
+	public void notifyPlayerOfTransaction(int amount) throws IOException, InvalidConfigurationException {
 		if (!Config.getBoolean("properties.notify-owner-of-transaction"))
 			return;
 		
@@ -183,18 +185,18 @@ public class Order {
 
 	}
 
-	public Boolean reduceAmount(int byAmount) throws IllegalArgumentException, SQLException {
+	public Boolean reduceAmount(int byAmount) throws IllegalArgumentException, SQLException, IOException, InvalidConfigurationException {
 		if ((this.amount - byAmount) < 0)
 			throw new IllegalArgumentException("Cannot reduce amount below zero.");
 
 		return setAmount(this.amount - byAmount);
 	}
 
-	public Boolean increaseAmount(int byAmount) throws SQLException {
+	public Boolean increaseAmount(int byAmount) throws SQLException, IOException, InvalidConfigurationException {
 		return setAmount(this.amount + byAmount);
 	}
 
-	public Boolean setAmount(int amount) throws SQLException {
+	public Boolean setAmount(int amount) throws SQLException, IOException, InvalidConfigurationException {
 		if (id > 0) {
 			if (Plugin.database.setAmount(id, amount)) {
 				this.amount = amount;
@@ -208,11 +210,11 @@ public class Order {
 		return false;
 	}
 
-	public Boolean remove() throws SQLException {
+	public Boolean remove() throws SQLException, IOException, InvalidConfigurationException {
 		return Plugin.database.remove(id);
 	}
 
-	public Boolean setPrice(double price) throws SQLException {
+	public Boolean setPrice(double price) throws SQLException, IOException, InvalidConfigurationException {
 		if (id > 0) {
 			if (Plugin.database.setPrice(id, price)) {
 				this.price = price;
@@ -226,7 +228,7 @@ public class Order {
 		return false;
 	}
 
-	public String formatString(String format, CommandSender sender) throws SQLException {
+	public String formatString(String format, CommandSender sender) throws SQLException, IOException, InvalidConfigurationException {
 		String message = format.replace("<id>", String.valueOf(getId()));
 		message = message.replace("<cid>", getCId(sender));
 		message = message.replace("<otype>", getOrderTypeColouredString());
@@ -239,7 +241,7 @@ public class Order {
 		return message;
 	}
 
-	public Boolean insertTransaction(CommandSender sender, int transAmount) throws SQLException{
+	public Boolean insertTransaction(CommandSender sender, int transAmount) throws SQLException, IOException, InvalidConfigurationException{
 		return Plugin.database.insertTransaction(type, sender.getName(), itemId, itemDur, itemEnchants, transAmount, price, player);
 	}
 	

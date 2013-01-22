@@ -1,10 +1,12 @@
 package com.cyprias.ExchangeMarket.command;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -90,7 +92,7 @@ public class ConfirmCommand implements Command {
 	 */
 	
 	@Override
-	public boolean execute(CommandSender sender, org.bukkit.command.Command cmd, String[] args) throws IllegalArgumentException, SQLException {
+	public boolean execute(CommandSender sender, org.bukkit.command.Command cmd, String[] args) throws IllegalArgumentException, SQLException, IOException, InvalidConfigurationException {
 		if (!Plugin.checkPermission(sender, Perm.CONFIRM)) {
 			return false;
 		}
@@ -185,7 +187,7 @@ public class ConfirmCommand implements Command {
 				moneyTraded += spend;
 				
 				if (Config.getBoolean("properties.show-orderer-each-transaction"))
-					ChatUtils.send(sender, String.format("§7You bought §f%s§7x§f%s §7for $§f%s §7($§f%s§7e).", Plugin.getItemName(stock), traded, Plugin.Round(spend,places), Plugin.Round(order.getPrice(),places)));
+					ChatUtils.send(sender, String.format("§7Bought §f%s§7x§f%s §7for $§f%s §7($§f%s§7e).", Plugin.getItemName(stock), traded, Plugin.Round(spend,places), Plugin.Round(order.getPrice(),places)));
 					
 				
 			}
@@ -261,7 +263,7 @@ public class ConfirmCommand implements Command {
 				totalTraded += traded;
 				
 				if (Config.getBoolean("properties.show-orderer-each-transaction"))
-					ChatUtils.send(sender, String.format("§7You sold §f%s§7x§f%s §7for $§f%s §7($§f%s§7e).", Plugin.getItemName(stock), traded, Plugin.Round(profit,places), Plugin.Round(order.getPrice(),places)));
+					ChatUtils.send(sender, String.format("§7Sold §f%s§7x§f%s §7for $§f%s §7($§f%s§7e).", Plugin.getItemName(stock), traded, Plugin.Round(profit,places), Plugin.Round(order.getPrice(),places)));
 					
 				//po.order
 				

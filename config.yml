@@ -1,23 +1,57 @@
 properties:
+  # If you want to use only permissions and ignore op status, set to false.
   permission-default: op
+  
+  # Database to use, default sqlite, no setup needed. If you're using MySQL, set to mysql and fill out the values at the bottom.
   db-type: sqlite
+  
+  # Check for a new version on startup, runs in separate thread, no lag. 
   check-new-version: true
+  
+  # Seperate messages between this part, not quite used yet.
   line-separator: "<newline>"
-  log-balance-changes-to-console: true
+  
+  # Chat prefix players will see. 
   chat-prefix: "&f[&6EM&f] "
+  
+  # Allow damaged gear to be exchanged.
   allow-damaged-gear: false
+  
+  # Min order price allowed.
   min-order-price: 0.0001
+  
+  # How many rows per page to show in the list and order commands.
   rows-per-page: 10
+  
+  # List order string format.
   list-row-format: "&7[<otype>&7] &f<item>&7x&f<amount> &7@ $&f<price> &7(&f<priceeach>&7e)"
+  
+  # Orders order string format, includes order ID.
   orders-row-format: "&7[<otype>&7] &f<id>&7: &f<item>&7x&f<amount> &7@ $&f<price> &7(&f<priceeach>&7e)"
+  
+  # Round prices to this many decmial places.
   price-decmial-places: 4
+  
+  # Show debug messages in console.
   debugging: false
+  
+  # Show the plugin's replies to players in console, so you can see what the plugin's telling players.
   show-plugin-replies: true
+  
+  # Allow players to buy/sell to their own orders, used for debugging.
   trade-to-yourself: false
+  
+  # Tell the owner of an order when someone buys/sells to them.
   notify-owner-of-transaction: true
+  
+  # Log transactions to the database, for the /em transactions command.
   log-transactions-to-db: true
+  
+  # Disallow EM to be used in creative mode (you should be handling this in permissions anyway)
   block-usage-in-creative: true
-  show-orderer-each-transaction: false
+  
+  # When someone buy/sells to an order, tell them each order transaction as well as the end summary.
+  show-orderer-each-transaction: true
 mysql:
   hostname: localhost
   username: root

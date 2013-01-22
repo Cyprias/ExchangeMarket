@@ -67,10 +67,35 @@ public class Plugin extends JavaPlugin {
 	public void onEnable() {
 		instance = this;
 
-		getConfig().options().copyDefaults(true);
-		Config.migrateConfig();
-		saveConfig();
-
+		if (!(new File(getDataFolder(), "config.yml").exists())){
+			Logger.info("Copying config.yml to disk.");
+			try {
+				YML c = new YML(getResource("config.yml"), getDataFolder(), "config.yml");
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				return;
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				return;
+			} catch (InvalidConfigurationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				return;
+			}
+			//getConfig().options().copyDefaults(true);
+			//saveConfig();
+		}
+		if (Config.migrateConfig())
+			saveConfig();
+		
+		try {
+			Config.checkForMissingProperties() ;
+		} catch (IOException e4) {e4.printStackTrace();
+		} catch (InvalidConfigurationException e4) {e4.printStackTrace();
+		}
+		
         if (!Econ.setupEconomy() ) {
             Logger.severe(String.format("[%s] - Disabled due to no Vault dependency found!", getDescription().getName()));
             getServer().getPluginManager().disablePlugin(this);
@@ -87,10 +112,18 @@ public class Plugin extends JavaPlugin {
 			return;
 		}
 
-		if (!database.init()) {
-			Logger.severe("Failed to initilize database, unloading plugin...");
-			instance.getPluginLoader().disablePlugin(instance);
-			return;
+		try {
+			if (!database.init()) {
+				Logger.severe("Failed to initilize database, unloading plugin...");
+				instance.getPluginLoader().disablePlugin(instance);
+				return;
+			}
+		} catch (IOException e3) {
+			// TODO Auto-generated catch block
+			e3.printStackTrace();
+		} catch (InvalidConfigurationException e3) {
+			// TODO Auto-generated catch block
+			e3.printStackTrace();
 		}
 
 		loadPermissions();
@@ -149,7 +182,6 @@ public class Plugin extends JavaPlugin {
 		
 		if (Config.getBoolean("properties.check-new-version"))
 			checkVersion();
-		
 		
 		
 		Logger.info("enabled.");

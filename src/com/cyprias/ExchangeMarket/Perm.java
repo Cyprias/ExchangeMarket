@@ -69,7 +69,7 @@ public enum Perm {
 		return parent;
 	}
 
-	private final Permission bukkitPerm;
+	private Permission bukkitPerm;
 	private Perm parent;
 	private final String errorMessage;
 

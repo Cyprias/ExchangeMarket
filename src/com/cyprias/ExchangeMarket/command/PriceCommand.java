@@ -1,9 +1,11 @@
 package com.cyprias.ExchangeMarket.command;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.inventory.ItemStack;
 
 import com.cyprias.ExchangeMarket.ChatUtils;
@@ -32,7 +34,7 @@ public class PriceCommand implements Command {
 		return false;
 	}
 
-	public boolean execute(CommandSender sender, org.bukkit.command.Command cmd, String[] args) {
+	public boolean execute(CommandSender sender, org.bukkit.command.Command cmd, String[] args) throws IOException, InvalidConfigurationException {
 		if (!Plugin.checkPermission(sender, Perm.PRICE))
 			return false;
 

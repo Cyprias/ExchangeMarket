@@ -1,10 +1,13 @@
 package com.cyprias.ExchangeMarket.command;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
+import org.bukkit.configuration.InvalidConfigurationException;
+
 import com.cyprias.ExchangeMarket.ChatUtils;
 import com.cyprias.ExchangeMarket.Perm;
 import com.cyprias.ExchangeMarket.Plugin;
@@ -18,7 +21,7 @@ public class ListCommand implements Command {
 			list.add("/%s list - List all notes.");
 	}
 
-	public boolean execute(final CommandSender sender, org.bukkit.command.Command cmd, String[] args) {
+	public boolean execute(final CommandSender sender, org.bukkit.command.Command cmd, String[] args) throws IOException, InvalidConfigurationException {
 		if (!Plugin.checkPermission(sender, Perm.LIST)) 
 			return false;
 		

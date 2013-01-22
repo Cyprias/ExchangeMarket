@@ -10,7 +10,7 @@ public class Logger {
 		if (Config.getBoolean("properties.debugging"))
 			logger.info(getLogPrefix() +"[Debug] "+ mess);
 	}
-	
+
 	public static void info(String mess) {
 		logger.info(getLogPrefix() + mess);
 	}
@@ -49,6 +49,11 @@ public class Logger {
 
 	public static void warningRaw(String format, Object... args) {
 		logger.warning(String.format(format, args));
+	}
+
+	
+	public static void error(String mess) {
+		severe(mess);
 	}
 
 	public static void severe(String mess) {

@@ -1,13 +1,14 @@
 package com.cyprias.ExchangeMarket.command;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.inventory.ItemStack;
 
 import com.cyprias.ExchangeMarket.ChatUtils;
-import com.cyprias.ExchangeMarket.Logger;
 import com.cyprias.ExchangeMarket.Perm;
 import com.cyprias.ExchangeMarket.Plugin;
 import com.cyprias.ExchangeMarket.configuration.Config;
@@ -28,7 +29,7 @@ public class InfSellCommand implements Command {
 		ChatUtils.sendCommandHelp(sender, Perm.INF_SELL, "/%s infsell <item> <amount> <price>", cmd);
 	}
 
-	public boolean execute(final CommandSender sender, org.bukkit.command.Command cmd, String[] args) throws SQLException {
+	public boolean execute(final CommandSender sender, org.bukkit.command.Command cmd, String[] args) throws SQLException, IOException, InvalidConfigurationException {
 		if (!Plugin.checkPermission(sender, Perm.INF_SELL)) 
 			return false;
 		
@@ -42,7 +43,7 @@ public class InfSellCommand implements Command {
 			return true;
 		}
 
-		Logger.debug( "item: " + stock.getType());
+		//Logger.debug( "item: " + stock.getType());
 
 		//Player player = (Player) sender;
 
@@ -58,7 +59,7 @@ public class InfSellCommand implements Command {
 			}
 		}
 		
-		Logger.debug("amount1: " + amount);
+		//Logger.debug("amount1: " + amount);
 
 		double price = 0;
 		// plugin.sendMessage(sender, "amount: " + amount);

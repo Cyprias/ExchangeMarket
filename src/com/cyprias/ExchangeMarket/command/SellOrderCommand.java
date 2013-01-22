@@ -1,8 +1,10 @@
 package com.cyprias.ExchangeMarket.command;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -20,7 +22,7 @@ public class SellOrderCommand implements Command {
 			list.add("/%s sellorder - Create a sell order.");
 	}
 
-	public boolean execute(final CommandSender sender, org.bukkit.command.Command cmd, String[] args) throws SQLException {
+	public boolean execute(final CommandSender sender, org.bukkit.command.Command cmd, String[] args) throws SQLException, IOException, InvalidConfigurationException {
 		if (!Plugin.checkPermission(sender, Perm.SELL_ORDER)) 
 			return false;
 		

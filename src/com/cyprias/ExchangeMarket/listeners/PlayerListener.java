@@ -1,7 +1,10 @@
 package com.cyprias.ExchangeMarket.listeners;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
+
+import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -25,7 +28,7 @@ public class PlayerListener implements Listener {
 
 
 	@EventHandler(priority = EventPriority.NORMAL)
-	public void onPlayerJoinEvent(PlayerJoinEvent event) throws SQLException  {
+	public void onPlayerJoinEvent(PlayerJoinEvent event) throws SQLException, IOException, InvalidConfigurationException  {
 		List<Parcel> packages = Plugin.database.getPackages(event.getPlayer());
 		
 		if (packages.size() <= 0)

@@ -1,11 +1,13 @@
 package com.cyprias.ExchangeMarket.command;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 
 import net.milkbowl.vault.economy.EconomyResponse;
 
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -22,7 +24,7 @@ public class BuyOrderCommand implements Command {
 			list.add("/%s buyorder - Create a buy order.");
 	}
 
-	public boolean execute(final CommandSender sender, org.bukkit.command.Command cmd, String[] args) {
+	public boolean execute(final CommandSender sender, org.bukkit.command.Command cmd, String[] args) throws IOException, InvalidConfigurationException {
 		if (!Plugin.checkPermission(sender, Perm.BUY_ORDER)) {
 			return false;
 		}

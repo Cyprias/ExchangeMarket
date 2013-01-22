@@ -6,6 +6,7 @@ import java.util.List;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.InvalidConfigurationException;
 import org.xml.sax.SAXException;
 
 import com.cyprias.ExchangeMarket.ChatUtils;
@@ -21,7 +22,7 @@ public class VersionCommand implements Command {
 			list.add("/%s version - Get the plugin version.");
 	}
 
-	public boolean execute(final CommandSender sender, org.bukkit.command.Command cmd, String[] args) {
+	public boolean execute(final CommandSender sender, org.bukkit.command.Command cmd, String[] args) throws IllegalArgumentException, IOException, InvalidConfigurationException {
 		if (!Plugin.checkPermission(sender, Perm.VERSION)) {
 			return false;
 		}

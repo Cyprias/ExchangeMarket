@@ -1,5 +1,6 @@
 package com.cyprias.ExchangeMarket.database;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -10,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.inventory.ItemStack;
 
 
@@ -25,7 +27,7 @@ public class MySQL implements Database {
 	static String mailbox_table;
 	static String transaction_table;
 	
-	public boolean init() {
+	public boolean init() throws IOException, InvalidConfigurationException {
 		if (!canConnect()){
 			Logger.warning("Failed to connect to MySQL!");
 			return false;
@@ -45,7 +47,7 @@ public class MySQL implements Database {
 		return true;
 	}
 
-	public static void createTables() throws SQLException {
+	public static void createTables() throws SQLException, IOException, InvalidConfigurationException {
 		Connection con = getConnection();
 
 		if (tableExists(prefix + "Orders") == false) {
@@ -93,7 +95,7 @@ public class MySQL implements Database {
 		con.close();
 	}
 
-	private static void migrateExchangedToMailbox() throws SQLException {
+	private static void migrateExchangedToMailbox() throws SQLException, IOException, InvalidConfigurationException {
 		queryReturn results = executeQuery("SELECT * FROM `" + order_table + "` WHERE `type` =2 AND `exchanged` >0");
 		ResultSet r = results.result;
 		
@@ -112,7 +114,7 @@ public class MySQL implements Database {
 
 		results.close();
 	}
-	private static int insertIntoMailbox(String player, int itemID, int itemDur, String itemEnchant, int amount) throws SQLException {
+	private static int insertIntoMailbox(String player, int itemID, int itemDur, String itemEnchant, int amount) throws SQLException, IOException, InvalidConfigurationException {
 		int success = executeUpdate("UPDATE `" + mailbox_table
 			+ "` SET `amount` = `amount` + ?, `time` = CURRENT_TIMESTAMP WHERE `player` = ? AND `itemId` = ? AND `itemDur` = ? AND `itemEnchant` = ?", amount, player, itemID, itemDur, ((itemEnchant != null) ? itemEnchant : null));
 
@@ -126,7 +128,7 @@ public class MySQL implements Database {
 	}
 
 	
-	public static boolean tableFieldExists(String table, String field) throws SQLException {
+	public static boolean tableFieldExists(String table, String field) throws SQLException, IOException, InvalidConfigurationException {
 		boolean found = false;
 		queryReturn results = executeQuery("SELECT * FROM " + table + ";");
 		
@@ -148,7 +150,7 @@ public class MySQL implements Database {
 	}
 	
 	@SuppressWarnings("rawtypes")
-	public static queryReturn executeQuery(String query, Object... args) throws SQLException {
+	public static queryReturn executeQuery(String query, Object... args) throws SQLException, IOException, InvalidConfigurationException {
 		Connection con = getConnection();
 		queryReturn myreturn = null;// = new queryReturn();
 		PreparedStatement statement = con.prepareStatement(query);
@@ -177,7 +179,7 @@ public class MySQL implements Database {
 		return myreturn;
 	}
 	
-	public static int getResultCount(String query, Object... args) throws SQLException {
+	public static int getResultCount(String query, Object... args) throws SQLException, IOException, InvalidConfigurationException {
 		queryReturn qReturn = executeQuery(query, args);
 		qReturn.result.first();
 		int rows = qReturn.result.getInt(1);
@@ -185,7 +187,7 @@ public class MySQL implements Database {
 		return rows;
 	}
 	
-	public static boolean tableExists(String tableName) throws SQLException {
+	public static boolean tableExists(String tableName) throws SQLException, IOException, InvalidConfigurationException {
 		boolean exists = false;
 		Connection con = getConnection();
 		ResultSet result = con.prepareStatement("show tables like '" + tableName + "'").executeQuery();
@@ -197,15 +199,15 @@ public class MySQL implements Database {
 	}
 
 	
-	private static String getURL(){
+	private static String getURL() throws IOException, InvalidConfigurationException{
 		return "jdbc:mysql://" + Config.getString("mysql.hostname") + ":" + Config.getInt("mysql.port") + "/" + Config.getString("mysql.database");
 	}
 	
-	public static Connection getConnection() throws SQLException {
+	public static Connection getConnection() throws SQLException, IOException, InvalidConfigurationException {
 		return DriverManager.getConnection(getURL(), Config.getString("mysql.username"), Config.getString("mysql.password"));
 	}
 	
-	private Boolean canConnect(){
+	private Boolean canConnect() throws IOException, InvalidConfigurationException{
 		try {
 			@SuppressWarnings("unused")
 			Connection con = getConnection();
@@ -216,7 +218,7 @@ public class MySQL implements Database {
 	}
 
 	
-	public static int executeUpdate(String query, Object... args) throws SQLException {
+	public static int executeUpdate(String query, Object... args) throws SQLException, IOException, InvalidConfigurationException {
 		Connection con = getConnection();
 		int sucessful = 0;
 
@@ -232,7 +234,7 @@ public class MySQL implements Database {
 	}
 
 	@Override
-	public Order getOrder(int id) throws SQLException {
+	public Order getOrder(int id) throws SQLException, IOException, InvalidConfigurationException {
 		queryReturn results = executeQuery("SELECT * FROM `"+order_table+"` WHERE `id` = ? LIMIT 0 , 1", id);
 		ResultSet r = results.result;
 
@@ -258,7 +260,7 @@ public class MySQL implements Database {
 	}
 
 
-	public boolean insert(Order o) throws SQLException {
+	public boolean insert(Order o) throws SQLException, IOException, InvalidConfigurationException {
 		int success = 0;
 		String query;
 		/*
@@ -285,7 +287,7 @@ public class MySQL implements Database {
 	}
 
 	@Override
-	public int getLastId() throws SQLException {
+	public int getLastId() throws SQLException, IOException, InvalidConfigurationException {
 		int id = 0;
 		queryReturn results = executeQuery("SELECT * FROM `"+order_table+"` ORDER BY `id` DESC LIMIT 0 , 1");
 		ResultSet r = results.result;
@@ -297,16 +299,16 @@ public class MySQL implements Database {
 	}
 
 	@Override
-	public List<Order> search(ItemStack stock) throws SQLException {
+	public List<Order> search(ItemStack stock) throws SQLException, IOException, InvalidConfigurationException {
 		return search(stock, 0, null);
 	}
-	public List<Order> search(ItemStack stock, int orderType) throws SQLException{
+	public List<Order> search(ItemStack stock, int orderType) throws SQLException, IOException, InvalidConfigurationException{
 		return search(stock, orderType, null);
 	}
 	
 	
 	@Override
-	public List<Order> search(ItemStack stock, int orderType, CommandSender sender) throws SQLException {
+	public List<Order> search(ItemStack stock, int orderType, CommandSender sender) throws SQLException, IOException, InvalidConfigurationException {
 	//	queryReturn results = executeQuery("SELECT * FROM `"+order_table+"` WHERE `player` LIKE ?", parser.players.get(i));
 		List<Order> orders = new ArrayList<Order>();
 		
@@ -365,7 +367,7 @@ public class MySQL implements Database {
 		return orders;
 	}
 
-	public List<Order> list(CommandSender sender, int page) throws SQLException {
+	public List<Order> list(CommandSender sender, int page) throws SQLException, IOException, InvalidConfigurationException {
 
 		int rows = getResultCount("SELECT COUNT(*) FROM " + order_table);
 
@@ -415,7 +417,7 @@ public class MySQL implements Database {
 	}
 
 	@Override
-	public Order findMatchingOrder(Order order) throws SQLException {
+	public Order findMatchingOrder(Order order) throws SQLException, IOException, InvalidConfigurationException {
 		Order foundOrder = null;
 		queryReturn results = executeQuery("SELECT * FROM `"+order_table+"` WHERE `type` = ? AND `player` = ? AND `itemID` = ? AND `itemDur` = ? AND `price` = ? ORDER BY `id` DESC LIMIT 0 , 1", order.getOrderType(), order.getPlayer(), order.getItemId(), order.getDurability(), order.getPrice());
 		ResultSet r = results.result;
@@ -438,16 +440,16 @@ public class MySQL implements Database {
 	}
 
 	@Override
-	public boolean setAmount(int id, int amount) throws SQLException {
+	public boolean setAmount(int id, int amount) throws SQLException, IOException, InvalidConfigurationException {
 		return (executeUpdate("UPDATE `"+order_table+"` SET `amount` = ? WHERE `id` = ?;", amount, id) > 0) ? true : false;
 	}
-	public boolean setPrice(int id, double price) throws SQLException {
+	public boolean setPrice(int id, double price) throws SQLException, IOException, InvalidConfigurationException {
 		return (executeUpdate("UPDATE `"+order_table+"` SET `price` = ? WHERE `id` = ?;", price, id) > 0) ? true : false;
 	}
 	
 	
 	@Override
-	public double getLastPrice(Order order) throws SQLException {
+	public double getLastPrice(Order order) throws SQLException, IOException, InvalidConfigurationException {
 		double price = 0.0;
 		
 		String query;
@@ -472,7 +474,7 @@ public class MySQL implements Database {
 	}
 
 	@Override
-	public List<Order> findOrders(int orderType, ItemStack stock) throws SQLException {
+	public List<Order> findOrders(int orderType, ItemStack stock) throws SQLException, IOException, InvalidConfigurationException {
 		String query = "SELECT * FROM `"+order_table+"` WHERE `type` = ? AND `itemID` = ? AND `itemDur` = ? ";
 		
 		queryReturn results;
@@ -515,19 +517,19 @@ public class MySQL implements Database {
 		return orders;
 	}
 
-	public boolean remove(int id) throws SQLException {
+	public boolean remove(int id) throws SQLException, IOException, InvalidConfigurationException {
 		return (executeUpdate("DELETE FROM `"+order_table+"` WHERE `id` = ?", id) > 0) ? true : false;
 	}
 
 	@Override
-	public boolean cleanEmpties() throws SQLException {
+	public boolean cleanEmpties() throws SQLException, IOException, InvalidConfigurationException {
 		return (executeUpdate("DELETE FROM `"+order_table+"` WHERE `amount` = 0") > 0) ? true : false;
 	}
 
 	
 	
 	@Override
-	public boolean sendToMailbox(String receiver, ItemStack stock, int amount) throws SQLException {
+	public boolean sendToMailbox(String receiver, ItemStack stock, int amount) throws SQLException, IOException, InvalidConfigurationException {
 		String query = "UPDATE `" + mailbox_table
 			+ "` SET `amount` = `amount` + ?, `time` = CURRENT_TIMESTAMP WHERE `player` = ? AND `itemId` = ? AND `itemDur` = ?";// AND `itemEnchant` = ?";
 		
@@ -550,7 +552,7 @@ public class MySQL implements Database {
 	}
 
 	@Override
-	public boolean orderExists(int id) throws SQLException {
+	public boolean orderExists(int id) throws SQLException, IOException, InvalidConfigurationException {
 		boolean exists = false;
 		queryReturn results = executeQuery("SELECT * FROM `"+order_table+"` WHERE `id` = ? LIMIT 0 , 1", id);
 		ResultSet r = results.result;
@@ -567,7 +569,7 @@ public class MySQL implements Database {
 	}
 
 	@Override
-	public int getAmount(int id) throws SQLException {
+	public int getAmount(int id) throws SQLException, IOException, InvalidConfigurationException {
 		int amount = 0;
 		String query = "SELECT * FROM `"+order_table+"` WHERE `id` = ? ";
 		
@@ -587,7 +589,7 @@ public class MySQL implements Database {
 	}
 
 	@Override
-	public List<Parcel> getPackages(CommandSender sender) throws SQLException {
+	public List<Parcel> getPackages(CommandSender sender) throws SQLException, IOException, InvalidConfigurationException {
 		// TODO Auto-generated method stub
 		List<Parcel> packages = new ArrayList<Parcel>();
 		
@@ -606,18 +608,18 @@ public class MySQL implements Database {
 	}
 
 	@Override
-	public boolean setPackageAmount(int id, int amount) throws SQLException {
+	public boolean setPackageAmount(int id, int amount) throws SQLException, IOException, InvalidConfigurationException {
 		return (executeUpdate("UPDATE `"+mailbox_table+"` SET `amount` = ? WHERE `id` = ?;", amount, id) > 0) ? true : false;
 	}
 	
 
 	@Override
-	public boolean cleanMailboxEmpties() throws SQLException {
+	public boolean cleanMailboxEmpties() throws SQLException, IOException, InvalidConfigurationException {
 		return (executeUpdate("DELETE FROM `"+mailbox_table+"` WHERE `amount` = 0") > 0) ? true : false;
 	}
 
 	@Override
-	public List<Order> getPlayerOrders(CommandSender sender, int page) throws SQLException {
+	public List<Order> getPlayerOrders(CommandSender sender, int page) throws SQLException, IOException, InvalidConfigurationException {
 		int rows = getResultCount("SELECT COUNT(*) FROM " + order_table + " WHERE `player` LIKE ?", sender.getName());
 
 		int perPage = Config.getInt("properties.rows-per-page");
@@ -673,14 +675,14 @@ public class MySQL implements Database {
 	}
 
 	@Override
-	public boolean insertTransaction(int type, String buyer, int itemID, int itemDur, String itemEnchants, int amount, double price, String seller) throws SQLException {
+	public boolean insertTransaction(int type, String buyer, int itemID, int itemDur, String itemEnchants, int amount, double price, String seller) throws SQLException, IOException, InvalidConfigurationException {
 		if (itemEnchants == null)
 			itemEnchants = "";
 		return (executeUpdate("INSERT INTO "+ transaction_table+ " (`type`, `buyer`, `itemID`, `itemDur`, `itemEnchants`, `amount`, `price`, `seller`, `timestamp`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP);", type, buyer, itemID, itemDur, itemEnchants, amount, price, seller) > 0) ? true : false;
 	}
 
 	@Override
-	public List<Transaction> listTransactions(CommandSender sender, int page) throws SQLException {
+	public List<Transaction> listTransactions(CommandSender sender, int page) throws SQLException, IOException, InvalidConfigurationException {
 
 		int rows = getResultCount("SELECT COUNT(*) FROM " + transaction_table);
 

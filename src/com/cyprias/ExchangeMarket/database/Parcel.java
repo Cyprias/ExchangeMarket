@@ -1,8 +1,10 @@
 package com.cyprias.ExchangeMarket.database;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 
+import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.inventory.ItemStack;
 
 import com.cyprias.ExchangeMarket.Plugin;
@@ -54,7 +56,7 @@ public class Parcel {
 		return Plugin.getItemStack(itemId, itemDur, itemEnchant);
 	}
 
-	public boolean setAmount(int amount) throws SQLException {
+	public boolean setAmount(int amount) throws SQLException, IOException, InvalidConfigurationException {
 		boolean success = Plugin.database.setPackageAmount(id, amount);
 		if (success)
 			this.amount = amount;

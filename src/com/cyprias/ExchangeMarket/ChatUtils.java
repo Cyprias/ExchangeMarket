@@ -16,7 +16,8 @@ public class ChatUtils {
 
 	public static void broadcast(String message) {
 		message = replaceColorCodes(message);
-		String[] messages = message.split(Config.getString("properties.line-separator"));
+		String[] messages;
+		messages = message.split(Config.getString("properties.line-separator"));
 		String prefix = getChatPrefix();
 		for (int cntr = 0; cntr < messages.length; cntr++)
 			messages[cntr] = prefix + messages[cntr];
@@ -24,6 +25,7 @@ public class ChatUtils {
 			player.sendMessage(messages);
 		}
 		Bukkit.getConsoleSender().sendMessage(messages);
+
 	}
 
 	public static void broadcastRaw(String format, Object... args) {
@@ -32,7 +34,8 @@ public class ChatUtils {
 
 	public static void broadcast(Perm permission, String message) {
 		message = replaceColorCodes(message);
-		String[] messages = message.split(Config.getString("properties.line-separator"));
+		String[] messages;
+		messages = message.split(Config.getString("properties.line-separator"));
 		String prefix = getChatPrefix();
 		for (int cntr = 0; cntr < messages.length; cntr++)
 			messages[cntr] = prefix + messages[cntr];
@@ -41,32 +44,36 @@ public class ChatUtils {
 				player.sendMessage(messages);
 		}
 		Bukkit.getConsoleSender().sendMessage(messages);
+
 	}
-	
+
 	public static void broadcastRaw(String message) {
 		message = replaceColorCodes(message);
-		String[] messages = message.split(Config.getString("properties.line-separator"));
+		String[] messages;
+		messages = message.split(Config.getString("properties.line-separator"));
 		for (Player player : Bukkit.getOnlinePlayers()) {
 			player.sendMessage(messages);
 		}
 		Bukkit.getConsoleSender().sendMessage(messages);
+
 	}
 
 	public static void notify(CommandSender sender, String message) {
 		send(sender, getChatPrefix() + message);
 	}
-	
+
 	public static void sendSpam(CommandSender sender, String message) {
 		message = replaceColorCodes(message);
-		String[] messages = message.split(Config.getString("properties.line-separator"));
+		String[] messages;
+		messages = message.split(Config.getString("properties.line-separator"));
 		sender.sendMessage(messages);
+
 	}
-	
+
 	public static void send(CommandSender sender, String message) {
 		sendSpam(sender, message);
 		if (Config.getBoolean("properties.show-plugin-replies") && !(sender instanceof ConsoleCommandSender))
-			Logger.infoRaw( ChatColor.stripColor(getChatPrefix()+ sender.getName() + " > "+message));
-
+			Logger.infoRaw(ChatColor.stripColor(getChatPrefix() + sender.getName() + " > " + message));
 	}
 
 	public static void send(CommandSender sender, ChatColor color, String format, Object... args) {

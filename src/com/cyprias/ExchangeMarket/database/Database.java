@@ -1,5 +1,6 @@
 package com.cyprias.ExchangeMarket.database;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -7,6 +8,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.inventory.ItemStack;
 
 public interface Database {
@@ -30,33 +32,33 @@ public interface Database {
 
 	}
 	
-	boolean cleanEmpties() throws SQLException;
-	boolean cleanMailboxEmpties() throws SQLException;
-	boolean init();
-	boolean insert(Order order) throws SQLException;
-	boolean insertTransaction(int type, String buyer, int itemID, int itemDur, String itemEnchants, int amount, double price, String seller) throws SQLException;
-	boolean orderExists(int id) throws SQLException;
-	boolean remove(int id) throws SQLException;
-	boolean sendToMailbox(String receiver, ItemStack stock, int amount) throws SQLException;
-	boolean setAmount(int id, int amount) throws SQLException;
-	boolean setPackageAmount(int id, int amount) throws SQLException;
-	boolean setPrice(int id, double price) throws SQLException;
+	boolean cleanEmpties() throws SQLException, IOException, InvalidConfigurationException;
+	boolean cleanMailboxEmpties() throws SQLException, IOException, InvalidConfigurationException;
+	boolean init() throws IOException, InvalidConfigurationException;
+	boolean insert(Order order) throws SQLException, IOException, InvalidConfigurationException;
+	boolean insertTransaction(int type, String buyer, int itemID, int itemDur, String itemEnchants, int amount, double price, String seller) throws SQLException, IOException, InvalidConfigurationException;
+	boolean orderExists(int id) throws SQLException, IOException, InvalidConfigurationException;
+	boolean remove(int id) throws SQLException, IOException, InvalidConfigurationException;
+	boolean sendToMailbox(String receiver, ItemStack stock, int amount) throws SQLException, IOException, InvalidConfigurationException;
+	boolean setAmount(int id, int amount) throws SQLException, IOException, InvalidConfigurationException;
+	boolean setPackageAmount(int id, int amount) throws SQLException, IOException, InvalidConfigurationException;
+	boolean setPrice(int id, double price) throws SQLException, IOException, InvalidConfigurationException;
 	
-	double getLastPrice(Order order) throws SQLException;
+	double getLastPrice(Order order) throws SQLException, IOException, InvalidConfigurationException;
 	
-	int getAmount(int id) throws SQLException;
-	int getLastId() throws SQLException;
+	int getAmount(int id) throws SQLException, IOException, InvalidConfigurationException;
+	int getLastId() throws SQLException, IOException, InvalidConfigurationException;
 
-	List<Order> findOrders(int orderType, ItemStack stock) throws SQLException;
-	List<Order> getPlayerOrders(CommandSender sender, int page) throws SQLException;
-	List<Order> list(CommandSender sender, int page) throws SQLException;
-	List<Order> search(ItemStack stock) throws SQLException;
-	List<Order> search(ItemStack stock, int orderType) throws SQLException;
-	List<Order> search(ItemStack stock, int orderType, CommandSender sender) throws SQLException;
-	List<Parcel> getPackages(CommandSender sender) throws SQLException;
-	List<Transaction> listTransactions(CommandSender sender, int page) throws SQLException;
+	List<Order> findOrders(int orderType, ItemStack stock) throws SQLException, IOException, InvalidConfigurationException;
+	List<Order> getPlayerOrders(CommandSender sender, int page) throws SQLException, IOException, InvalidConfigurationException;
+	List<Order> list(CommandSender sender, int page) throws SQLException, IOException, InvalidConfigurationException;
+	List<Order> search(ItemStack stock) throws SQLException, IOException, InvalidConfigurationException;
+	List<Order> search(ItemStack stock, int orderType) throws SQLException, IOException, InvalidConfigurationException;
+	List<Order> search(ItemStack stock, int orderType, CommandSender sender) throws SQLException, IOException, InvalidConfigurationException;
+	List<Parcel> getPackages(CommandSender sender) throws SQLException, IOException, InvalidConfigurationException;
+	List<Transaction> listTransactions(CommandSender sender, int page) throws SQLException, IOException, InvalidConfigurationException;
 	
-	Order findMatchingOrder(Order order) throws SQLException;
-	Order getOrder(int id) throws SQLException;
+	Order findMatchingOrder(Order order) throws SQLException, IOException, InvalidConfigurationException;
+	Order getOrder(int id) throws SQLException, IOException, InvalidConfigurationException;
 
 }
