@@ -2,7 +2,6 @@ package com.cyprias.ExchangeMarket.configuration;
 
 import java.io.IOException;
 
-import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.InvalidConfigurationException;
 
 import com.cyprias.ExchangeMarket.Logger;

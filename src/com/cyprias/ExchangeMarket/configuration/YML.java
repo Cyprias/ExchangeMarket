@@ -39,7 +39,7 @@ public class YML extends YamlConfiguration {
 	}
 	
 	//Write a stream to file on disk, return the file object.  
-	private static File toFile(InputStream in, File pluginDur, String fileName) throws IOException {
+	public static File toFile(InputStream in, File pluginDur, String fileName) throws IOException {
 		File file = new File(pluginDur, fileName);
 		file.getParentFile().mkdirs();
 		OutputStream out = new FileOutputStream(file);

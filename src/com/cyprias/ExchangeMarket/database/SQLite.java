@@ -1,7 +1,6 @@
 package com.cyprias.ExchangeMarket.database;
 
 import java.io.File;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -12,7 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.bukkit.command.CommandSender;
-import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.inventory.ItemStack;
 
 import com.cyprias.ExchangeMarket.ChatUtils;
@@ -210,7 +208,7 @@ public class SQLite implements Database {
 	}
 
 
-	public List<Order> list(CommandSender sender, int page) throws SQLException, IOException, InvalidConfigurationException {
+	public List<Order> list(CommandSender sender, int page) throws SQLException {
 
 		int rows = getResultCount("SELECT COUNT(*) FROM " + order_table);
 
@@ -515,7 +513,7 @@ public class SQLite implements Database {
 		return (executeUpdate("DELETE FROM `"+mailbox_table+"` WHERE `amount` = 0") > 0) ? true : false;
 	}
 	@Override
-	public List<Order> getPlayerOrders(CommandSender sender, int page) throws SQLException, IOException, InvalidConfigurationException {
+	public List<Order> getPlayerOrders(CommandSender sender, int page) throws SQLException {
 		int rows = getResultCount("SELECT COUNT(*) FROM " + order_table + " WHERE `player` LIKE ?", sender.getName());
 
 		int perPage = Config.getInt("properties.rows-per-page");
@@ -579,7 +577,7 @@ public class SQLite implements Database {
 		return (executeUpdate("INSERT INTO "+ transaction_table+ " (`type`, `buyer`, `itemID`, `itemDur`, `itemEnchants`, `amount`, `price`, `seller`, `timestamp`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP);", type, buyer, itemID, itemDur, itemEnchants, amount, price, seller) > 0) ? true : false;
 	}
 
-	public List<Transaction> listTransactions(CommandSender sender, int page) throws SQLException, IOException, InvalidConfigurationException {
+	public List<Transaction> listTransactions(CommandSender sender, int page) throws SQLException {
 
 		int rows = getResultCount("SELECT COUNT(*) FROM " + transaction_table);
 

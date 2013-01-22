@@ -70,16 +70,12 @@ public class Plugin extends JavaPlugin {
 		if (!(new File(getDataFolder(), "config.yml").exists())){
 			Logger.info("Copying config.yml to disk.");
 			try {
-				YML c = new YML(getResource("config.yml"), getDataFolder(), "config.yml");
+				YML.toFile(getResource("config.yml"), getDataFolder(), "config.yml");
 			} catch (FileNotFoundException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 				return;
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				return;
-			} catch (InvalidConfigurationException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 				return;
