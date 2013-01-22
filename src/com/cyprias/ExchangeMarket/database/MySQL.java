@@ -25,7 +25,7 @@ public class MySQL implements Database {
 	static String mailbox_table;
 	static String transaction_table;
 	
-	public Boolean init() {
+	public boolean init() {
 		if (!canConnect()){
 			Logger.warning("Failed to connect to MySQL!");
 			return false;
@@ -259,7 +259,7 @@ public class MySQL implements Database {
 	}
 
 
-	public Boolean insert(Order o) throws SQLException {
+	public boolean insert(Order o) throws SQLException {
 		int success = 0;
 		String query;
 		/*
@@ -440,7 +440,7 @@ public class MySQL implements Database {
 	}
 
 	@Override
-	public Boolean setAmount(int id, int amount) throws SQLException {
+	public boolean setAmount(int id, int amount) throws SQLException {
 		return (executeUpdate("UPDATE `"+order_table+"` SET `amount` = ? WHERE `id` = ?;", amount, id) > 0) ? true : false;
 	}
 	public boolean setPrice(int id, double price) throws SQLException {
@@ -449,7 +449,7 @@ public class MySQL implements Database {
 	
 	
 	@Override
-	public Double getLastPrice(Order order) throws SQLException {
+	public double getLastPrice(Order order) throws SQLException {
 		double price = 0.0;
 		
 		String query;
@@ -517,19 +517,19 @@ public class MySQL implements Database {
 		return orders;
 	}
 
-	public Boolean remove(int id) throws SQLException {
+	public boolean remove(int id) throws SQLException {
 		return (executeUpdate("DELETE FROM `"+order_table+"` WHERE `id` = ?", id) > 0) ? true : false;
 	}
 
 	@Override
-	public Boolean cleanEmpties() throws SQLException {
+	public boolean cleanEmpties() throws SQLException {
 		return (executeUpdate("DELETE FROM `"+order_table+"` WHERE `amount` = 0") > 0) ? true : false;
 	}
 
 	
 	
 	@Override
-	public Boolean sendToMailbox(String receiver, ItemStack stock, int amount) throws SQLException {
+	public boolean sendToMailbox(String receiver, ItemStack stock, int amount) throws SQLException {
 		String query = "UPDATE `" + mailbox_table
 			+ "` SET `amount` = `amount` + ?, `time` = CURRENT_TIMESTAMP WHERE `player` = ? AND `itemId` = ? AND `itemDur` = ?";// AND `itemEnchant` = ?";
 		
@@ -608,13 +608,13 @@ public class MySQL implements Database {
 	}
 
 	@Override
-	public Boolean setPackageAmount(int id, int amount) throws SQLException {
+	public boolean setPackageAmount(int id, int amount) throws SQLException {
 		return (executeUpdate("UPDATE `"+mailbox_table+"` SET `amount` = ? WHERE `id` = ?;", amount, id) > 0) ? true : false;
 	}
 	
 
 	@Override
-	public Boolean cleanMailboxEmpties() throws SQLException {
+	public boolean cleanMailboxEmpties() throws SQLException {
 		return (executeUpdate("DELETE FROM `"+mailbox_table+"` WHERE `amount` = 0") > 0) ? true : false;
 	}
 
@@ -676,7 +676,7 @@ public class MySQL implements Database {
 	}
 
 	@Override
-	public Boolean insertTransaction(int type, String buyer, int itemID, int itemDur, String itemEnchants, int amount, double price, String seller) throws SQLException {
+	public boolean insertTransaction(int type, String buyer, int itemID, int itemDur, String itemEnchants, int amount, double price, String seller) throws SQLException {
 		if (itemEnchants == null)
 			itemEnchants = "";
 		return (executeUpdate("INSERT INTO "+ transaction_table+ " (`type`, `buyer`, `itemID`, `itemDur`, `itemEnchants`, `amount`, `price`, `seller`, `timestamp`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP);", type, buyer, itemID, itemDur, itemEnchants, amount, price, seller) > 0) ? true : false;

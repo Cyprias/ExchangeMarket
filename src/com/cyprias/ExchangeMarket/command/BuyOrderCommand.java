@@ -122,36 +122,6 @@ public class BuyOrderCommand implements Command {
 		}
 		
 		
-		/*SELLORDER
-		if (amount <= 0){
-			amount = intAmount;
-		}else{
-			amount = Math.min(amount, intAmount);
-		}
-		
-		
-
-		
-		
-		Logger.debug("amount2: " + amount +", " + order.getAmount());
-		stock.setAmount(amount);
-		try {
-			order.setAmount(amount);
-		} catch (SQLException e) {
-			e.printStackTrace();
-			ChatUtils.error(sender, "An error has occured: " + e.getLocalizedMessage());
-			return true;
-		}
-		*/
-		
-		/*SELLORDER
-		if (!Config.getBoolean("properties.allow-damaged-gear") && Plugin.isGear(stock.getType()) && stock.getDurability() > 0) {
-			// ExchangeMarket.sendMessage(sender, F("cannotPostDamagedOrder"));
-			ChatUtils.send(sender, "You cannot sell damaged gear.");
-			return true;
-		}
-		 */
-		
 
 		try {
 
