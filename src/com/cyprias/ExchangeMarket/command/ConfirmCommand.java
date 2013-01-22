@@ -127,6 +127,8 @@ public class ConfirmCommand implements Command {
 		double moneyTraded = 0;
 		int traded = 0;
 		Order order;
+		int places = Config.getInt("properties.price-decmial-places");
+		
 		if (pT.transactionType == Order.SELL_ORDER) {//Buy command
 
 			
@@ -180,23 +182,26 @@ public class ConfirmCommand implements Command {
 				}
 
 				order.insertTransaction(sender, traded);
-				
-				
 				moneyTraded += spend;
+				
+				if (Config.getBoolean("properties.show-orderer-each-transaction"))
+					ChatUtils.send(sender, String.format("§7You bought §f%s§7x§f%s §7for $§f%s §7($§f%s§7e).", Plugin.getItemName(stock), traded, Plugin.Round(spend,places), Plugin.Round(order.getPrice(),places)));
+					
+				
 			}
 
 			Plugin.database.cleanEmpties();
 
 			if (moneyTraded > 0) {
 				ChatUtils.send(sender, String.format("§7Spent $§f%s §7buying §f%s§7x§f%s§7.",
-					Plugin.Round(moneyTraded, Config.getInt("properties.price-decmial-places")), Plugin.getItemName(stock), totalTraded));
+					Plugin.Round(moneyTraded, places), Plugin.getItemName(stock), totalTraded));
 
 			} else {
 				stock.setAmount(1);
 				if (!InventoryUtil.fits(stock, ((Player) sender).getInventory())) {
-					ChatUtils.send(sender, "You have no bag space available.");
+					ChatUtils.send(sender, "§7You have no bag space available.");
 				} else {
-					ChatUtils.send(sender, "Failed to buy any items, start over.");
+					ChatUtils.send(sender, "§7Failed to buy any items, start over.");
 					pendingTransactions.remove(sender.getName());
 				}
 
@@ -248,26 +253,30 @@ public class ConfirmCommand implements Command {
 					order.notifyPlayerOfTransaction(traded);
 				}
 				
+				
+				
 				order.insertTransaction(sender, traded);
 				
 				moneyTraded += profit;
 				totalTraded += traded;
 				
-				
+				if (Config.getBoolean("properties.show-orderer-each-transaction"))
+					ChatUtils.send(sender, String.format("§7You sold §f%s§7x§f%s §7for $§f%s §7($§f%s§7e).", Plugin.getItemName(stock), traded, Plugin.Round(profit,places), Plugin.Round(order.getPrice(),places)));
+					
 				//po.order
 				
 			}
 			if (moneyTraded > 0) {
 				Plugin.database.cleanEmpties();
 				ChatUtils.send(sender, String.format("§7Made $§f%s §7selling §f%s§7x§f%s§7.",
-					Plugin.Round(moneyTraded, Config.getInt("properties.price-decmial-places")), Plugin.getItemName(stock), totalTraded));
+					Plugin.Round(moneyTraded, places), Plugin.getItemName(stock), totalTraded));
 
 				
 			} else if (InventoryUtil.getAmount(stock, pT.player.getInventory()) == 0) {
-				ChatUtils.send(sender, "You have no " + Plugin.getItemName(stock) + " to sell.");
+				ChatUtils.send(sender, "§7You have no §f" + Plugin.getItemName(stock) + " §7to sell.");
 				
 			} else {
-				ChatUtils.send(sender, "Failed to sell any items, start over.");
+				ChatUtils.send(sender, "§7Failed to sell any items, start over.");
 				pendingTransactions.remove(sender.getName());
 			}
 			

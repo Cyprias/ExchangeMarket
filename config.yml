@@ -17,6 +17,7 @@ properties:
   notify-owner-of-transaction: true
   log-transactions-to-db: true
   block-usage-in-creative: true
+  show-orderer-each-transaction: false
 mysql:
   hostname: localhost
   username: root

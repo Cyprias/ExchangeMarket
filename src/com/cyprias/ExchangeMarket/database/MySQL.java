@@ -239,7 +239,7 @@ public class MySQL implements Database {
 		Order order = null;
 		while (r.next()) {
 		//	Logger.info("id: " + r.getInt(1));
-			order = new Order(
+			order = new Order(r.getInt("id"),
 				r.getInt("type"),
 				r.getBoolean("infinite"),
 				r.getString("player"),
@@ -249,7 +249,6 @@ public class MySQL implements Database {
 				r.getInt("amount"),
 				r.getDouble("price")
 			);
-			order.setId(id);
 			
 		}
 		
@@ -347,7 +346,7 @@ public class MySQL implements Database {
 			if (orderType > 0 && orderType != r.getInt("type"))
 				continue;
 				
-			order = new Order(
+			order = new Order(r.getInt("id"),
 				r.getInt("type"),
 				r.getBoolean("infinite"),
 				r.getString("player"),
@@ -357,7 +356,6 @@ public class MySQL implements Database {
 				r.getInt("amount"),
 				r.getDouble("price")
 			);
-			order.setId(r.getInt("id"));
 			
 			orders.add(order);
 			
@@ -371,6 +369,7 @@ public class MySQL implements Database {
 
 		int rows = getResultCount("SELECT COUNT(*) FROM " + order_table);
 
+		
 		int perPage = Config.getInt("properties.rows-per-page");
 
 		int max = (rows / perPage);// + 1;
@@ -384,11 +383,11 @@ public class MySQL implements Database {
 			if (page > max)
 				page = max;
 		}
-		if (rows == 0)
-			return null;
+
 		
 		ChatUtils.send(sender, "§7Page: §f" + (page+1) + "§7/§f" + (max+1));
-
+		if (rows == 0)
+			return null;
 		
 		queryReturn results = executeQuery("SELECT * FROM `"+order_table+"` LIMIT "+(perPage * page)+" , " + perPage);
 		ResultSet r = results.result;
@@ -397,7 +396,7 @@ public class MySQL implements Database {
 		Order order;
 		while (r.next()) {
 		//	Logger.info("id: " + r.getInt(1));
-			order = new Order(
+			order = new Order(r.getInt("id"),
 				r.getInt("type"),
 				r.getBoolean("infinite"),
 				r.getString("player"),
@@ -407,7 +406,7 @@ public class MySQL implements Database {
 				r.getInt("amount"),
 				r.getDouble("price")
 			);
-			order.setId(r.getInt("id"));
+			
 			orders.add(order);
 		}
 
@@ -423,7 +422,7 @@ public class MySQL implements Database {
 
 		if (r.next()) {
 		
-			foundOrder = new Order(
+			foundOrder = new Order(r.getInt("id"),
 				r.getInt("type"),
 				r.getBoolean("infinite"),
 				r.getString("player"),
@@ -433,7 +432,6 @@ public class MySQL implements Database {
 				r.getInt("amount"),
 				r.getDouble("price")
 			);
-			foundOrder.setId(r.getInt("id"));
 		}
 		
 		return foundOrder;
@@ -498,7 +496,7 @@ public class MySQL implements Database {
 		Order order;
 		while (r.next()) {
 			
-			order = new Order(
+			order = new Order(r.getInt("id"),
 				r.getInt("type"),
 				r.getBoolean("infinite"),
 				r.getString("player"),
@@ -508,7 +506,7 @@ public class MySQL implements Database {
 				r.getInt("amount"),
 				r.getDouble("price")
 			);
-			order.setId(r.getInt("id"));
+			
 			
 			orders.add(order);
 			
@@ -656,7 +654,7 @@ public class MySQL implements Database {
 		Order order;
 		while (r.next()) {
 			
-			order = new Order(
+			order = new Order(r.getInt("id"),
 				r.getInt("type"),
 				r.getBoolean("infinite"),
 				r.getString("player"),
@@ -666,7 +664,6 @@ public class MySQL implements Database {
 				r.getInt("amount"),
 				r.getDouble("price")
 			);
-			order.setId(r.getInt("id"));
 			
 			orders.add(order);
 			

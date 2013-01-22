@@ -29,6 +29,8 @@ public class Order {
 
 	private ItemStack stock = null;
 
+
+	
 	public Order(int type, boolean infinite, String player, int itemId, short itemDur, String itemEnchants, int amount, double price) {
 		this.type = type;
 		this.infinite = infinite;
@@ -45,7 +47,11 @@ public class Order {
 
 		this.stock = Plugin.getItemStack(itemId, itemDur, amount, itemEnchants);
 	}
-
+	public Order(int id, int type, boolean infinite, String player, int itemId, short itemDur, String itemEnchants, int amount, double price) {
+		this(type, infinite, player, itemId, itemDur, itemEnchants, amount, price);
+		this.id = id;
+	}
+	
 	public Order(int type, boolean infinite, String player, int itemId, short itemDur, Map<Enchantment, Integer> enchantments, int amount, double price) {
 		this(type, infinite, player, itemId, itemDur, MaterialUtil.Enchantment.encodeEnchantment(enchantments), amount, price);
 	}
@@ -53,10 +59,10 @@ public class Order {
 	public Order(int type, boolean infinite, String player, ItemStack stock, double price) {
 		this(type, infinite, player, stock.getTypeId(), stock.getDurability(), MaterialUtil.Enchantment.encodeEnchantment(stock), stock.getAmount(), price);
 	}
-
+	/*
 	public void setId(int id) {
 		this.id = id;
-	}
+	}*/
 
 	public boolean hasEnchantments() {
 		return (itemEnchants != null);

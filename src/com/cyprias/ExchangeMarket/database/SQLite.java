@@ -154,7 +154,7 @@ public class SQLite implements Database {
 		Order order = null;
 		while (r.next()) {
 		//	Logger.info("id: " + r.getInt(1));
-			order = new Order(
+			order = new Order(id, 
 				r.getInt("type"),
 				r.getBoolean("infinite"),
 				r.getString("player"),
@@ -164,7 +164,6 @@ public class SQLite implements Database {
 				r.getInt("amount"),
 				r.getDouble("price")
 			);
-			order.setId(id);
 			
 		}
 		
@@ -238,7 +237,7 @@ public class SQLite implements Database {
 		Order order;
 		while (r.next()) {
 		//	Logger.info("id: " + r.getInt(1));
-			order = new Order(
+			order = new Order(r.getInt("id"),
 				r.getInt("type"),
 				r.getBoolean("infinite"),
 				r.getString("player"),
@@ -248,7 +247,6 @@ public class SQLite implements Database {
 				r.getInt("amount"),
 				r.getDouble("price")
 			);
-			order.setId(r.getInt("id"));
 			orders.add(order);
 		}
 
@@ -263,7 +261,7 @@ public class SQLite implements Database {
 
 		if (r.next()) {
 		
-			foundOrder = new Order(
+			foundOrder = new Order(r.getInt("id"),
 				r.getInt("type"),
 				r.getBoolean("infinite"),
 				r.getString("player"),
@@ -273,7 +271,6 @@ public class SQLite implements Database {
 				r.getInt("amount"),
 				r.getDouble("price")
 			);
-			foundOrder.setId(r.getInt("id"));
 		}
 		
 		return foundOrder;
@@ -360,7 +357,7 @@ public class SQLite implements Database {
 			if (orderType > 0 && orderType != r.getInt("type"))
 				continue;
 				
-			order = new Order(
+			order = new Order(r.getInt("id"),
 				r.getInt("type"),
 				r.getBoolean("infinite"),
 				r.getString("player"),
@@ -370,7 +367,6 @@ public class SQLite implements Database {
 				r.getInt("amount"),
 				r.getDouble("price")
 			);
-			order.setId(r.getInt("id"));
 			
 			orders.add(order);
 			
@@ -405,7 +401,7 @@ public class SQLite implements Database {
 		Order order;
 		while (r.next()) {
 			
-			order = new Order(
+			order = new Order(r.getInt("id"),
 				r.getInt("type"),
 				r.getBoolean("infinite"),
 				r.getString("player"),
@@ -415,8 +411,7 @@ public class SQLite implements Database {
 				r.getInt("amount"),
 				r.getDouble("price")
 			);
-			order.setId(r.getInt("id"));
-			
+
 			orders.add(order);
 			
 		}
@@ -555,7 +550,7 @@ public class SQLite implements Database {
 		Order order;
 		while (r.next()) {
 			
-			order = new Order(
+			order = new Order(r.getInt("id"),
 				r.getInt("type"),
 				r.getBoolean("infinite"),
 				r.getString("player"),
@@ -565,7 +560,7 @@ public class SQLite implements Database {
 				r.getInt("amount"),
 				r.getDouble("price")
 			);
-			order.setId(r.getInt("id"));
+
 			
 			orders.add(order);
 			
