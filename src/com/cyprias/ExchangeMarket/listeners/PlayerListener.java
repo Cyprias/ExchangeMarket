@@ -163,6 +163,11 @@ public class PlayerListener implements Listener {
 			double estPrice = Plugin.getEstimatedBuyPrice(stock, amount);
 			if (estPrice < Config.getDouble("properties.min-order-price")) {
 				ChatUtils.send(player, String.format("§7There are no sell orders for §f%s§7.", Plugin.getItemName(stock)));
+				
+				String priceText = (estPrice > 0) ? "B " + Plugin.dRound(estPrice, 2) : "";
+				sign.setLine(Signs.PRICE_LINE, priceText);
+				sign.update();
+				
 				return;
 			}
 
@@ -280,6 +285,11 @@ public class PlayerListener implements Listener {
 			double estPrice = Plugin.getEstimatedSellPrice(stock, amount);
 			if (estPrice < Config.getDouble("properties.min-order-price")) {
 				ChatUtils.send(player, String.format("§7There are no buy orders for §f%s§7.", Plugin.getItemName(stock)));
+				
+				String priceText = (buyPrice > 0) ? "B " + Plugin.dRound(buyPrice, 2) : "";
+				sign.setLine(Signs.PRICE_LINE, priceText);
+				sign.update();
+				
 				return;
 			}
 
