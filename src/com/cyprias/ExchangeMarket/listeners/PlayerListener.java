@@ -133,7 +133,9 @@ public class PlayerListener implements Listener {
 
 		String[] line = sign.getLines();
 
-		ItemStack stock = MaterialUtil.getItem(line[Signs.ITEM_LINE]);
+		
+		
+		ItemStack stock = Plugin.getItemStack(line[Signs.ITEM_LINE]);
 		if (stock == null || stock.getTypeId() == 0) {
 			ChatUtils.error(player, "Unknown item: " + line[Signs.ITEM_LINE]);
 			return;

@@ -675,16 +675,16 @@ public class MySQL implements Database {
 	}
 
 	@Override
-	public boolean insertTransaction(int type, String buyer, int itemID, int itemDur, String itemEnchants, int amount, double price, String seller) throws SQLException {
+	public boolean insertTransaction(int type, String orderer, int itemID, int itemDur, String itemEnchants, int amount, double price, String owner) throws SQLException {
 		if (itemEnchants == null)
 			itemEnchants = "";
-		return (executeUpdate("INSERT INTO "+ transaction_table+ " (`type`, `buyer`, `itemID`, `itemDur`, `itemEnchants`, `amount`, `price`, `seller`, `timestamp`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP);", type, buyer, itemID, itemDur, itemEnchants, amount, price, seller) > 0) ? true : false;
+		return (executeUpdate("INSERT INTO "+ transaction_table+ " (`type`, `buyer`, `itemID`, `itemDur`, `itemEnchants`, `amount`, `price`, `seller`, `timestamp`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP);", type, orderer, itemID, itemDur, itemEnchants, amount, price, owner) > 0) ? true : false;
 	}
 
 	@Override
 	public List<Transaction> listTransactions(CommandSender sender, int page) throws SQLException {
 
-		int rows = getResultCount("SELECT COUNT(*) FROM " + transaction_table);
+		int rows = getResultCount("SELECT COUNT(*) FROM " + transaction_table + " WHERE `seller` LIKE ? ", sender.getName());
 
 		//Logger.info("rows: " + rows);
 		
@@ -715,7 +715,7 @@ public class MySQL implements Database {
 		
 
 		
-		queryReturn results = executeQuery("SELECT * FROM `"+transaction_table+"` LIMIT "+(perPage * page)+" , " + perPage);
+		queryReturn results = executeQuery("SELECT * FROM `"+transaction_table+"` WHERE `seller` LIKE ? LIMIT "+(perPage * page)+" , " + perPage, sender.getName());
 		ResultSet r = results.result;
 		
 		//List<Order> orders = new ArrayList<Order>();
