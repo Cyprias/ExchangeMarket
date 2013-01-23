@@ -88,10 +88,8 @@ public class PlayerListener implements Listener {
 	
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public static void onInteract(PlayerInteractEvent event) throws IllegalArgumentException, SQLException, IOException, InvalidConfigurationException {
-		if (event.isCancelled())
-			return;
-
-		
+		//if (event.isCancelled())
+		//	return;
 		
 		Player player = event.getPlayer();
 		if (Config.getBoolean("properties.block-usage-in-creative") == true && player.getGameMode().getValue() == 1)
@@ -174,7 +172,7 @@ public class PlayerListener implements Listener {
 			if (Plugin.dRound(estPrice, 2) != (Plugin.dRound(buyPrice, 2))) {
 				String priceText = (estPrice > 0) ? "B " + Plugin.dRound(estPrice, 2) : "";
 				if (sellPrice > 0)
-					priceText += (priceText != "") ? " : " : "" + Plugin.dRound(sellPrice, 2) + " S";
+					priceText += ((priceText != "") ? " : " : "") + Plugin.dRound(sellPrice, 2) + " S";
 
 				sign.setLine(Signs.PRICE_LINE, priceText);
 				sign.update();
@@ -293,7 +291,7 @@ public class PlayerListener implements Listener {
 				String priceText = (buyPrice > 0) ? "B " + Plugin.dRound(buyPrice, 2) : "";
 
 				if (estPrice > 0)
-					priceText += (priceText != "") ? " : " : "" + Plugin.dRound(estPrice, 2) + " S";
+					priceText += ((priceText != "") ? " : " : "") + Plugin.dRound(estPrice, 2) + " S";
 
 				sign.setLine(Signs.PRICE_LINE, priceText);
 				sign.update();
@@ -374,7 +372,7 @@ public class PlayerListener implements Listener {
 
 			if (itemsTraded > 0) {
 
-				ChatUtils.send(player, String.format("§a[Estimate] §f%s§7x§f%s§7 will earn $§f%s§7, type §d/em confirm §7to confirm transaction.",
+				ChatUtils.send(player, String.format("§a[Estimate] §f%s§7x§f%s§7 will earn $§f%s§7, type §d/em confirm §7to confirm estimate.",
 					Plugin.getItemName(stock), itemsTraded, Plugin.Round(moneyProfited, Config.getInt("properties.price-decmial-places"))));
 
 			} else {
