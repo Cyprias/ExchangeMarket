@@ -30,7 +30,7 @@ public class BuyCommand implements Command {
 
 
 	
-	@Override
+
 	public boolean execute(CommandSender sender, org.bukkit.command.Command cmd, String[] args) throws IOException, InvalidConfigurationException {
 		if (!Plugin.checkPermission(sender, Perm.BUY)) 
 			return false;

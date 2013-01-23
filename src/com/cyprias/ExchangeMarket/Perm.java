@@ -33,7 +33,9 @@ public enum Perm {
 	SELL_HAND("exchangemarket.sellhand"),
 	CANCEL("exchangemarket.cancel"),
 	CONFIRM("exchangemarket.confirm"),
-	PARENT_USER("exchangemarket.user", PARENT_INFO, SELL,BUY,SELL_ORDER,BUY_ORDER,COLLECT,SELL_HAND,CANCEL,CONFIRM),
+	USE_EXCHANGE_SIGN("exchangemarket.use-exchange-sign"),
+	
+	PARENT_USER("exchangemarket.user", USE_EXCHANGE_SIGN, PARENT_INFO, SELL,BUY,SELL_ORDER,BUY_ORDER,COLLECT,SELL_HAND,CANCEL,CONFIRM),
 	
 	INF_BUY("exchangemarket.infbuy"),
 	INF_SELL("exchangemarket.infsell"),

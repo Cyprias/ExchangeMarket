@@ -57,7 +57,7 @@ public class ItemInfoCommand implements Command {
 		//
 		
 		
-		ChatUtils.send(sender, String.format("§7Item: §f%s§7, id: §f%s", Plugin.getItemName(stock), stock.getTypeId() + ((stock.getDurability() > 0) ? ";"+stock.getDurability() : "")));
+		ChatUtils.send(sender, String.format("§7Item: §f%s§7, id: §f%s", Plugin.getItemName(stock), stock.getTypeId() + ((stock.getDurability() > 0) ? ":"+stock.getDurability() : "")));
 		
 		if (stock.getEnchantments().size() > 0){
 			//§7

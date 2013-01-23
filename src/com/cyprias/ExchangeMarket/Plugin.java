@@ -56,6 +56,7 @@ import com.cyprias.ExchangeMarket.database.Database;
 import com.cyprias.ExchangeMarket.database.MySQL;
 import com.cyprias.ExchangeMarket.database.SQLite;
 import com.cyprias.ExchangeMarket.listeners.PlayerListener;
+import com.cyprias.ExchangeMarket.listeners.SignListener;
 
 
 public class Plugin extends JavaPlugin {
@@ -166,7 +167,7 @@ public class Plugin extends JavaPlugin {
 		} catch (IOException e1) {e1.printStackTrace();
 		}
 		
-		registerListeners(new PlayerListener());
+		registerListeners(new PlayerListener(), new SignListener());
 		
 		
 		try {
@@ -245,7 +246,8 @@ public class Plugin extends JavaPlugin {
 		instance.getServer().getScheduler().cancelAllTasks();
 		
 		PlayerListener.unregisterEvents(instance);
-
+		SignListener.unregisterEvents(instance);
+		
 		instance = null;
 		Logger.info("disabled.");
 	}
@@ -517,6 +519,13 @@ public class Plugin extends JavaPlugin {
 				return i;
 			}
 		}
+		return 0;
+	}
+	
+	public double getEstimatedBuyPrice(ItemStack stock){
+		
+		
+		
 		return 0;
 	}
 	

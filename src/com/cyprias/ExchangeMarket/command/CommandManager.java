@@ -17,7 +17,7 @@ import com.cyprias.ExchangeMarket.Plugin;
 
 public class CommandManager implements CommandExecutor, Listable {
 	private static final Plugin plugin = Plugin.getInstance();
-	private final static Map<String, Command> commands = new HashMap<String, Command>();
+	public final static Map<String, Command> commands = new HashMap<String, Command>();
 
 	public CommandManager() {}
 
