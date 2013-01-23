@@ -64,7 +64,7 @@ public class InfoCommand implements Command {
 		}
 		
 
-		String message = order.formatString(Config.getColouredString("properties.list-row-format"), sender);
+		String message = order.formatString(Config.getColouredString("properties.orders-row-format"), sender);
 		
 		
 		if (sender instanceof ConsoleCommandSender){
