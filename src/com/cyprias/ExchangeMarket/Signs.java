@@ -27,7 +27,8 @@ public class Signs {
     }
 
     public static boolean isValid(String[] line) {
-        return isValidPreparedSign(line) && (line[PRICE_LINE].toUpperCase().contains("B") || line[PRICE_LINE].toUpperCase().contains("S")) && !line[NAME_LINE].isEmpty();
+//        return isValidPreparedSign(line) && (line[PRICE_LINE].toUpperCase().contains("B") || line[PRICE_LINE].toUpperCase().contains("S")) && !line[NAME_LINE].isEmpty();
+        return isValidPreparedSign(line) && !line[NAME_LINE].isEmpty();
     }
 
     public static boolean isValid(Block sign) {
@@ -55,8 +56,12 @@ public class Signs {
 		return (line.length() > 15 ? null : line);
 	}
 
-	public static final Pattern[] SHOP_SIGN_PATTERN = { Pattern.compile("^\\[Exchange\\]$"), Pattern.compile("^[1-9][0-9]*$"),
-		Pattern.compile("(?i)^[\\d.bs(free) :]+$"), Pattern.compile("^[\\w : -]+$") };
+	//Pattern.compile("(?i)^[\\d.bs(free) :]+$"), 
+	public static final Pattern[] SHOP_SIGN_PATTERN = { 
+		Pattern.compile("^\\[Exchange\\]$"), 
+		Pattern.compile("^[1-9][0-9]*$"),
+		Pattern.compile("(?i)(.*)$"), 
+		Pattern.compile("^[\\w : -]+$") };
 
 	public static boolean isValidPreparedSign(String[] lines) {
 		for (int i = 0; i < 4; i++) {

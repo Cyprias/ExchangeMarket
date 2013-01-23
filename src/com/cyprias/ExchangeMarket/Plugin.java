@@ -8,8 +8,10 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -54,6 +56,7 @@ import com.cyprias.ExchangeMarket.configuration.Config;
 import com.cyprias.ExchangeMarket.configuration.YML;
 import com.cyprias.ExchangeMarket.database.Database;
 import com.cyprias.ExchangeMarket.database.MySQL;
+import com.cyprias.ExchangeMarket.database.Order;
 import com.cyprias.ExchangeMarket.database.SQLite;
 import com.cyprias.ExchangeMarket.listeners.PlayerListener;
 import com.cyprias.ExchangeMarket.listeners.SignListener;
@@ -522,11 +525,81 @@ public class Plugin extends JavaPlugin {
 		return 0;
 	}
 	
-	public double getEstimatedBuyPrice(ItemStack stock){
+	public static double getEstimatedBuyPrice(ItemStack stock) throws SQLException, IOException, InvalidConfigurationException{
+		return getEstimatedBuyPrice(stock, stock.getAmount());
+	}
+	
+	public static double getEstimatedBuyPrice(ItemStack stock, int amount) throws SQLException, IOException, InvalidConfigurationException{
+		List<Order> orders = Plugin.database.search(stock, Order.SELL_ORDER);
 		
+		if (orders.size() <= 0)
+			return 0;
+
+		Order o;
+		int canTrade, traded;
+		double moneySpent = 0;
+		for (int i=0; i<orders.size();i++){
+			if (amount <= 0)
+				break;
+			
+			o = orders.get(i);
+			
+			canTrade = amount;
+			if (!o.isInfinite())
+				canTrade  = Math.min(o.getAmount(), amount);
+			
+			if (canTrade <= 0)
+				break;
+			
+			
+			traded = canTrade;
+			
+			double spend = (traded*o.getPrice());
+			moneySpent += spend;
+			
+			amount -=traded;
+			
+		}
 		
+		return moneySpent;
+	}
+	
+	public static double getEstimatedSellPrice(ItemStack stock) throws SQLException, IOException, InvalidConfigurationException{
+		return getEstimatedSellPrice(stock, stock.getAmount());
+	}
+	public static double getEstimatedSellPrice(ItemStack stock, int amount) throws SQLException, IOException, InvalidConfigurationException{
+		List<Order> orders = Plugin.database.search(stock, Order.BUY_ORDER);
 		
-		return 0;
+		if (orders.size() <= 0)
+			return 0;
+
+		Order o;
+		int canTrade, traded;
+		double moneySpent = 0;
+		for (int i = (orders.size() - 1); i >= 0; i--) {
+			if (amount <= 0)
+				break;
+			
+			o = orders.get(i);
+			
+			canTrade = amount;
+			if (!o.isInfinite())
+				canTrade  = Math.min(o.getAmount(), amount);
+			
+			if (canTrade <= 0)
+				break;
+			
+			
+			traded = canTrade;
+			
+			double spend = (traded*o.getPrice());
+			moneySpent += spend;
+			
+			amount -=traded;
+			
+		}
+		
+		return moneySpent;
 	}
 	
 }

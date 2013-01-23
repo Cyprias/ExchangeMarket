@@ -1,6 +1,10 @@
 package com.cyprias.ExchangeMarket.listeners;
 
+import java.io.IOException;
+import java.sql.SQLException;
+
 import org.bukkit.block.Block;
+import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -28,8 +32,10 @@ public class SignListener implements Listener {
 	}
 
 	@EventHandler(priority = EventPriority.NORMAL)
-	public static void onSignChange(SignChangeEvent event) {
-
+	public static void onSignChange(SignChangeEvent event) throws SQLException, IOException, InvalidConfigurationException {
+		if (event.isCancelled())
+			return;
+		
 		Block signBlock = event.getBlock();
 		String[] line = event.getLines();
 
@@ -49,7 +55,22 @@ public class SignListener implements Listener {
 			ChatUtils.error(player, "Unknown item: " + line[Signs.ITEM_LINE]);
 			return;
 		}
+		int amount = Integer.parseInt(line[Signs.QUANTITY_LINE]);
+		
+		
+		double estBuyPrice = Plugin.getEstimatedBuyPrice(stock, amount);
+		double estSellPrice = Plugin.getEstimatedSellPrice(stock, amount);
+	
+		
+		String priceText = (estBuyPrice>0 ) ? "B " + Plugin.Round(estBuyPrice, 2) : "";
+		if (estSellPrice > 0)
+			priceText += " : " + Plugin.Round(estSellPrice, 2) + " S";
 
+		event.setLine(Signs.PRICE_LINE, priceText);
+		
+		
+		
+		
 		String formattedPrice = Signs.formatPriceLine(line[Signs.PRICE_LINE]);
 
 		if (formattedPrice == null) {
@@ -69,7 +90,6 @@ public class SignListener implements Listener {
 			return;
 		}
 
-		int amount = Integer.parseInt(line[Signs.QUANTITY_LINE]);
 		int pl = Config.getInt("properties.price-decmial-places");
 
 		ChatUtils.send(player, String.format("§7Created exchange sign for §f%s§7x§f%s§7.", Plugin.getItemName(stock), amount));

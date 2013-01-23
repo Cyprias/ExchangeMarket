@@ -85,34 +85,34 @@ public class PlayerListener implements Listener {
 
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public static void onInteract(PlayerInteractEvent event) throws IllegalArgumentException, SQLException, IOException, InvalidConfigurationException {
+		if (event.isCancelled())
+			return;
+		
 		Player player = event.getPlayer();
 		if (Config.getBoolean("properties.block-usage-in-creative") == true && player.getGameMode().getValue() == 1)
 			return;
 
+
+		
 		Block block = event.getClickedBlock();
 
-		if (block == null) {
+		if (block == null)
 			return;
-		}
 
+		
 		Action action = event.getAction();
 
-		if (!BlockUtil.isSign(block) || player.getItemInHand().getType() == Material.SIGN) { // Blocking
-																								// accidental
-																								// sign
-																								// edition
+		if (!BlockUtil.isSign(block) || player.getItemInHand().getType() == Material.SIGN)
 			return;
-		}
 
+		
 		Sign sign = (Sign) block.getState();
 
-		if (!Signs.isValid(sign)) {
+		if (!Signs.isValid(sign))
 			return;
-		}
-
-		if (!Plugin.checkPermission(player, Perm.USE_EXCHANGE_SIGN)) {
+		
+		if (!Plugin.checkPermission(player, Perm.USE_EXCHANGE_SIGN))
 			return;
-		}
 
 		Logger.debug("action " + action);
 
@@ -131,15 +131,39 @@ public class PlayerListener implements Listener {
 
 		int dplaces = Config.getInt("properties.price-decmial-places");
 
+		double buyPrice = PriceUtil.getBuyPrice(formattedPrice);
+		double sellPrice = PriceUtil.getSellPrice(formattedPrice);
 		// ////////////////////////////////////////////////////
 		if (action == RIGHT_CLICK_BLOCK) {
+			event.setCancelled(true);
 			if (Econ.getBalance(player.getName()) <= 0) {
 				ChatUtils.send(player, String.format("§7You have no money in your account."));
 				return;
 			}
 
-			double buyPrice = PriceUtil.getBuyPrice(formattedPrice);
 			Logger.debug("buyPrice " + buyPrice);
+
+			double estPrice = Plugin.getEstimatedBuyPrice(stock, amount);
+			if (estPrice == 0){
+				ChatUtils.send(player, String.format("§7There are no sell orders for §f%s§7.", Plugin.getItemName(stock)));
+				return;
+			}
+			
+			
+			
+			
+			if (!Plugin.Round(estPrice, 2).equalsIgnoreCase(Plugin.Round(buyPrice, 2))) {
+				String priceText = (estPrice>0 ) ? "B " + Plugin.Round(estPrice, 2) : "";
+				if (sellPrice > 0)
+					priceText += " : " + Plugin.Round(sellPrice, 2) + " S";
+
+				sign.setLine(Signs.PRICE_LINE, priceText);
+				sign.update();
+				ChatUtils.send(player, String.format("§7Updates buy price, try again."));
+				return;
+			}
+			
+			
 			if (buyPrice <= 0) {
 				ChatUtils.send(player, "§7That exchange does not have a buy price.");
 				return;
@@ -195,8 +219,8 @@ public class PlayerListener implements Listener {
 
 				double spend = (traded * o.getPrice());
 
-				if (spend > buyPrice)
-					continue;
+				//if (spend > buyPrice)
+				//	continue;
 
 				Logger.debug("traded: " + traded);
 				Logger.debug("spend: " + spend);
@@ -234,10 +258,33 @@ public class PlayerListener implements Listener {
 
 			// ///////////////////////////////////////////////////////////////////////
 		} else if (action == LEFT_CLICK_BLOCK) {
-			double sellPrice = PriceUtil.getSellPrice(formattedPrice);
+
 			Logger.debug("sellPrice " + sellPrice);
+
+			double estPrice = Plugin.getEstimatedSellPrice(stock, amount);
+			if (estPrice == 0){
+				ChatUtils.send(player, String.format("§7There are no buy orders for §f%s§7.", Plugin.getItemName(stock)));
+				return;
+			}
+			
+			if (!Plugin.Round(estPrice, 2).equalsIgnoreCase(Plugin.Round(sellPrice, 2))) {
+				/*
+				 * String priceText = "B " + estPrice; if (sellPrice > 0) {
+				 * priceText += ": " + sellPrice + " S"; }
+				 */
+				String priceText = (buyPrice > 0) ? "B " + Plugin.Round(buyPrice, 2) : "";
+
+				if (estPrice > 0)
+					priceText += " : " + Plugin.Round(estPrice, 2) + " S";
+
+				sign.setLine(Signs.PRICE_LINE, priceText);
+				sign.update();
+				ChatUtils.send(player, String.format("§7Updated sell price, try again."));
+				return;
+			}
+
 			if (sellPrice <= 0) {
-				ChatUtils.send(player, "§7fThat exchange does not have a sell price.");
+				ChatUtils.send(player, "§7That exchange does not have a sell price.");
 				return;
 			}
 
@@ -280,14 +327,14 @@ public class PlayerListener implements Listener {
 				int traded = canTrade;// (canBuy - leftover);
 
 				double profit = (traded * o.getPrice());
-				
-				//Logger.debug("traded: " + traded);
-				//Logger.debug("profit: " + profit);
-				//Logger.debug("sellPrice: " + sellPrice);
-				
-				if (profit < sellPrice)
-					continue;
-				
+
+				// Logger.debug("traded: " + traded);
+				// Logger.debug("profit: " + profit);
+				// Logger.debug("sellPrice: " + sellPrice);
+
+				//if (profit < sellPrice)
+				//	continue;
+
 				moneyProfited += profit;
 
 				pendingOrder po = new pendingOrder(o.getId(), traded);
@@ -313,12 +360,13 @@ public class PlayerListener implements Listener {
 					Plugin.getItemName(stock), itemsTraded, Plugin.Round(moneyProfited, Config.getInt("properties.price-decmial-places"))));
 
 			} else {
-				ChatUtils.send(player, String.format("§7There are no buy orders for §f%s§7x§f%s §7at $§f%s§7.", Plugin.getItemName(stock), amount,
-					Plugin.Round(sellPrice, dplaces)));
+				ChatUtils.send(
+					player,
+					String.format("§7There are no buy orders for §f%s§7x§f%s §7at $§f%s§7.", Plugin.getItemName(stock), amount,
+						Plugin.Round(sellPrice, dplaces)));
 				return;
 			}
 
 		}
-
 	}
 }
