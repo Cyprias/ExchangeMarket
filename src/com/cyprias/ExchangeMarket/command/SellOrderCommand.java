@@ -165,7 +165,7 @@ public class SellOrderCommand implements Command {
 					if (stock.getAmount() != amount)
 						Logger.warning("(A) We removed the wrong "+Plugin.getItemName(stock) +" amount from " + sender.getName() + "'s inventory. stock: " + stock.getAmount() + ", inserted: " + amount);
 
-					ChatUtils.send(sender, String.format("§f%sx§7%s §7has been withdrawnfrom your inventory.", Plugin.getItemName(stock), stock.getAmount()));
+					ChatUtils.send(sender, String.format("§f%s§7x§f%s §7has been withdrawnfrom your inventory.", Plugin.getItemName(stock), stock.getAmount()));
 					
 				}
 			} else {
