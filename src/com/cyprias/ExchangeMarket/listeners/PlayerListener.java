@@ -98,14 +98,10 @@ public class PlayerListener implements Listener {
 			return;
 
 		String playerName = player.getName();
-		if (lastUsed.containsKey(playerName))
-			if ((lastUsed.get(playerName) + Config.getDouble("properties.exchange-sign-throttle")) > Plugin.getUnixTime()){
-				ChatUtils.sendSpam(player, "§7Please wait...");
-				return;
-			}
+
 			
 		
-		lastUsed.put(playerName, Plugin.getUnixTime());
+		
 		
 		
 		
@@ -127,6 +123,14 @@ public class PlayerListener implements Listener {
 		if (!Plugin.checkPermission(player, Perm.USE_EXCHANGE_SIGN))
 			return;
 
+		if (lastUsed.containsKey(playerName))
+			if ((lastUsed.get(playerName) + Config.getDouble("properties.exchange-sign-throttle")) > Plugin.getUnixTime()){
+				ChatUtils.sendSpam(player, "§7Please wait...");
+				return;
+			}
+		lastUsed.put(playerName, Plugin.getUnixTime());
+		
+		
 		Logger.debug("action " + action);
 
 		String[] line = sign.getLines();

@@ -58,7 +58,7 @@ public class Signs {
 
 	//Pattern.compile("(?i)^[\\d.bs(free) :]+$"), 
 	public static final Pattern[] SHOP_SIGN_PATTERN = { 
-		Pattern.compile("^\\[Exchange\\]$"), 
+		Pattern.compile("^(?i)\\[Exchange\\]$"), 
 		Pattern.compile("^[1-9][0-9]*$"),
 		Pattern.compile("(?i)(.*)$"), 
 		Pattern.compile("^[\\w : -]+$") };
