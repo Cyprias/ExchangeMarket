@@ -99,8 +99,10 @@ public class PlayerListener implements Listener {
 
 		String playerName = player.getName();
 		if (lastUsed.containsKey(playerName))
-			if ((lastUsed.get(playerName) + Config.getDouble("properties.exchange-sign-throttle")) > Plugin.getUnixTime())
+			if ((lastUsed.get(playerName) + Config.getDouble("properties.exchange-sign-throttle")) > Plugin.getUnixTime()){
+				ChatUtils.sendSpam(player, "§7Please wait...");
 				return;
+			}
 			
 		
 		lastUsed.put(playerName, Plugin.getUnixTime());
@@ -168,7 +170,7 @@ public class PlayerListener implements Listener {
 			if (Plugin.dRound(estPrice, 2) != (Plugin.dRound(buyPrice, 2))) {
 				String priceText = (estPrice > 0) ? "B " + Plugin.dRound(estPrice, 2) : "";
 				if (sellPrice > 0)
-					priceText += " : " + Plugin.dRound(sellPrice, 2) + " S";
+					priceText += (priceText != "") ? " : " : "" + Plugin.dRound(sellPrice, 2) + " S";
 
 				sign.setLine(Signs.PRICE_LINE, priceText);
 				sign.update();
@@ -287,7 +289,7 @@ public class PlayerListener implements Listener {
 				String priceText = (buyPrice > 0) ? "B " + Plugin.dRound(buyPrice, 2) : "";
 
 				if (estPrice > 0)
-					priceText += " : " + Plugin.dRound(estPrice, 2) + " S";
+					priceText += (priceText != "") ? " : " : "" + Plugin.dRound(estPrice, 2) + " S";
 
 				sign.setLine(Signs.PRICE_LINE, priceText);
 				sign.update();

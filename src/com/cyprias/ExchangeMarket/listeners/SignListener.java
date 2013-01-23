@@ -64,7 +64,7 @@ public class SignListener implements Listener {
 		
 		String priceText = (estBuyPrice>0 ) ? "B " + Plugin.Round(estBuyPrice, 2) : "";
 		if (estSellPrice > 0)
-			priceText += " : " + Plugin.Round(estSellPrice, 2) + " S";
+ 			priceText += (priceText != "") ? " : " : "" + Plugin.Round(estSellPrice, 2) + " S";
 
 		event.setLine(Signs.PRICE_LINE, priceText);
 		
