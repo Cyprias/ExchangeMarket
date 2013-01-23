@@ -61,19 +61,18 @@ import com.cyprias.ExchangeMarket.database.SQLite;
 import com.cyprias.ExchangeMarket.listeners.PlayerListener;
 import com.cyprias.ExchangeMarket.listeners.SignListener;
 
-
 public class Plugin extends JavaPlugin {
 	private static Plugin instance = null;
 
-	//public void onLoad() {}
+	// public void onLoad() {}
 
 	public static Database database;
 	public static HashMap<String, String> aliases = new HashMap<String, String>();
-	
+
 	public void onEnable() {
 		instance = this;
 
-		if (!(new File(getDataFolder(), "config.yml").exists())){
+		if (!(new File(getDataFolder(), "config.yml").exists())) {
 			Logger.info("Copying config.yml to disk.");
 			try {
 				YML.toFile(getResource("config.yml"), getDataFolder(), "config.yml");
@@ -86,24 +85,26 @@ public class Plugin extends JavaPlugin {
 				e.printStackTrace();
 				return;
 			}
-			//getConfig().options().copyDefaults(true);
-			//saveConfig();
+			// getConfig().options().copyDefaults(true);
+			// saveConfig();
 		}
 		if (Config.migrateConfig())
 			saveConfig();
-		
+
 		try {
-			Config.checkForMissingProperties() ;
-		} catch (IOException e4) {e4.printStackTrace();
-		} catch (InvalidConfigurationException e4) {e4.printStackTrace();
+			Config.checkForMissingProperties();
+		} catch (IOException e4) {
+			e4.printStackTrace();
+		} catch (InvalidConfigurationException e4) {
+			e4.printStackTrace();
 		}
-		
-        if (!Econ.setupEconomy() ) {
-            Logger.severe(String.format("[%s] - Disabled due to no Vault dependency found!", getDescription().getName()));
-            getServer().getPluginManager().disablePlugin(this);
-            return;
-        }
-		
+
+		if (!Econ.setupEconomy()) {
+			Logger.severe(String.format("[%s] - Disabled due to no Vault dependency found!", getDescription().getName()));
+			getServer().getPluginManager().disablePlugin(this);
+			return;
+		}
+
 		if (Config.getString("properties.db-type").equalsIgnoreCase("mysql")) {
 			database = new MySQL();
 		} else if (Config.getString("properties.db-type").equalsIgnoreCase("sqlite")) {
@@ -150,44 +151,46 @@ public class Plugin extends JavaPlugin {
 		cm.registerCommand("transactions", new TransactionsCommand());
 		cm.registerCommand("info", new InfoCommand());
 		cm.registerCommand("iteminfo", new ItemInfoCommand());
-		
+
 		this.getCommand("em").setExecutor(cm);
 
 		try {
-			YML yml = new YML(getResource("aliases.yml"),getDataFolder(), "aliases.yml");
+			YML yml = new YML(getResource("aliases.yml"), getDataFolder(), "aliases.yml");
 			for (String key : yml.getKeys(false)) {
 				aliases.put(key, yml.getString(key));
 			}
-		} catch (FileNotFoundException e2) {e2.printStackTrace();
-		} catch (IOException e2) {e2.printStackTrace();
-		} catch (InvalidConfigurationException e2) {e2.printStackTrace();
+		} catch (FileNotFoundException e2) {
+			e2.printStackTrace();
+		} catch (IOException e2) {
+			e2.printStackTrace();
+		} catch (InvalidConfigurationException e2) {
+			e2.printStackTrace();
 		}
 
-		
 		try {
 			loadItemIds();
-		} catch (NumberFormatException e1) {e1.printStackTrace();
-		} catch (IOException e1) {e1.printStackTrace();
+		} catch (NumberFormatException e1) {
+			e1.printStackTrace();
+		} catch (IOException e1) {
+			e1.printStackTrace();
 		}
-		
+
 		registerListeners(new PlayerListener(), new SignListener());
-		
-		
+
 		try {
 			Metrics metrics = new Metrics(this);
 			metrics.start();
 		} catch (IOException e) {
 		}
 
-		/*if (!Econ.setupEconomy())
-		{
-			Logger.warning("Unable to find economy plugin!");
-		}*/
-		
+		/*
+		 * if (!Econ.setupEconomy()) {
+		 * Logger.warning("Unable to find economy plugin!"); }
+		 */
+
 		if (Config.getBoolean("properties.check-new-version"))
 			checkVersion();
-		
-		
+
 		Logger.info("enabled.");
 	}
 
@@ -198,8 +201,6 @@ public class Plugin extends JavaPlugin {
 		}
 	}
 
-
-	
 	private void checkVersion() {
 		getServer().getScheduler().runTaskAsynchronously(instance, new Runnable() {
 			public void run() {
@@ -225,7 +226,6 @@ public class Plugin extends JavaPlugin {
 		});
 	}
 
-	
 	private void registerListeners(Listener... listeners) {
 		PluginManager manager = getServer().getPluginManager();
 
@@ -244,13 +244,12 @@ public class Plugin extends JavaPlugin {
 
 		CommandManager.unregisterCommands();
 		this.getCommand("em").setExecutor(null);
-		
-		
+
 		instance.getServer().getScheduler().cancelAllTasks();
-		
+
 		PlayerListener.unregisterEvents(instance);
 		SignListener.unregisterEvents(instance);
-		
+
 		instance = null;
 		Logger.info("disabled.");
 	}
@@ -267,7 +266,7 @@ public class Plugin extends JavaPlugin {
 		if (sender != null) {
 			if (sender instanceof ConsoleCommandSender)
 				return true;
-			
+
 			if (sender.hasPermission(permission.getPermission())) {
 				return true;
 			} else {
@@ -328,16 +327,25 @@ public class Plugin extends JavaPlugin {
 
 	public static String Round(double Rval, int Rpl) {
 		String format = "#";
-		if (Rpl>0) format +=".";
-		for (int i=1; i<=Rpl; i++)
+		if (Rpl > 0)
+			format += ".";
+		for (int i = 1; i <= Rpl; i++)
 			format += "#";
-		
+
 		return new DecimalFormat(format).format(Rval);
 	}
+
 	public static String Round(double Rval) {
 		return Round(Rval, 0);
 	}
-	
+
+	public static double dRound(double Rval, int Rpl) {
+		double p = (double) Math.pow(10, Rpl);
+		Rval = Rval * p;
+		double tmp = Math.round(Rval);
+		return (double) tmp / p;
+	}
+
 	public static ItemStack getItemStack(int itemID, short itemDur, int amount, String enchants) {
 		ItemStack itemStack = new ItemStack(itemID, amount);
 		itemStack.setDurability(itemDur);
@@ -347,19 +355,21 @@ public class Plugin extends JavaPlugin {
 
 		return itemStack;
 	}
+
 	public static ItemStack getItemStack(int itemID, short itemDur, String enchants) {
 		return getItemStack(itemID, itemDur, 1, enchants);
 	}
+
 	public static ItemStack getItemStack(int itemID, short itemDur) {
 		return getItemStack(itemID, itemDur, 1, null);
 	}
+
 	public static ItemStack getItemStack(ItemStack stock, String enchants) {
 		if (enchants != null && !enchants.equalsIgnoreCase(""))
 			stock.addEnchantments(MaterialUtil.Enchantment.getEnchantments(enchants));
 		return stock;
-	}	
-	
-	
+	}
+
 	public static ItemStack getItemStack(String id) {
 		int itemid = 0;
 		String itemname = null;
@@ -396,12 +406,13 @@ public class Plugin extends JavaPlugin {
 
 		return null;
 	}
-	//static HashMap<String, String> idToName = new HashMap<String, String>();
+
+	// static HashMap<String, String> idToName = new HashMap<String, String>();
 	static HashMap<String, ItemStack> nameToStack = new HashMap<String, ItemStack>();
 	static HashMap<String, String> stockToName = new HashMap<String, String>();
-	
+
 	private void loadItemIds() throws NumberFormatException, IOException {
-		
+
 		File file = new File(instance.getDataFolder(), "items.csv");
 		if (!file.exists()) {
 			file.getParentFile().mkdirs();
@@ -425,62 +436,58 @@ public class Plugin extends JavaPlugin {
 				id_dur = String.valueOf(stock.getTypeId());
 				if (stock.getDurability() > 0)
 					id_dur += ";" + stock.getDurability();
-				
+
 				if (!stockToName.containsKey(id_dur))
 					stockToName.put(id_dur, values[0]);
 				/*
-				sID = values[1];// + ":" + values[2];
-				if (!values[2].equalsIgnoreCase("0"))
-					sID+=values[2];
-				
-				if (!idToName.containsKey(sID))
-					idToName.put(sID, values[0]);
-				*/
+				 * sID = values[1];// + ":" + values[2]; if
+				 * (!values[2].equalsIgnoreCase("0")) sID+=values[2];
+				 * 
+				 * if (!idToName.containsKey(sID)) idToName.put(sID, values[0]);
+				 */
 			}
 		}
 
-
 	}
-	
-	public static String getItemName(ItemStack stock){
+
+	public static String getItemName(ItemStack stock) {
 		/*
-		String id_dur = String.valueOf(stock.getTypeId());
-		if (stock.getDurability() > 0)
-			id_dur += ";" + stock.getDurability();
-		
-		if (stockToName.containsKey(id_dur))
-			return stockToName.get(id_dur);
-		
-		return stock.getType().name();*/
+		 * String id_dur = String.valueOf(stock.getTypeId()); if
+		 * (stock.getDurability() > 0) id_dur += ";" + stock.getDurability();
+		 * 
+		 * if (stockToName.containsKey(id_dur)) return stockToName.get(id_dur);
+		 * 
+		 * return stock.getType().name();
+		 */
 		return getItemName(stock.getTypeId(), stock.getDurability(), MaterialUtil.Enchantment.encodeEnchantment(stock));
 	}
-	
-	public static String getItemName(int itemId, short itemDur, String itemEnchant){
+
+	public static String getItemName(int itemId, short itemDur, String itemEnchant) {
 		String id_dur = String.valueOf(itemId);
 		if (itemDur > 0)
 			id_dur += ";" + itemDur;
-		
+
 		String name = null;
 		if (stockToName.containsKey(id_dur))
-			name =  stockToName.get(id_dur);
+			name = stockToName.get(id_dur);
 
-		if (name != null){
+		if (name != null) {
 			if (itemEnchant != null && !itemEnchant.equals(""))
 				name += "-" + itemEnchant;
 			return name;
 		}
-		
+
 		return id_dur + ((itemEnchant != null) ? itemEnchant : "");
 	}
-	
-	public static String getItemName(int itemId, short itemDur){
+
+	public static String getItemName(int itemId, short itemDur) {
 		return getItemName(itemId, itemDur, null);
 	}
-	
-	public static String getItemName(int itemId){
+
+	public static String getItemName(int itemId) {
 		return getItemName(itemId, (short) 0);
 	}
-	
+
 	public void copy(InputStream in, File file) throws IOException {
 		OutputStream out = new FileOutputStream(file);
 		byte[] buf = new byte[1024];
@@ -514,7 +521,7 @@ public class Plugin extends JavaPlugin {
 
 		return false;
 	}
-	
+
 	public static int getFitAmount(ItemStack itemStack, int amount, PlayerInventory inventory) {
 		for (int i = amount; i > 0; i--) {
 			itemStack.setAmount(i);
@@ -524,82 +531,81 @@ public class Plugin extends JavaPlugin {
 		}
 		return 0;
 	}
-	
-	public static double getEstimatedBuyPrice(ItemStack stock) throws SQLException, IOException, InvalidConfigurationException{
+
+	public static double getEstimatedBuyPrice(ItemStack stock) throws SQLException, IOException, InvalidConfigurationException {
 		return getEstimatedBuyPrice(stock, stock.getAmount());
 	}
-	
-	public static double getEstimatedBuyPrice(ItemStack stock, int amount) throws SQLException, IOException, InvalidConfigurationException{
+
+	public static double getEstimatedBuyPrice(ItemStack stock, int amount) throws SQLException, IOException, InvalidConfigurationException {
 		List<Order> orders = Plugin.database.search(stock, Order.SELL_ORDER);
-		
+
 		if (orders.size() <= 0)
 			return 0;
 
 		Order o;
 		int canTrade, traded;
-		double moneySpent = 0;
-		for (int i=0; i<orders.size();i++){
+		double moneySpent = 0.0;
+		for (int i = 0; i < orders.size(); i++) {
 			if (amount <= 0)
 				break;
-			
+
 			o = orders.get(i);
-			
+
 			canTrade = amount;
 			if (!o.isInfinite())
-				canTrade  = Math.min(o.getAmount(), amount);
-			
+				canTrade = Math.min(o.getAmount(), amount);
+
 			if (canTrade <= 0)
 				break;
-			
-			
+
 			traded = canTrade;
-			
-			double spend = (traded*o.getPrice());
+
+			double spend = (traded * o.getPrice());
 			moneySpent += spend;
-			
-			amount -=traded;
-			
+
+			amount -= traded;
+
 		}
-		
+
 		return moneySpent;
 	}
-	
-	public static double getEstimatedSellPrice(ItemStack stock) throws SQLException, IOException, InvalidConfigurationException{
+
+	public static double getEstimatedSellPrice(ItemStack stock) throws SQLException, IOException, InvalidConfigurationException {
 		return getEstimatedSellPrice(stock, stock.getAmount());
 	}
-	public static double getEstimatedSellPrice(ItemStack stock, int amount) throws SQLException, IOException, InvalidConfigurationException{
+
+	public static double getEstimatedSellPrice(ItemStack stock, int amount) throws SQLException, IOException, InvalidConfigurationException {
 		List<Order> orders = Plugin.database.search(stock, Order.BUY_ORDER);
-		
+
 		if (orders.size() <= 0)
 			return 0;
 
 		Order o;
 		int canTrade, traded;
-		double moneySpent = 0;
+		double moneySpent = 0.0;
 		for (int i = (orders.size() - 1); i >= 0; i--) {
 			if (amount <= 0)
 				break;
-			
+
 			o = orders.get(i);
-			
+
 			canTrade = amount;
 			if (!o.isInfinite())
-				canTrade  = Math.min(o.getAmount(), amount);
-			
+				canTrade = Math.min(o.getAmount(), amount);
+
 			if (canTrade <= 0)
 				break;
-			
-			
+
 			traded = canTrade;
-			
-			double spend = (traded*o.getPrice());
+
+			double spend = (traded * o.getPrice());
 			moneySpent += spend;
-			
-			amount -=traded;
-			
+
+			amount -= traded;
+
 		}
-		
+
 		return moneySpent;
 	}
-	
+
 }

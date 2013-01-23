@@ -87,30 +87,26 @@ public class PlayerListener implements Listener {
 	public static void onInteract(PlayerInteractEvent event) throws IllegalArgumentException, SQLException, IOException, InvalidConfigurationException {
 		if (event.isCancelled())
 			return;
-		
+
 		Player player = event.getPlayer();
 		if (Config.getBoolean("properties.block-usage-in-creative") == true && player.getGameMode().getValue() == 1)
 			return;
 
-
-		
 		Block block = event.getClickedBlock();
 
 		if (block == null)
 			return;
 
-		
 		Action action = event.getAction();
 
 		if (!BlockUtil.isSign(block) || player.getItemInHand().getType() == Material.SIGN)
 			return;
 
-		
 		Sign sign = (Sign) block.getState();
 
 		if (!Signs.isValid(sign))
 			return;
-		
+
 		if (!Plugin.checkPermission(player, Perm.USE_EXCHANGE_SIGN))
 			return;
 
@@ -133,6 +129,10 @@ public class PlayerListener implements Listener {
 
 		double buyPrice = PriceUtil.getBuyPrice(formattedPrice);
 		double sellPrice = PriceUtil.getSellPrice(formattedPrice);
+		
+		if (buyPrice < 0) buyPrice = 0;
+		if (sellPrice < 0) sellPrice = 0;
+		
 		// ////////////////////////////////////////////////////
 		if (action == RIGHT_CLICK_BLOCK) {
 			event.setCancelled(true);
@@ -141,30 +141,27 @@ public class PlayerListener implements Listener {
 				return;
 			}
 
-			Logger.debug("buyPrice " + buyPrice);
-
 			double estPrice = Plugin.getEstimatedBuyPrice(stock, amount);
-			if (estPrice == 0){
+			if (estPrice < Config.getDouble("properties.min-order-price")) {
 				ChatUtils.send(player, String.format("§7There are no sell orders for §f%s§7.", Plugin.getItemName(stock)));
 				return;
 			}
-			
-			
-			
-			
-			if (!Plugin.Round(estPrice, 2).equalsIgnoreCase(Plugin.Round(buyPrice, 2))) {
-				String priceText = (estPrice>0 ) ? "B " + Plugin.Round(estPrice, 2) : "";
+
+			Logger.debug("estPrice: " + estPrice + ", " + Plugin.Round(estPrice, 2) + ", " + Plugin.dRound(estPrice, 2));
+			Logger.debug("buyPrice: " + buyPrice + ", " + Plugin.Round(buyPrice, 2) + ", " + Plugin.dRound(buyPrice, 2));
+
+			if (Plugin.dRound(estPrice, 2) != (Plugin.dRound(buyPrice, 2))) {
+				String priceText = (estPrice > 0) ? "B " + Plugin.dRound(estPrice, 2) : "";
 				if (sellPrice > 0)
-					priceText += " : " + Plugin.Round(sellPrice, 2) + " S";
+					priceText += " : " + Plugin.dRound(sellPrice, 2) + " S";
 
 				sign.setLine(Signs.PRICE_LINE, priceText);
 				sign.update();
-				ChatUtils.send(player, String.format("§7Updates buy price, try again."));
+				ChatUtils.send(player, String.format("§7Updated buy price, try again."));
 				return;
 			}
-			
-			
-			if (buyPrice <= 0) {
+
+			if (buyPrice <= 0 && estPrice == 0) {
 				ChatUtils.send(player, "§7That exchange does not have a buy price.");
 				return;
 			}
@@ -219,8 +216,8 @@ public class PlayerListener implements Listener {
 
 				double spend = (traded * o.getPrice());
 
-				//if (spend > buyPrice)
-				//	continue;
+				// if (spend > buyPrice)
+				// continue;
 
 				Logger.debug("traded: " + traded);
 				Logger.debug("spend: " + spend);
@@ -262,20 +259,20 @@ public class PlayerListener implements Listener {
 			Logger.debug("sellPrice " + sellPrice);
 
 			double estPrice = Plugin.getEstimatedSellPrice(stock, amount);
-			if (estPrice == 0){
+			if (estPrice < Config.getDouble("properties.min-order-price")) {
 				ChatUtils.send(player, String.format("§7There are no buy orders for §f%s§7.", Plugin.getItemName(stock)));
 				return;
 			}
-			
-			if (!Plugin.Round(estPrice, 2).equalsIgnoreCase(Plugin.Round(sellPrice, 2))) {
+
+			if (Plugin.dRound(estPrice, 2) != (Plugin.dRound(sellPrice, 2))) {
 				/*
 				 * String priceText = "B " + estPrice; if (sellPrice > 0) {
 				 * priceText += ": " + sellPrice + " S"; }
 				 */
-				String priceText = (buyPrice > 0) ? "B " + Plugin.Round(buyPrice, 2) : "";
+				String priceText = (buyPrice > 0) ? "B " + Plugin.dRound(buyPrice, 2) : "";
 
 				if (estPrice > 0)
-					priceText += " : " + Plugin.Round(estPrice, 2) + " S";
+					priceText += " : " + Plugin.dRound(estPrice, 2) + " S";
 
 				sign.setLine(Signs.PRICE_LINE, priceText);
 				sign.update();
@@ -283,7 +280,7 @@ public class PlayerListener implements Listener {
 				return;
 			}
 
-			if (sellPrice <= 0) {
+			if (sellPrice <= 0 && estPrice == 0) {
 				ChatUtils.send(player, "§7That exchange does not have a sell price.");
 				return;
 			}
@@ -332,8 +329,8 @@ public class PlayerListener implements Listener {
 				// Logger.debug("profit: " + profit);
 				// Logger.debug("sellPrice: " + sellPrice);
 
-				//if (profit < sellPrice)
-				//	continue;
+				// if (profit < sellPrice)
+				// continue;
 
 				moneyProfited += profit;
 
