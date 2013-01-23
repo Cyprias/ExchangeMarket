@@ -52,6 +52,9 @@ properties:
   
   # When someone buy/sells to an order, tell them each order transaction as well as the end summary.
   show-orderer-each-transaction: true
+  
+  # Allow exchange sign to be used once every x seconds.
+  exchange-sign-throttle: 1
 mysql:
   hostname: localhost
   username: root

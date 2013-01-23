@@ -3,6 +3,7 @@ package com.cyprias.ExchangeMarket.listeners;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.bukkit.Material;
@@ -83,15 +84,29 @@ public class PlayerListener implements Listener {
 		}
 	}
 
+	public static HashMap<String, Double> lastUsed = new HashMap<String, Double>();
+	
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public static void onInteract(PlayerInteractEvent event) throws IllegalArgumentException, SQLException, IOException, InvalidConfigurationException {
 		if (event.isCancelled())
 			return;
 
+		
+		
 		Player player = event.getPlayer();
 		if (Config.getBoolean("properties.block-usage-in-creative") == true && player.getGameMode().getValue() == 1)
 			return;
 
+		String playerName = player.getName();
+		if (lastUsed.containsKey(playerName))
+			if ((lastUsed.get(playerName) + Config.getDouble("properties.exchange-sign-throttle")) > Plugin.getUnixTime())
+				return;
+			
+		
+		lastUsed.put(playerName, Plugin.getUnixTime());
+		
+		
+		
 		Block block = event.getClickedBlock();
 
 		if (block == null)
