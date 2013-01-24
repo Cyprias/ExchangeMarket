@@ -72,6 +72,7 @@ public class Signs {
 		return lines[PRICE_LINE].indexOf(':') == lines[PRICE_LINE].lastIndexOf(':');
 	}
 
+	/*
 	public static String formatItemLine(String line, ItemStack item) {
 		if (MaterialUtil.Odd.getFromString(line) != null) {
 			return line;
@@ -85,7 +86,7 @@ public class Signs {
 		}
 
 		String longItemName = MaterialUtil.getName(item, true);
-		ItemStack formattedItem = MaterialUtil.getItem(longItemName + data);
+		ItemStack formattedItem = Plugin.getItemStack(longItemName + data);
 
 		if (longItemName.length() < (15 - data.length()) && formattedItem != null && MaterialUtil.equals(formattedItem, item)) {
 			return StringUtil.capitalizeFirstLetter(longItemName + data);
@@ -98,7 +99,7 @@ public class Signs {
 			formatted = formatted.substring(0, (15 - 1 - data.length()));
 		}
 
-		formattedItem = MaterialUtil.getItem(formatted);
+		formattedItem = Plugin.getItemStack(formatted);
 
 		if (formattedItem == null || formattedItem.getType() != item.getType()) {
 			formatted = String.valueOf(item.getTypeId());
@@ -110,5 +111,5 @@ public class Signs {
 		}
 
 		return StringUtil.capitalizeFirstLetter(formatted);
-	}
+	}*/
 }

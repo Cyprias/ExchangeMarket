@@ -703,13 +703,14 @@ public class MySQL implements Database {
 			if (page > max)
 				page = max;
 		}
-		if (rows == 0)
-			return null;
+
 		
 		
 		ChatUtils.send(sender, "§7Page: §f" + (page+1) + "§7/§f" + (max+1));
 
-
+		if (rows == 0)
+			return null;
+		
 		
 		List<Transaction> transactions = new ArrayList<Transaction>();
 		

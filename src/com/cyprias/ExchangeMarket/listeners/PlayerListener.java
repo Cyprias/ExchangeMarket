@@ -166,20 +166,20 @@ public class PlayerListener implements Listener {
 			if (estPrice < Config.getDouble("properties.min-order-price")) {
 				ChatUtils.send(player, String.format("§7There are no sell orders for §f%s§7.", Plugin.getItemName(stock)));
 				
-				String priceText = (estPrice > 0) ? "B " + Plugin.dRound(estPrice, 2) : "";
+				String priceText = (estPrice > 0) ? "B " + Plugin.Round(estPrice, 2) : "";
 				sign.setLine(Signs.PRICE_LINE, priceText);
 				sign.update();
 				
 				return;
 			}
 
-			Logger.debug("estPrice: " + estPrice + ", " + Plugin.Round(estPrice, 2) + ", " + Plugin.dRound(estPrice, 2));
-			Logger.debug("buyPrice: " + buyPrice + ", " + Plugin.Round(buyPrice, 2) + ", " + Plugin.dRound(buyPrice, 2));
+			//Logger.debug("estPrice: " + estPrice + ", " + Plugin.Round(estPrice, 2) + ", " + Plugin.dRound(estPrice, 2));
+			//Logger.debug("buyPrice: " + buyPrice + ", " + Plugin.Round(buyPrice, 2) + ", " + Plugin.dRound(buyPrice, 2));
 
-			if (Plugin.dRound(estPrice, 2) != (Plugin.dRound(buyPrice, 2))) {
-				String priceText = (estPrice > 0) ? "B " + Plugin.dRound(estPrice, 2) : "";
+			if (!Plugin.Round(estPrice, 2).equalsIgnoreCase(Plugin.Round(buyPrice, 2))) {
+				String priceText = (estPrice > 0) ? "B " + Plugin.Round(estPrice, 2) : "";
 				if (sellPrice > 0)
-					priceText += ((priceText != "") ? " : " : "") + Plugin.dRound(sellPrice, 2) + " S";
+					priceText += ((priceText != "") ? " : " : "") + Plugin.Round(sellPrice, 2) + " S";
 
 				sign.setLine(Signs.PRICE_LINE, priceText);
 				sign.update();
@@ -288,22 +288,22 @@ public class PlayerListener implements Listener {
 			if (estPrice < Config.getDouble("properties.min-order-price")) {
 				ChatUtils.send(player, String.format("§7There are no buy orders for §f%s§7.", Plugin.getItemName(stock)));
 				
-				String priceText = (buyPrice > 0) ? "B " + Plugin.dRound(buyPrice, 2) : "";
+				String priceText = (buyPrice > 0) ? "B " + Plugin.Round(buyPrice, 2) : "";
 				sign.setLine(Signs.PRICE_LINE, priceText);
 				sign.update();
 				
 				return;
 			}
 
-			if (Plugin.dRound(estPrice, 2) != (Plugin.dRound(sellPrice, 2))) {
+			if (!Plugin.Round(estPrice, 2).equalsIgnoreCase(Plugin.Round(sellPrice, 2))) {
 				/*
 				 * String priceText = "B " + estPrice; if (sellPrice > 0) {
 				 * priceText += ": " + sellPrice + " S"; }
 				 */
-				String priceText = (buyPrice > 0) ? "B " + Plugin.dRound(buyPrice, 2) : "";
+				String priceText = (buyPrice > 0) ? "B " + Plugin.Round(buyPrice, 2) : "";
 
 				if (estPrice > 0)
-					priceText += ((priceText != "") ? " : " : "") + Plugin.dRound(estPrice, 2) + " S";
+					priceText += ((priceText != "") ? " : " : "") + Plugin.Round(estPrice, 2) + " S";
 
 				sign.setLine(Signs.PRICE_LINE, priceText);
 				sign.update();

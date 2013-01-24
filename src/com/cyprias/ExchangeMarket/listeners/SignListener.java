@@ -50,11 +50,16 @@ public class SignListener implements Listener {
 
 		Player player = event.getPlayer();
 
-		ItemStack stock = MaterialUtil.getItem(line[Signs.ITEM_LINE]);
+		ItemStack stock = Plugin.getItemStack(line[Signs.ITEM_LINE]);
+
 		if (stock == null || stock.getTypeId() == 0) {
 			ChatUtils.error(player, "Unknown item: " + line[Signs.ITEM_LINE]);
 			return;
 		}
+	//	Logger.debug("id " + stock.getTypeId() + ", " + stock.getDurability());
+		
+		event.setLine(Signs.ITEM_LINE, Plugin.getItemName(stock));
+		
 		int amount = Integer.parseInt(line[Signs.QUANTITY_LINE]);
 		
 		
@@ -79,7 +84,7 @@ public class SignListener implements Listener {
 		}
 
 		event.setLine(Signs.PRICE_LINE, formattedPrice);
-		event.setLine(Signs.ITEM_LINE, Signs.formatItemLine(line[Signs.ITEM_LINE], stock));
+		//event.setLine(Signs.ITEM_LINE, Signs.formatItemLine(line[Signs.ITEM_LINE], stock));
 
 		double buyPrice = PriceUtil.getBuyPrice(formattedPrice);
 		double sellPrice = PriceUtil.getSellPrice(formattedPrice);

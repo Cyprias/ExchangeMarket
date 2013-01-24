@@ -339,6 +339,7 @@ public class Plugin extends JavaPlugin {
 		return Round(Rval, 0);
 	}
 
+	
 	public static double dRound(double Rval, int Rpl) {
 		double p = (double) Math.pow(10, Rpl);
 		Rval = Rval * p;
@@ -397,11 +398,14 @@ public class Plugin extends JavaPlugin {
 			return getItemStack(itemid, metaData, enchant);
 		}
 		if (itemname != null) {
-			if (!nameToStack.containsKey(itemname)) {
-				return null;
-			}
-
-			return getItemStack(nameToStack.get(itemname), enchant);
+			ItemStack mat = MaterialUtil.getItem(id);
+			
+			if (mat != null)
+				return mat;
+			
+			if (nameToStack.containsKey(itemname)) 
+				return getItemStack(nameToStack.get(itemname), enchant);
+			
 		}
 
 		return null;
@@ -435,7 +439,7 @@ public class Plugin extends JavaPlugin {
 
 				id_dur = String.valueOf(stock.getTypeId());
 				if (stock.getDurability() > 0)
-					id_dur += ";" + stock.getDurability();
+					id_dur += ":" + stock.getDurability();
 
 				if (!stockToName.containsKey(id_dur))
 					stockToName.put(id_dur, values[0]);
@@ -465,12 +469,17 @@ public class Plugin extends JavaPlugin {
 	public static String getItemName(int itemId, short itemDur, String itemEnchant) {
 		String id_dur = String.valueOf(itemId);
 		if (itemDur > 0)
-			id_dur += ";" + itemDur;
+			id_dur += ":" + itemDur;
 
+		//Logger.debug("getItemName itemDur: " + itemDur);
+		//Logger.debug("getItemName id_dur: " + id_dur);
+		
 		String name = null;
 		if (stockToName.containsKey(id_dur))
 			name = stockToName.get(id_dur);
 
+		//Logger.debug("getItemName name: " + name);
+		
 		if (name != null) {
 			if (itemEnchant != null && !itemEnchant.equals(""))
 				name += "-" + itemEnchant;
