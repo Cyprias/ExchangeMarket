@@ -230,7 +230,7 @@ public class SQLite implements Database {
 		
 		ChatUtils.send(sender, "§7Page: §f" + (page+1) + "§7/§f" + (max+1));
 
-		queryReturn results = executeQuery("SELECT * FROM `"+order_table+"` LIMIT "+(perPage * page)+" , " + perPage);
+		queryReturn results = executeQuery("SELECT * FROM `"+order_table+"` ORDER BY `id` LIMIT "+(perPage * page)+" , " + perPage);
 		ResultSet r = results.result;
 		
 		List<Order> orders = new ArrayList<Order>();
@@ -382,10 +382,10 @@ public class SQLite implements Database {
 		
 		queryReturn results;
 		if (stock.getEnchantments().size() > 0){
-			query += "AND `itemEnchants` = ?";
+			query += "AND `itemEnchants` = ? ORDER BY `id`";
 			results = executeQuery(query, orderType, stock.getTypeId(),stock.getDurability(), MaterialUtil.Enchantment.encodeEnchantment(stock));
 		}else{
-			query += "AND `itemEnchants` IS NULL";
+			query += "AND `itemEnchants` IS NULL ORDER BY `id`";
 			results = executeQuery(query, orderType, stock.getTypeId(),stock.getDurability());
 		}
 		
@@ -542,7 +542,7 @@ public class SQLite implements Database {
 		
 		List<Order> orders = new ArrayList<Order>();
 		
-		queryReturn results = executeQuery("SELECT * FROM `" + order_table + "` WHERE `player` LIKE ? LIMIT "+(perPage * page)+" , " + perPage, sender.getName());
+		queryReturn results = executeQuery("SELECT * FROM `" + order_table + "` WHERE `player` LIKE ? ORDER BY `id` LIMIT "+(perPage * page)+" , " + perPage, sender.getName());
 
 		ResultSet r = results.result;
 		
@@ -610,7 +610,7 @@ public class SQLite implements Database {
 		
 
 		
-		queryReturn results = executeQuery("SELECT * FROM `"+transaction_table+"` LIMIT "+(perPage * page)+" , " + perPage);
+		queryReturn results = executeQuery("SELECT * FROM `"+transaction_table+"` ORDER BY `id` LIMIT "+(perPage * page)+" , " + perPage);
 		ResultSet r = results.result;
 		
 		//List<Order> orders = new ArrayList<Order>();

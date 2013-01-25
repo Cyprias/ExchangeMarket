@@ -370,20 +370,25 @@ public class MySQL implements Database {
 	public List<Order> list(CommandSender sender, int page) throws SQLException {
 
 		int rows = getResultCount("SELECT COUNT(*) FROM " + order_table);
-
+		Logger.debug("rows: " +rows);
 		
 		int perPage = Config.getInt("properties.rows-per-page");
 
 		int max = (rows / perPage);// + 1;
+		Logger.debug("max 1: " +max);
 		
 		if (rows % perPage == 0)
 			max--;
-		
+		Logger.debug("max 2: " +max);
+		Logger.debug("page 1: " +page);
 		if (page < 0){
 			page = max - (Math.abs(page) - 1);
+			Logger.debug("page 2: " +page);
 		}else{
 			if (page > max)
 				page = max;
+			
+			Logger.debug("page 13: " +page);
 		}
 
 		
@@ -391,13 +396,13 @@ public class MySQL implements Database {
 		if (rows == 0)
 			return null;
 		
-		queryReturn results = executeQuery("SELECT * FROM `"+order_table+"` LIMIT "+(perPage * page)+" , " + perPage);
+		queryReturn results = executeQuery("SELECT * FROM `"+order_table+"` ORDER BY `id` LIMIT "+(perPage * page)+" , " + perPage);
 		ResultSet r = results.result;
 		
 		List<Order> orders = new ArrayList<Order>();
 		Order order;
 		while (r.next()) {
-		//	Logger.info("id: " + r.getInt(1));
+			Logger.debug("id: " + r.getInt(1));
 			order = new Order(r.getInt("id"),
 				r.getInt("type"),
 				r.getBoolean("infinite"),
@@ -475,14 +480,16 @@ public class MySQL implements Database {
 
 	@Override
 	public List<Order> findOrders(int orderType, ItemStack stock) throws SQLException {
-		String query = "SELECT * FROM `"+order_table+"` WHERE `type` = ? AND `itemID` = ? AND `itemDur` = ? ";
+		String query = "SELECT * FROM `"+order_table+"` WHERE `type` = ? AND `itemID` = ? AND `itemDur` = ?";
 		
 		queryReturn results;
 		if (stock.getEnchantments().size() > 0){
-			query += "AND `itemEnchants` = ?";
+			query += " AND `itemEnchants` = ?";
+			query += " ORDER BY `id`";
 			results = executeQuery(query, orderType, stock.getTypeId(),stock.getDurability(), MaterialUtil.Enchantment.encodeEnchantment(stock));
 		}else{
-			query += "AND `itemEnchants` IS NULL";
+			query += " AND `itemEnchants` IS NULL";
+			query += " ORDER BY `id`";
 			results = executeQuery(query, orderType, stock.getTypeId(),stock.getDurability());
 		}
 		
@@ -593,7 +600,7 @@ public class MySQL implements Database {
 		// TODO Auto-generated method stub
 		List<Parcel> packages = new ArrayList<Parcel>();
 		
-		queryReturn results = executeQuery("SELECT * FROM `"+mailbox_table+"` WHERE `player` LIKE ?", sender.getName());
+		queryReturn results = executeQuery("SELECT * FROM `"+mailbox_table+"` WHERE `player` LIKE ? ORDER BY `id`", sender.getName());
 		
 		ResultSet r = results.result;
 		while (r.next()) {
@@ -648,7 +655,7 @@ public class MySQL implements Database {
 		
 		List<Order> orders = new ArrayList<Order>();
 		
-		queryReturn results = executeQuery("SELECT * FROM `" + order_table + "` WHERE `player` LIKE ? LIMIT "+(perPage * page)+" , " + perPage, sender.getName());
+		queryReturn results = executeQuery("SELECT * FROM `" + order_table + "` WHERE `player` LIKE ? ORDER BY `id` LIMIT "+(perPage * page)+" , " + perPage, sender.getName());
 
 		ResultSet r = results.result;
 		
@@ -716,7 +723,7 @@ public class MySQL implements Database {
 		
 
 		
-		queryReturn results = executeQuery("SELECT * FROM `"+transaction_table+"` WHERE `seller` LIKE ? LIMIT "+(perPage * page)+" , " + perPage, sender.getName());
+		queryReturn results = executeQuery("SELECT * FROM `"+transaction_table+"` WHERE `seller` LIKE ? ORDER BY `id` LIMIT "+(perPage * page)+" , " + perPage, sender.getName());
 		ResultSet r = results.result;
 		
 		//List<Order> orders = new ArrayList<Order>();
