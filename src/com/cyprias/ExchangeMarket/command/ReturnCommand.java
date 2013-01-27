@@ -65,7 +65,7 @@ public class ReturnCommand implements Command {
 		int amount = 1;// InventoryUtil.getAmount(item, player.getInventory());
 		if (args.length > 1) {
 			if (Plugin.isInt(args[1])) {
-				amount = Integer.parseInt(args[1]);
+				amount = Math.max(amount, Integer.parseInt(args[1]));
 			} else {
 				ChatUtils.error(sender, "Invalid amount: " + args[1]);
 				return true;
@@ -88,19 +88,17 @@ public class ReturnCommand implements Command {
 			order = orders.get(i);
 			
 			//stock = order.getItemStack();
-			
-			
-			receive = Plugin.getFitAmount(stock, order.getAmount(), player.getInventory());
-			
-			if (amount>0)
-				receive = Math.min(receive, amount);
-			
-			if (receive <= 0)
-				break;
-			
-			stock.setAmount(receive);
+
+			receive = Math.min(order.getAmount(), amount);
+
+			//receive = Plugin.getFitAmount(stock, receive, player.getInventory());
+			//if (receive <= 0)
+			//	break;
+			//stock.setAmount(receive);
+			//receive = order.giveAmount(player, receive);
 			
 			receive = order.giveAmount(player, receive);
+			
 			
 			//InventoryUtil.add(stock, player.getInventory());
 			//order.reduceAmount(receive);

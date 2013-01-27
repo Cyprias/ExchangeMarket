@@ -180,7 +180,7 @@ public class PlayerListener implements Listener {
 
 
 			if (buyPrice <= 0 && estBuyPrice == 0) {
-				ChatUtils.send(player, "§7That exchange does not have a buy price.");
+				ChatUtils.send(player, "§7That exchange is not selling items.");
 				return;
 			}
 
@@ -200,7 +200,7 @@ public class PlayerListener implements Listener {
 				return;
 			}
 
-			int playerCanFit = Plugin.getFitAmount(stock, 64 * 36, player.getInventory());
+			int playerCanFit = Plugin.getFitAmount(stock, player.getInventory());
 			double moneySpent = 0;
 			int itemsTraded = 0;
 
@@ -279,7 +279,7 @@ public class PlayerListener implements Listener {
 
 
 			if (sellPrice <= 0 && estSellPrice == 0) {
-				ChatUtils.send(player, "§7That exchange does not have a sell price.");
+				ChatUtils.send(player, "§7That exchange is not buying items.");
 				return;
 			}
 

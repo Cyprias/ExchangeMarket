@@ -48,7 +48,7 @@ public class BuyOrderCommand implements Command {
 		int amount = 0;// InventoryUtil.getAmount(item, player.getInventory());
 		if (args.length > 1) {
 			if (Plugin.isInt(args[1])) {
-				amount = Integer.parseInt(args[1]);
+				amount = Math.max(amount, Integer.parseInt(args[1]));
 			} else {
 				// ExchangeMarket.sendMessage(sender, F("invalidAmount",
 				// args[2]));
@@ -125,12 +125,9 @@ public class BuyOrderCommand implements Command {
 
 				// int mAmount = matchingOrder.getAmount();
 				 if (matchingOrder.increaseAmount(amount)) {
-				
-					//
+
 					ChatUtils.send(sender, String.format("§7Increased your existing buy order #§f%s §7of §f%s §7to §f%s§7.", matchingOrder.getId(),
 						Plugin.getItemName(stock), matchingOrder.getAmount())); // amount
-
-					// Econ.depositPlayer();
 
 					EconomyResponse r = Econ.withdrawPlayer(sender.getName(), (price * amount));
 

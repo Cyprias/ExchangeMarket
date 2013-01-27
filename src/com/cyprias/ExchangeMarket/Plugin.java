@@ -537,6 +537,10 @@ public class Plugin extends JavaPlugin {
 		return false;
 	}
 
+	public static int getFitAmount(ItemStack itemStack, PlayerInventory inventory) {
+		return getFitAmount(itemStack, 64 * 36, inventory);//36 slots in a player inventory.
+	}
+	
 	public static int getFitAmount(ItemStack itemStack, int amount, PlayerInventory inventory) {
 		for (int i = amount; i > 0; i--) {
 			itemStack.setAmount(i);

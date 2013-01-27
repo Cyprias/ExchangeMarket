@@ -193,8 +193,8 @@ public class Order {
 	//Give an amount to a player, return the leftover.
 	public int giveAmount(Player player, int amount) throws IllegalArgumentException, SQLException, IOException, InvalidConfigurationException {
 		ItemStack stock = getItemStack();
-		int playerCanFit = Plugin.getFitAmount(getItemStack(), amount, player.getInventory());
-		stock.setAmount(playerCanFit);
+		int canFit = Plugin.getFitAmount(getItemStack(), amount, player.getInventory());
+		stock.setAmount(canFit);
 
 		//if (!InventoryUtil.fits(stock, player.getInventory()))
 		//	return amount;
@@ -203,10 +203,10 @@ public class Order {
 		
 		
 		if (!isInfinite())
-			reduceAmount(playerCanFit);
+			reduceAmount(canFit);
 		
-		Logger.debug("amount: " + amount + ", playerCanFit: " + playerCanFit);
-		return playerCanFit;		
+		Logger.debug("amount: " + amount + ", playerCanFit: " + canFit);
+		return canFit;		
 	}
 	
 	public int takeAmount(Player player, int amount) throws SQLException, IOException, InvalidConfigurationException{

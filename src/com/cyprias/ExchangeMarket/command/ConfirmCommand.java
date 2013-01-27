@@ -141,21 +141,21 @@ public class ConfirmCommand implements Command {
 				if (!order.isInfinite())
 					traded = Math.min(order.getAmount(), traded);
 
-				traded = Math.min(traded, Plugin.getFitAmount(stock, 64 * 36, pT.player.getInventory()));
+				traded = Math.min(traded, Plugin.getFitAmount(stock, pT.player.getInventory()));
 
 				if (traded <= 0)
 					break;
 
 				stock.setAmount(traded);
 
-				totalTraded += traded;
+				
 
 				//
 
 				//InventoryUtil.add(stock, pT.player.getInventory());
 				traded = order.giveAmount(pT.player, traded);
 				
-				
+				totalTraded += traded;
 				
 
 				spend = traded * order.getPrice();
@@ -224,18 +224,25 @@ public class ConfirmCommand implements Command {
 
 				// totalTraded = +po.amount;
 
+				//Remove items from player's inventory for the buy order.
 				InventoryUtil.remove(stock, pT.player.getInventory());
-
-				if (!order.isInfinite())
+				//Note, don't use takeAmount().
+				
+				if (!order.isInfinite()) {
+					//Send the items to the orderer's mailbox.
 					order.sendAmountToMailbox(traded);
+					
+					//Reduce the buy order's amount.
+					order.reduceAmount(traded);
+					
+					//Notify the orderer of the transaction.
+					order.notifyPlayerOfTransaction(traded);
+				}
 
+				
 				profit = traded * order.getPrice();
 				Econ.depositPlayer(sender.getName(), profit);
 
-				if (!order.isInfinite()) {
-					order.reduceAmount(traded);
-					order.notifyPlayerOfTransaction(traded);
-				}
 
 				order.insertTransaction(sender, traded);
 
