@@ -400,6 +400,7 @@ public class Plugin extends JavaPlugin {
 			return getItemStack(itemid, metaData, enchant);
 		}
 		if (itemname != null) {
+		//	Logger.info("getItemStack", itemname, enchant);
 			if (nameToStack.containsKey(itemname)) 
 				return getItemStack(nameToStack.get(itemname), enchant);
 			

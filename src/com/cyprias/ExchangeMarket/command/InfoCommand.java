@@ -3,6 +3,7 @@ package com.cyprias.ExchangeMarket.command;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
@@ -12,6 +13,7 @@ import org.bukkit.entity.Player;
 import com.cyprias.ExchangeMarket.ChatUtils;
 import com.cyprias.ExchangeMarket.Perm;
 import com.cyprias.ExchangeMarket.Plugin;
+import com.cyprias.ExchangeMarket.Breeze.MaterialUtil;
 import com.cyprias.ExchangeMarket.configuration.Config;
 import com.cyprias.ExchangeMarket.database.Order;
 
@@ -72,6 +74,11 @@ public class InfoCommand implements Command {
 		}else
 			ChatUtils.sendSpam(sender, message);
 		
+		if (order.hasEnchantments())
+			for (Map.Entry<org.bukkit.enchantments.Enchantment, Integer> entry : order.getEnchantments().entrySet()) 
+				ChatUtils.sendSpam(sender, String.format("§f%s§7: §f%s", entry.getKey().getName(), entry.getValue()));
+			
+			
 		
 		
 		return true;
