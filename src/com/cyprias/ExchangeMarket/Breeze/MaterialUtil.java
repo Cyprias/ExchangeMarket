@@ -11,6 +11,7 @@ import org.bukkit.Material;
 import org.bukkit.TreeSpecies;
 import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.material.*;
 
 import com.google.common.base.Splitter;
@@ -24,10 +25,13 @@ import java.util.regex.Pattern;
 /**
 * @author Acrobot
 */
-@SuppressWarnings("deprecation")
 public class MaterialUtil {
     public static final Pattern DURABILITY = Pattern.compile(":(\\d)*");
     public static final Pattern ENCHANTMENT = Pattern.compile("-([0-9a-zA-Z])*");
+    public static final Pattern METADATA = Pattern.compile("#([0-9a-zA-Z])*");
+
+    public static final boolean LONG_NAME = true;
+    public static final boolean SHORT_NAME = false;
 
     /**
 * Checks if the itemStack is empty or null
@@ -121,9 +125,6 @@ public class MaterialUtil {
             name.append(':').append(itemStack.getDurability());
         }
 
-        if (!itemStack.getEnchantments().isEmpty()) {
-            name.append('-').append(MaterialUtil.Enchantment.encodeEnchantment(itemStack));
-        }
 
         return StringUtil.capitalizeFirstLetter(name.toString(), '_');
     }
@@ -141,7 +142,7 @@ public class MaterialUtil {
             return itemStack;
         }
 
-        String[] split = Iterables.toArray(Splitter.onPattern(":|-").trimResults().split(itemName), String.class);
+        String[] split = Iterables.toArray(Splitter.onPattern(":|-|#").trimResults().split(itemName), String.class);
 
         Material material = getMaterial(split[0]);
 
@@ -176,7 +177,7 @@ public class MaterialUtil {
 
         itemStack.setDurability(durability);
 
-        Map<org.bukkit.enchantments.Enchantment, Integer> enchantments = getEnchantments(itemName);
+        Map<org.bukkit.enchantments.Enchantment, Integer> enchantments = getEnchantments(itemName); //TODO - it's obsolete, left only for backward compatibility
 
         if (!enchantments.isEmpty()) {
             try {
@@ -229,6 +230,13 @@ public class MaterialUtil {
         String group = m.group().substring(1);
         return Enchantment.getEnchantments(group);
     }
+
+    /**
+* Returns metadata from a string
+*
+* @param itemName Item name
+* @return Metadata found
+*/
 
     public static class Enchantment {
         /**
@@ -399,6 +407,7 @@ public class MaterialUtil {
             }
         }
     }
+
 
     public static class Odd {
         private static boolean isInitialized = false;

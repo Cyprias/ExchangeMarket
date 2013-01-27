@@ -44,6 +44,8 @@ public class SellOrderCommand implements Command {
 		}
 
 
+		
+		
 		int intAmount = InventoryUtil.getAmount(stock, player.getInventory());
 
 		if (intAmount == 0) {

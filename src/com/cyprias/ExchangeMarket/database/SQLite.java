@@ -17,6 +17,7 @@ import com.cyprias.ExchangeMarket.ChatUtils;
 import com.cyprias.ExchangeMarket.Plugin;
 import com.cyprias.ExchangeMarket.Breeze.MaterialUtil;
 import com.cyprias.ExchangeMarket.configuration.Config;
+import com.cyprias.ExchangeMarket.database.Database.queryReturn;
 
 public class SQLite implements Database {
 	private static String sqlDB;
@@ -256,7 +257,14 @@ public class SQLite implements Database {
 
 	public Order findMatchingOrder(Order order) throws SQLException {
 		Order foundOrder = null;
-		queryReturn results = executeQuery("SELECT * FROM `"+order_table+"` WHERE `type` = ? AND `player` = ? AND `itemID` = ? AND `itemDur` = ? AND `price` = ? LIMIT 0 , 1", order.getOrderType(), order.getPlayer(), order.getItemId(), order.getDurability(), order.getPrice());
+		queryReturn results;
+		if (order.hasEnchantments()){
+			results = executeQuery("SELECT * FROM `"+order_table+"` WHERE `type` = ? AND `player` = ? AND `itemID` = ? AND `itemDur` = ? AND `price` = ? AND `itemEnchants` = ? ORDER BY `id` DESC LIMIT 0 , 1", order.getOrderType(), order.getPlayer(), order.getItemId(), order.getDurability(), order.getPrice(), order.getEncodedEnchantments());
+		}else{
+			results = executeQuery("SELECT * FROM `"+order_table+"` WHERE `type` = ? AND `player` = ? AND `itemID` = ? AND `itemDur` = ? AND `price` = ? AND `itemEnchants` = NULL ORDER BY `id` DESC LIMIT 0 , 1", order.getOrderType(), order.getPlayer(), order.getItemId(), order.getDurability(), order.getPrice());
+		}
+		
+		//queryReturn results = executeQuery("SELECT * FROM `"+order_table+"` WHERE `type` = ? AND `player` = ? AND `itemID` = ? AND `itemDur` = ? AND `price` = ? ORDER BY `id` DESC LIMIT 0 , 1", order.getOrderType(), order.getPlayer(), order.getItemId(), order.getDurability(), order.getPrice());
 		ResultSet r = results.result;
 
 		if (r.next()) {

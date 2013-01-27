@@ -163,6 +163,7 @@ public class InventoryUtil {
 */
     public static int remove(ItemStack item, Inventory inventory) {
         Map<Integer, ItemStack> leftovers = inventory.removeItem(item);
+
         return countItems(leftovers);
     }
 
