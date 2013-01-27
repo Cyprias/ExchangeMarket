@@ -65,15 +65,11 @@ public class SignListener implements Listener {
 		
 		double estBuyPrice = Plugin.getEstimatedBuyPrice(stock, amount);
 		double estSellPrice = Plugin.getEstimatedSellPrice(stock, amount);
-	
-		
-		String priceText = (estBuyPrice>0 ) ? "B " + Plugin.Round(estBuyPrice, 2) : "";
+		String priceText = (estBuyPrice > 0) ? "B " + Plugin.Round(estBuyPrice, 2) : "";
 		if (estSellPrice > 0)
- 			priceText += (priceText != "") ? " : " : "" + Plugin.Round(estSellPrice, 2) + " S";
-
+			priceText += ((priceText != "") ? " : " : "") + Plugin.Round(estSellPrice, 2) + " S";
+		
 		event.setLine(Signs.PRICE_LINE, priceText);
-		
-		
 		
 		
 		String formattedPrice = Signs.formatPriceLine(line[Signs.PRICE_LINE]);
