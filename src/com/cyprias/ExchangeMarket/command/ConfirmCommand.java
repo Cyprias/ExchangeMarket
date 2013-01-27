@@ -152,14 +152,18 @@ public class ConfirmCommand implements Command {
 
 				//
 
-				InventoryUtil.add(stock, pT.player.getInventory());
+				//InventoryUtil.add(stock, pT.player.getInventory());
+				traded = order.giveAmount(pT.player, traded);
+				
+				
+				
 
 				spend = traded * order.getPrice();
 				Econ.withdrawPlayer(pT.player.getName(), spend);
 				Econ.depositPlayer(order.getPlayer(), spend);
 
 				if (!order.isInfinite()) {
-					order.reduceAmount(traded);
+				//	order.reduceAmount(traded);
 					order.notifyPlayerOfTransaction(traded);
 				}
 

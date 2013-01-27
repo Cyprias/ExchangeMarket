@@ -50,6 +50,7 @@ import com.cyprias.ExchangeMarket.command.ReturnCommand;
 import com.cyprias.ExchangeMarket.command.SearchCommand;
 import com.cyprias.ExchangeMarket.command.SellCommand;
 import com.cyprias.ExchangeMarket.command.SellOrderCommand;
+import com.cyprias.ExchangeMarket.command.TestCommand;
 import com.cyprias.ExchangeMarket.command.TransactionsCommand;
 import com.cyprias.ExchangeMarket.command.VersionCommand;
 import com.cyprias.ExchangeMarket.configuration.Config;
@@ -151,6 +152,7 @@ public class Plugin extends JavaPlugin {
 		cm.registerCommand("transactions", new TransactionsCommand());
 		cm.registerCommand("info", new InfoCommand());
 		cm.registerCommand("iteminfo", new ItemInfoCommand());
+		cm.registerCommand("test", new TestCommand());
 
 		this.getCommand("em").setExecutor(cm);
 

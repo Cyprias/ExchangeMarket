@@ -154,18 +154,21 @@ public class SellOrderCommand implements Command {
 
 				//int mAmount = matchingOrder.getAmount();
 				//stock.setAmount(mAmount)
-				if (matchingOrder.increaseAmount(amount)) {
+				
+				amount = matchingOrder.takeAmount(player, amount);
+				//if (matchingOrder.increaseAmount(amount)) {
+				if (amount > 0) {
 					//ChatUtils.send(sender, "Increased amount " + mAmount + "+" + amount + "=" + matchingOrder.getAmount());
 					
 					ChatUtils.send(sender, String.format("§7Increased your existing sell order #§f%s §7of §f%s §7to §f%s§7.", matchingOrder.getId(), Plugin.getItemName(stock), matchingOrder.getAmount())); //amount
 					
 					
-					InventoryUtil.remove(stock, player.getInventory());
+					//InventoryUtil.remove(stock, player.getInventory());
 					
-					if (stock.getAmount() != amount)
-						Logger.warning("(A) We removed the wrong "+Plugin.getItemName(stock) +" amount from " + sender.getName() + "'s inventory. stock: " + stock.getAmount() + ", inserted: " + amount);
+					//if (stock.getAmount() != amount)
+					//	Logger.warning("(A) We removed the wrong "+Plugin.getItemName(stock) +" amount from " + sender.getName() + "'s inventory. stock: " + stock.getAmount() + ", inserted: " + amount);
 
-					ChatUtils.send(sender, String.format("§f%s§7x§f%s §7has been withdrawnfrom your inventory.", Plugin.getItemName(stock), stock.getAmount()));
+					ChatUtils.send(sender, String.format("§f%s§7x§f%s §7has been withdrawnfrom your inventory.", Plugin.getItemName(stock), amount));
 					
 				}
 			} else {

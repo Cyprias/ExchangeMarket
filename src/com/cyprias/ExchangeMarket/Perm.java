@@ -44,6 +44,8 @@ public enum Perm {
 	LOGIN_NEW_VERSION("exchangemarket.loginNewVersion"),
 	PARENT_ADMIN("exchangemarket.admin", PARENT_USER, INF_BUY,INF_SELL,RELOAD,REMOVE,LOGIN_NEW_VERSION),
 	
+	TEST("exchangemarket.test"),
+	
 	PARENT_ALL("exchangemarket.*", PARENT_ADMIN);
 
 	private Perm(String value, Perm... childrenArray) {

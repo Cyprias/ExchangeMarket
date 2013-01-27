@@ -13,7 +13,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import com.cyprias.ExchangeMarket.ChatUtils;
+import com.cyprias.ExchangeMarket.Logger;
 import com.cyprias.ExchangeMarket.Plugin;
+import com.cyprias.ExchangeMarket.Breeze.InventoryUtil;
 import com.cyprias.ExchangeMarket.Breeze.MaterialUtil;
 import com.cyprias.ExchangeMarket.configuration.Config;
 
@@ -29,7 +31,7 @@ public class Order {
 	private String itemEnchants = null;
 	private Double price;
 
-	private ItemStack stock = null;
+	//private ItemStack stock = null;
 
 
 	
@@ -47,7 +49,7 @@ public class Order {
 		this.price = price;
 		this.amount = amount;
 
-		this.stock = Plugin.getItemStack(itemId, itemDur, amount, itemEnchants);
+	//	this.stock = Plugin.getItemStack(itemId, itemDur, amount, itemEnchants);
 	}
 	public Order(int id, int type, boolean infinite, String player, int itemId, short itemDur, String itemEnchants, int amount, double price) {
 		this(type, infinite, player, itemId, itemDur, itemEnchants, amount, price);
@@ -78,30 +80,33 @@ public class Order {
 	}
 
 	public Boolean sendAmountToMailbox(int amount) throws SQLException, IOException, InvalidConfigurationException {
-		return Plugin.database.sendToMailbox(player, this.stock, amount);
+		return Plugin.database.sendToMailbox(player, Plugin.getItemStack(itemId, itemDur, amount, itemEnchants), amount);
 	}
 
 	public int getId() {
 		return this.id;
 	}
 
-	public String getName(CommandSender sender) {
+	public String getPlainName() {
+		return Plugin.getItemName(Plugin.getItemStack(itemId, itemDur, amount, itemEnchants));
+	}
+	
+	public String getColourName(CommandSender sender) {
 		if (infinite == true)
-			return ChatColor.GOLD + Plugin.getItemName(stock) + ChatColor.RESET;
+			return ChatColor.GOLD + getPlainName() + ChatColor.RESET;
 
 		if (sender.getName().equalsIgnoreCase(player))
-			return ChatColor.AQUA + Plugin.getItemName(stock) + ChatColor.RESET;
+			return ChatColor.AQUA + getPlainName() + ChatColor.RESET;
 
-		return ChatColor.WHITE + Plugin.getItemName(stock) + ChatColor.RESET;
+		return ChatColor.WHITE + getPlainName() + ChatColor.RESET;
 	}
 
 	public Material getItemType() {
-		return this.stock.getType();
+		return Plugin.getItemStack(itemId, itemDur, amount, itemEnchants).getType();
 	}
 
 	public ItemStack getItemStack() {
-		this.stock.setAmount(amount);
-		return this.stock;
+		return Plugin.getItemStack(itemId, itemDur, amount, itemEnchants);
 	}
 
 	public Map<Enchantment, Integer> getEnchantments() {
@@ -170,14 +175,14 @@ public class Order {
 
 				ChatUtils.notify(
 					p,
-					String.format("§7You sold §f%s§7x§f%s §7for $§f%s.", Plugin.getItemName(stock), amount,
+					String.format("§7You sold §f%s§7x§f%s §7for $§f%s.", getPlainName(), amount,
 						Plugin.Round(tPrice, Config.getInt("properties.price-decmial-places"))));
 
 
 			} else if (this.type == Order.BUY_ORDER) {
 				ChatUtils.notify(
 					p,
-					String.format("§7You bought §f%s§7x§f%s §7for $§f%s.", Plugin.getItemName(stock), amount,
+					String.format("§7You bought §f%s§7x§f%s §7for $§f%s.", getPlainName(), amount,
 						Plugin.Round(tPrice, Config.getInt("properties.price-decmial-places"))));
 
 			}
@@ -185,6 +190,44 @@ public class Order {
 
 	}
 
+	//Give an amount to a player, return the leftover.
+	public int giveAmount(Player player, int amount) throws IllegalArgumentException, SQLException, IOException, InvalidConfigurationException {
+		ItemStack stock = getItemStack();
+		int playerCanFit = Plugin.getFitAmount(getItemStack(), amount, player.getInventory());
+		stock.setAmount(playerCanFit);
+
+		//if (!InventoryUtil.fits(stock, player.getInventory()))
+		//	return amount;
+
+		InventoryUtil.add(stock, player.getInventory());
+		
+		
+		if (!isInfinite())
+			reduceAmount(playerCanFit);
+		
+		Logger.debug("amount: " + amount + ", playerCanFit: " + playerCanFit);
+		return playerCanFit;		
+	}
+	
+	public int takeAmount(Player player, int amount) throws SQLException, IOException, InvalidConfigurationException{
+		ItemStack stock = getItemStack();
+		//stock.setAmount(amount);
+
+		int canTake = Math.min(InventoryUtil.getAmount(stock, player.getInventory()), amount);
+		
+		stock.setAmount(canTake);
+
+		InventoryUtil.remove(stock, player.getInventory());
+		
+		
+		if (!isInfinite())
+			increaseAmount(canTake);
+		
+		Logger.debug("amount: " + amount + ", canTake: " + canTake);
+		return canTake;
+	}
+	
+	
 	public Boolean reduceAmount(int byAmount) throws IllegalArgumentException, SQLException, IOException, InvalidConfigurationException {
 		if ((this.amount - byAmount) < 0)
 			throw new IllegalArgumentException("Cannot reduce amount below zero.");
@@ -232,7 +275,7 @@ public class Order {
 		String message = format.replace("<id>", String.valueOf(getId()));
 		message = message.replace("<cid>", getCId(sender));
 		message = message.replace("<otype>", getOrderTypeColouredString());
-		message = message.replace("<item>", getName(sender));
+		message = message.replace("<item>", getColourName(sender));
 		message = message.replace("<player>", getPlayer());
 		message = message.replace("<amount>", String.valueOf(getAmount()));
 		int dplaces = Config.getInt("properties.price-decmial-places");

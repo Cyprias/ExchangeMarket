@@ -99,9 +99,11 @@ public class ReturnCommand implements Command {
 				break;
 			
 			stock.setAmount(receive);
-			InventoryUtil.add(stock, player.getInventory());
 			
-			order.reduceAmount(receive);
+			receive = order.giveAmount(player, receive);
+			
+			//InventoryUtil.add(stock, player.getInventory());
+			//order.reduceAmount(receive);
 			
 			ChatUtils.send(sender, String.format("§7Returned §f%s§7x§f%s§7, there's §f%s §7remaining in order #§f%s§7.", Plugin.getItemName(stock), receive, order.getAmount(), order.getId()));
 			amount -= receive;

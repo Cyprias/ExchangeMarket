@@ -33,7 +33,7 @@ public class BuyOrderCommand implements Command {
 			ChatUtils.send(sender, "Cannot use ExchangeMarket while in creative mode.");
 			return true;
 		}
-		
+
 		if (args.length <= 0 || args.length >= 4) {
 			getCommands(sender, cmd);
 			return true;
@@ -44,7 +44,6 @@ public class BuyOrderCommand implements Command {
 			ChatUtils.error(sender, "Unknown item: " + args[0]);
 			return true;
 		}
-
 
 		int amount = 0;// InventoryUtil.getAmount(item, player.getInventory());
 		if (args.length > 1) {
@@ -58,14 +57,12 @@ public class BuyOrderCommand implements Command {
 			}
 		}
 
-		
-		//Logger.debug("amount1: " + amount);
+		// Logger.debug("amount1: " + amount);
 
 		double price = 0;
 		// plugin.sendMessage(sender, "amount: " + amount);
 
 		if (args.length > 2) {
-
 
 			if (args[2].substring(args[2].length() - 1, args[2].length()).equalsIgnoreCase("e")) {
 				price = Math.abs(Double.parseDouble(args[2].substring(0, args[2].length() - 1)));
@@ -86,69 +83,63 @@ public class BuyOrderCommand implements Command {
 
 		stock.setAmount(amount);
 		Order preOrder = new Order(Order.BUY_ORDER, false, sender.getName(), stock, price);
-		
-		
-		
-		
+
 		if (price == 0) {
-			
+
 			try {
 				Double lastPrice = Plugin.database.getLastPrice(preOrder);
-				if (lastPrice > 0){
+				if (lastPrice > 0) {
 					price = lastPrice;
 					preOrder.setPrice(price);
-				}else{
+				} else {
 					ChatUtils.error(sender, "Invalid price: " + 0);
 					return true;
 				}
-				
+
 			} catch (SQLException e) {
 				e.printStackTrace();
 				ChatUtils.error(sender, "An error has occured: " + e.getLocalizedMessage());
 				return true;
 			}
-			
 
 		} else if (price < Config.getDouble("properties.min-order-price")) {
 			ChatUtils.error(sender, "§7Your price is too low.");
 			return true;
 		}
-		//Logger.debug( "price1: " + price);
-		
+		// Logger.debug( "price1: " + price);
+
 		Double accountBalance = Econ.getBalance(sender.getName());
-		//Logger.debug( "accountBalance: " + accountBalance);
-		if (accountBalance <= (price*amount)){
-			
-			ChatUtils.send(sender, "§7Your account ($§f"+accountBalance+ "§7) does not have enough funds to supply this buy order.");
+		// Logger.debug( "accountBalance: " + accountBalance);
+		if (accountBalance <= (price * amount)) {
+
+			ChatUtils.send(sender, "§7Your account ($§f" + accountBalance + "§7) does not have enough funds to supply this buy order.");
 			return true;
 		}
-		
-		
 
 		try {
 
 			Order matchingOrder = Plugin.database.findMatchingOrder(preOrder);
 			if (matchingOrder != null) {
-				//ChatUtils.send(sender, "Found matching order " + matchingOrder.getId());
+				// ChatUtils.send(sender, "Found matching order " +
+				// matchingOrder.getId());
 
+				// int mAmount = matchingOrder.getAmount();
+				 if (matchingOrder.increaseAmount(amount)) {
 				
-				
-				//int mAmount = matchingOrder.getAmount();
-
-				if (matchingOrder.increaseAmount(amount)) {
 					//
-					ChatUtils.send(sender, String.format("§7Increased your existing buy order #§f%s §7of §f%s §7to §f%s§7.", matchingOrder.getId(), Plugin.getItemName(stock), matchingOrder.getAmount())); //amount
-					
-					//Econ.depositPlayer();
-					
+					ChatUtils.send(sender, String.format("§7Increased your existing buy order #§f%s §7of §f%s §7to §f%s§7.", matchingOrder.getId(),
+						Plugin.getItemName(stock), matchingOrder.getAmount())); // amount
+
+					// Econ.depositPlayer();
+
 					EconomyResponse r = Econ.withdrawPlayer(sender.getName(), (price * amount));
-					
-		            if(r.transactionSuccess()) {
-		            	ChatUtils.send(sender, String.format("$§f%s §7has been withdrawnfrom your account, you now have $§f%s§7.", r.amount, r.balance));
-		            } else {
-		            	ChatUtils.send(sender, String.format("An error occured: %s", r.errorMessage));
-		            }
-					
+
+					if (r.transactionSuccess()) {
+						ChatUtils.send(sender, String.format("$§f%s §7has been withdrawnfrom your account, you now have $§f%s§7.", r.amount, r.balance));
+					} else {
+						ChatUtils.send(sender, String.format("An error occured: %s", r.errorMessage));
+					}
+
 				}
 			} else {
 
@@ -157,18 +148,17 @@ public class BuyOrderCommand implements Command {
 					int id = Plugin.database.getLastId();
 
 					int pl = Config.getInt("properties.price-decmial-places");
-					ChatUtils.send(sender,String.format("§7Created buy order #§f%s §7for §f%s§7x§f%s §7@ §f%s §7(§f%s§7e)", id, Plugin.getItemName(stock), preOrder.getAmount(), Plugin.Round(preOrder.getPrice()*preOrder.getAmount(),pl), Plugin.Round(preOrder.getPrice(),pl)));
+					ChatUtils.send(sender, String.format("§7Created buy order #§f%s §7for §f%s§7x§f%s §7@ §f%s §7(§f%s§7e)", id, Plugin.getItemName(stock),
+						preOrder.getAmount(), Plugin.Round(preOrder.getPrice() * preOrder.getAmount(), pl), Plugin.Round(preOrder.getPrice(), pl)));
 
 					EconomyResponse r = Econ.withdrawPlayer(sender.getName(), (price * amount));
-					
-					
-					
-		            if(r.transactionSuccess()) {
-		            	ChatUtils.send(sender, String.format("$§f%s §7has been withdrawnfrom your account, you now have $§f%s§7.", r.amount, r.balance));
-				           } else {
-				      	   ChatUtils.send(sender, String.format("An error occured: %s", r.errorMessage));
-		            }
-					
+
+					if (r.transactionSuccess()) {
+						ChatUtils.send(sender, String.format("$§f%s §7has been withdrawnfrom your account, you now have $§f%s§7.", r.amount, r.balance));
+					} else {
+						ChatUtils.send(sender, String.format("An error occured: %s", r.errorMessage));
+					}
+
 				}
 			}
 		} catch (SQLException e) {
