@@ -49,8 +49,8 @@ public class InfSellCommand implements Command {
 
 		int amount = 1;// InventoryUtil.getAmount(item, player.getInventory());
 		if (args.length > 1) {
-			if (Plugin.isInt(args[1])) {
-				amount = Math.max(amount, Integer.parseInt(args[1]));
+			if (Plugin.isInt(args[1]) && Integer.parseInt(args[1]) >= amount) {
+				amount = Integer.parseInt(args[1]);
 			} else {
 				// ExchangeMarket.sendMessage(sender, F("invalidAmount",
 				// args[2]));
@@ -82,12 +82,8 @@ public class InfSellCommand implements Command {
 
 			}
 		}
-
-		
-		
-		
-		if (price == 0) {
-			ChatUtils.error(sender, "Invalid price: " + 0);
+		if (price <= 0){
+			ChatUtils.error(sender, "Invalid price: " + args[2]);
 			return true;
 		} else if (price < Config.getDouble("properties.min-order-price")) {
 			ChatUtils.error(sender, "Your price is too low.");

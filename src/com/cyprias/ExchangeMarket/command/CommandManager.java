@@ -87,6 +87,7 @@ public class CommandManager implements CommandExecutor, Listable {
 			}
 		} else {
 			ChatUtils.error(sender, "Did not recognize '%s' as a command.", args[0]);
+			return true;
 		}
 		return false;
 	}

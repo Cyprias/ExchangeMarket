@@ -69,8 +69,8 @@ public class SellCommand implements Command {
 		
 		int amount = 0;// InventoryUtil.getAmount(item, player.getInventory());
 		if (args.length > 1) {
-			if (Plugin.isInt(args[1])) {
-				amount = Math.max(amount, Integer.parseInt(args[1]));
+			if (Plugin.isInt(args[1]) && Integer.parseInt(args[1]) >= amount) {
+				amount = Integer.parseInt(args[1]);
 			} else {
 				// ExchangeMarket.sendMessage(sender, F("invalidAmount",
 				// args[2]));

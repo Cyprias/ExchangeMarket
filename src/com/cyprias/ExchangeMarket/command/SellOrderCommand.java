@@ -53,8 +53,8 @@ public class SellOrderCommand implements Command {
 
 		int amount = 0;// InventoryUtil.getAmount(item, player.getInventory());
 		if (args.length > 1) {
-			if (Plugin.isInt(args[1])) {
-				amount = Math.max(amount, Integer.parseInt(args[1]));
+			if (Plugin.isInt(args[1]) && Integer.parseInt(args[1]) >= amount) {
+				amount = Integer.parseInt(args[1]);
 			} else {
 				// ExchangeMarket.sendMessage(sender, F("invalidAmount",
 				// args[2]));
@@ -72,11 +72,11 @@ public class SellOrderCommand implements Command {
 		if (args.length > 2) {
 
 			if (args[2].substring(args[2].length() - 1, args[2].length()).equalsIgnoreCase("e")) {
-				price = Math.abs(Double.parseDouble(args[2].substring(0, args[2].length() - 1)));
+				price = Double.parseDouble(args[2].substring(0, args[2].length() - 1));
 			} else {
 
 				if (Plugin.isDouble(args[2])) {
-					price = Math.abs(Double.parseDouble(args[2]));
+					price = Double.parseDouble(args[2]);
 				} else {
 					// ExchangeMarket.sendMessage(sender, F("invalidPrice",
 					// args[3]));
@@ -86,12 +86,21 @@ public class SellOrderCommand implements Command {
 				price = price / amount;
 
 			}
+			if (price <= 0){
+				ChatUtils.error(sender, "Invalid price: " + args[2]);
+				return true;
+			}
 		}
-
+		if (price <= 0){
+			ChatUtils.error(sender, "Invalid price: " + args[2]);
+			return true;
+		}
+		
 		Order preOrder = new Order(Order.SELL_ORDER, false, sender.getName(), stock, price);
 		
 		
-		if (price == 0) {
+
+		if (price <= 0){
 			
 			try {
 				Double lastPrice = Plugin.database.getLastPrice(preOrder);

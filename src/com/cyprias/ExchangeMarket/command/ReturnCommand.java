@@ -64,8 +64,8 @@ public class ReturnCommand implements Command {
 		
 		int amount = 1;// InventoryUtil.getAmount(item, player.getInventory());
 		if (args.length > 1) {
-			if (Plugin.isInt(args[1])) {
-				amount = Math.max(amount, Integer.parseInt(args[1]));
+			if (Plugin.isInt(args[1]) && Integer.parseInt(args[1]) >= amount) {
+				amount = Integer.parseInt(args[1]);
 			} else {
 				ChatUtils.error(sender, "Invalid amount: " + args[1]);
 				return true;
