@@ -24,7 +24,7 @@ public class BuyOrderCommand implements Command {
 			list.add("/%s buyorder - Create a buy order.");
 	}
 
-	public boolean execute(final CommandSender sender, org.bukkit.command.Command cmd, String[] args) throws IOException, InvalidConfigurationException {
+	public boolean execute(final CommandSender sender, org.bukkit.command.Command cmd, String[] args) throws IOException, InvalidConfigurationException, SQLException {
 		if (!Plugin.checkPermission(sender, Perm.BUY_ORDER)) {
 			return false;
 		}
@@ -85,31 +85,20 @@ public class BuyOrderCommand implements Command {
 			}
 		}
 
-		if (price <= 0){
-			ChatUtils.error(sender, "Invalid price: " + args[2]);
-			return true;
-		}
-		
 		stock.setAmount(amount);
 		Order preOrder = new Order(Order.BUY_ORDER, false, sender.getName(), stock, price);
 
-		if (price <= 0){
+		if (price <= 0){//price still zero, user never input it. lets find their last price.
 
-			try {
-				Double lastPrice = Plugin.database.getLastPrice(preOrder);
-				if (lastPrice > 0) {
-					price = lastPrice;
-					preOrder.setPrice(price);
-				} else {
-					ChatUtils.error(sender, "Invalid price: " + 0);
-					return true;
-				}
-
-			} catch (SQLException e) {
-				e.printStackTrace();
-				ChatUtils.error(sender, "An error has occured: " + e.getLocalizedMessage());
+			Double lastPrice = Plugin.database.getLastPrice(preOrder);
+			if (lastPrice > 0) {
+				price = lastPrice;
+				preOrder.setPrice(price);
+			} else {
+				ChatUtils.error(sender, "Invalid price: " + 0);
 				return true;
 			}
+
 
 		} else if (price < Config.getDouble("properties.min-order-price")) {
 			ChatUtils.error(sender, "§7Your price is too low.");
@@ -125,7 +114,6 @@ public class BuyOrderCommand implements Command {
 			return true;
 		}
 
-		try {
 
 			Order matchingOrder = Plugin.database.findMatchingOrder(preOrder);
 			if (matchingOrder != null) {
@@ -167,11 +155,6 @@ public class BuyOrderCommand implements Command {
 
 				}
 			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-			ChatUtils.error(sender, "An error has occured: " + e.getLocalizedMessage());
-			return true;
-		}
 
 		return true;
 	}

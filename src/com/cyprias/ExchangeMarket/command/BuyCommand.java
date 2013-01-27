@@ -31,7 +31,7 @@ public class BuyCommand implements Command {
 
 	
 
-	public boolean execute(CommandSender sender, org.bukkit.command.Command cmd, String[] args) throws IOException, InvalidConfigurationException {
+	public boolean execute(CommandSender sender, org.bukkit.command.Command cmd, String[] args) throws IOException, InvalidConfigurationException, SQLException {
 		if (!Plugin.checkPermission(sender, Perm.BUY)) 
 			return false;
 		
@@ -77,8 +77,7 @@ public class BuyCommand implements Command {
 		
 		//Double accountBalance = Econ.getBalance(sender.getName());
 	
-		try {
-			List<Order> orders = Plugin.database.search(stock, Order.SELL_ORDER);
+		List<Order> orders = Plugin.database.search(stock, Order.SELL_ORDER);
 			
 			Order o;
 			
@@ -184,11 +183,6 @@ public class BuyCommand implements Command {
 				}
 			
 			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-			ChatUtils.error(sender, "An error has occured: " + e.getLocalizedMessage());
-			return true;
-		}
 		
 		
 		return true;

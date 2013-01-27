@@ -39,7 +39,7 @@ public class SellCommand implements Command {
 		return false;
 	}
 
-	public boolean execute(CommandSender sender, org.bukkit.command.Command cmd, String[] args) throws IOException, InvalidConfigurationException {
+	public boolean execute(CommandSender sender, org.bukkit.command.Command cmd, String[] args) throws IOException, InvalidConfigurationException, SQLException {
 		if (!Plugin.checkPermission(sender, Perm.BUY)) {
 			return false;
 		}
@@ -95,7 +95,7 @@ public class SellCommand implements Command {
 		if (ConfirmCommand.expiredTransactions.containsKey(sender.getName())) 
 			ConfirmCommand.expiredTransactions.remove(sender.getName());
 		
-		try {
+		
 			List<Order> orders = Plugin.database.search(stock, Order.BUY_ORDER);
 			Order o;
 			
@@ -175,11 +175,6 @@ public class SellCommand implements Command {
 
 			}
 
-		} catch (SQLException e) {
-			e.printStackTrace();
-			ChatUtils.error(sender, "An error has occured: " + e.getLocalizedMessage());
-			return true;
-		}
 
 		return true;
 	}

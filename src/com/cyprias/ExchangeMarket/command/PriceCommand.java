@@ -34,7 +34,7 @@ public class PriceCommand implements Command {
 		return false;
 	}
 
-	public boolean execute(CommandSender sender, org.bukkit.command.Command cmd, String[] args) throws IOException, InvalidConfigurationException {
+	public boolean execute(CommandSender sender, org.bukkit.command.Command cmd, String[] args) throws IOException, InvalidConfigurationException, SQLException {
 		if (!Plugin.checkPermission(sender, Perm.PRICE))
 			return false;
 
@@ -61,7 +61,6 @@ public class PriceCommand implements Command {
 			}
 		}
 		
-		try {
 			List<Order> orders = Plugin.database.search(stock);
 
 		//	ChatUtils.send(sender, "Orders: " + orders.size());
@@ -122,11 +121,7 @@ public class PriceCommand implements Command {
 			
 
 
-		} catch (SQLException e) {
-			e.printStackTrace();
-			ChatUtils.error(sender, "An error has occured: " + e.getLocalizedMessage());
-			return true;
-		}
+	
 
 		return true;
 	}

@@ -91,18 +91,13 @@ public class SellOrderCommand implements Command {
 				return true;
 			}
 		}
-		if (price <= 0){
-			ChatUtils.error(sender, "Invalid price: " + args[2]);
-			return true;
-		}
-		
+
 		Order preOrder = new Order(Order.SELL_ORDER, false, sender.getName(), stock, price);
 		
 		
 
-		if (price <= 0){
+		if (price <= 0){//price still zero, user never input it. lets find their last price.
 			
-			try {
 				Double lastPrice = Plugin.database.getLastPrice(preOrder);
 				if (lastPrice > 0){
 					price = lastPrice;
@@ -112,11 +107,6 @@ public class SellOrderCommand implements Command {
 					return true;
 				}
 				
-			} catch (SQLException e) {
-				e.printStackTrace();
-				ChatUtils.error(sender, "An error has occured: " + e.getLocalizedMessage());
-				return true;
-			}
 			
 
 		} else if (price < Config.getDouble("properties.min-order-price")) {
@@ -137,13 +127,7 @@ public class SellOrderCommand implements Command {
 		
 		Logger.debug("amount2: " + amount +", " + preOrder.getAmount());
 		stock.setAmount(amount);
-		try {
-			preOrder.setAmount(amount);
-		} catch (SQLException e) {
-			e.printStackTrace();
-			ChatUtils.error(sender, "An error has occured: " + e.getLocalizedMessage());
-			return true;
-		}
+		preOrder.setAmount(amount);
 		
 		
 		
@@ -155,7 +139,7 @@ public class SellOrderCommand implements Command {
 
 		
 
-		try {
+	
 
 			Order matchingOrder = Plugin.database.findMatchingOrder(preOrder);
 			if (matchingOrder != null) {
@@ -200,11 +184,6 @@ public class SellOrderCommand implements Command {
 					
 				}
 			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-			ChatUtils.error(sender, "An error has occured: " + e.getLocalizedMessage());
-			return true;
-		}
 
 		return true;
 	}

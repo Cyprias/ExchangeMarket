@@ -21,7 +21,7 @@ public class ListCommand implements Command {
 			list.add("/%s list - List all notes.");
 	}
 
-	public boolean execute(final CommandSender sender, org.bukkit.command.Command cmd, String[] args) throws IOException, InvalidConfigurationException {
+	public boolean execute(final CommandSender sender, org.bukkit.command.Command cmd, String[] args) throws IOException, InvalidConfigurationException, SQLException {
 		if (!Plugin.checkPermission(sender, Perm.LIST)) 
 			return false;
 		
@@ -39,7 +39,6 @@ public class ListCommand implements Command {
 		
 		
 		
-		try {
 			List<Order> orders = Plugin.database.list(sender, page);
 			
 			if (orders == null || orders.size() <= 0){
@@ -65,12 +64,7 @@ public class ListCommand implements Command {
 			}
 			
 			
-		} catch (SQLException e) {
-			e.printStackTrace();
-			ChatUtils.error(sender, e.getLocalizedMessage());
-			return true;
-		}
-		
+			
 		
 		return true;
 	}

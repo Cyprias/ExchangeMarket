@@ -24,7 +24,7 @@ public class SearchCommand implements Command {
 
 	
 	@Override
-	public boolean execute(final CommandSender sender, org.bukkit.command.Command cmd, String[] args) throws IOException, InvalidConfigurationException {
+	public boolean execute(final CommandSender sender, org.bukkit.command.Command cmd, String[] args) throws IOException, InvalidConfigurationException, SQLException {
 		if (!Plugin.checkPermission(sender, Perm.SEARCH))
 			return false;
 
@@ -41,7 +41,7 @@ public class SearchCommand implements Command {
 		}
 
 		
-		try {
+		
 			List<Order> orders = Plugin.database.search(stock);
 			
 			
@@ -68,12 +68,6 @@ public class SearchCommand implements Command {
 			}
 			return true;
 			
-		} catch (SQLException e) {
-			e.printStackTrace();
-			ChatUtils.error(sender, "An error has occured: " + e.getLocalizedMessage());
-			return true;
-		}
-		
 	
 	}
 
