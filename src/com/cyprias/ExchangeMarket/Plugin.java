@@ -402,8 +402,12 @@ public class Plugin extends JavaPlugin {
 		if (itemname != null) {
 			ItemStack mat = MaterialUtil.getItem(id);
 			
-			if (mat != null)
+			if (mat != null){
+				if (enchant != null)
+					mat.addEnchantments(MaterialUtil.Enchantment.getEnchantments(enchant));
+				
 				return mat;
+			}
 			
 			if (nameToStack.containsKey(itemname)) 
 				return getItemStack(nameToStack.get(itemname), enchant);

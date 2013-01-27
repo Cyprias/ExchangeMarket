@@ -39,7 +39,7 @@ properties:
   show-plugin-replies: true
   
   # Allow players to buy/sell to their own orders, used for debugging.
-  trade-to-yourself: false
+  trade-to-yourself: true
   
   # Tell the owner of an order when someone buys/sells to them.
   notify-owner-of-transaction: true
