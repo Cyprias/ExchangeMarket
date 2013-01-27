@@ -1,6 +1,6 @@
 name: ExchangeMarket
 main: com.cyprias.ExchangeMarket.Plugin
-version: 1.3.2
+version: 1.3.3
 depend: [Vault]
 
 commands:
