@@ -428,7 +428,7 @@ public class MySQL implements Database {
 		if (order.hasEnchantments()){
 			results = executeQuery("SELECT * FROM `"+order_table+"` WHERE `type` = ? AND `player` = ? AND `itemID` = ? AND `itemDur` = ? AND `price` = ? AND `itemEnchants` = ? ORDER BY `id` DESC LIMIT 0 , 1", order.getOrderType(), order.getPlayer(), order.getItemId(), order.getDurability(), order.getPrice(), order.getEncodedEnchantments());
 		}else{
-			results = executeQuery("SELECT * FROM `"+order_table+"` WHERE `type` = ? AND `player` = ? AND `itemID` = ? AND `itemDur` = ? AND `price` = ? AND `itemEnchants` = NULL ORDER BY `id` DESC LIMIT 0 , 1", order.getOrderType(), order.getPlayer(), order.getItemId(), order.getDurability(), order.getPrice());
+			results = executeQuery("SELECT * FROM `"+order_table+"` WHERE `type` = ? AND `player` = ? AND `itemID` = ? AND `itemDur` = ? AND `price` = ? AND `itemEnchants` IS NULL ORDER BY `id` DESC LIMIT 0 , 1", order.getOrderType(), order.getPlayer(), order.getItemId(), order.getDurability(), order.getPrice());
 		}
 		
 		//queryReturn results = executeQuery("SELECT * FROM `"+order_table+"` WHERE `type` = ? AND `player` = ? AND `itemID` = ? AND `itemDur` = ? AND `price` = ? ORDER BY `id` DESC LIMIT 0 , 1", order.getOrderType(), order.getPlayer(), order.getItemId(), order.getDurability(), order.getPrice());
