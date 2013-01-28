@@ -32,6 +32,7 @@ import org.xml.sax.SAXException;
 import com.cyprias.ExchangeMarket.Breeze.InventoryUtil;
 import com.cyprias.ExchangeMarket.Breeze.MaterialUtil;
 import com.cyprias.ExchangeMarket.command.BuyCommand;
+import com.cyprias.ExchangeMarket.command.BuyListCommand;
 import com.cyprias.ExchangeMarket.command.BuyOrderCommand;
 import com.cyprias.ExchangeMarket.command.CancelCommand;
 import com.cyprias.ExchangeMarket.command.CollectCommand;
@@ -49,6 +50,7 @@ import com.cyprias.ExchangeMarket.command.RemoveCommand;
 import com.cyprias.ExchangeMarket.command.ReturnCommand;
 import com.cyprias.ExchangeMarket.command.SearchCommand;
 import com.cyprias.ExchangeMarket.command.SellCommand;
+import com.cyprias.ExchangeMarket.command.SellListCommand;
 import com.cyprias.ExchangeMarket.command.SellOrderCommand;
 import com.cyprias.ExchangeMarket.command.TestCommand;
 import com.cyprias.ExchangeMarket.command.TransactionsCommand;
@@ -153,7 +155,9 @@ public class Plugin extends JavaPlugin {
 		cm.registerCommand("info", new InfoCommand());
 		cm.registerCommand("iteminfo", new ItemInfoCommand());
 		cm.registerCommand("test", new TestCommand());
-
+		cm.registerCommand("buylist", new BuyListCommand());
+		cm.registerCommand("selllist", new SellListCommand());
+		
 		this.getCommand("em").setExecutor(cm);
 
 		try {

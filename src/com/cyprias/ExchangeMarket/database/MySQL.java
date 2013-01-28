@@ -366,10 +366,20 @@ public class MySQL implements Database {
 		
 		return orders;
 	}
-
 	public List<Order> list(CommandSender sender, int page) throws SQLException {
+		return list(sender, 0, page);
+	}
+	public List<Order> list(CommandSender sender, int orderType, int page) throws SQLException {
 
-		int rows = getResultCount("SELECT COUNT(*) FROM " + order_table);
+		//int rows = getResultCount("SELECT COUNT(*) FROM " + order_table);
+		int rows;
+		
+		if (orderType > 0){
+			rows = getResultCount("SELECT COUNT(*) FROM " + order_table + " WHERE `type` = ?", orderType);
+		}else{
+			rows = getResultCount("SELECT COUNT(*) FROM " + order_table);
+		}
+		
 		Logger.debug("rows: " +rows);
 		
 		int perPage = Config.getInt("properties.rows-per-page");
@@ -393,10 +403,14 @@ public class MySQL implements Database {
 
 		
 		ChatUtils.send(sender, "§7Page: §f" + (page+1) + "§7/§f" + (max+1));
+		queryReturn results;
 		if (rows == 0)
 			return null;
-		
-		queryReturn results = executeQuery("SELECT * FROM `"+order_table+"` ORDER BY `id` LIMIT "+(perPage * page)+" , " + perPage);
+		if (orderType > 0){
+			results = executeQuery("SELECT * FROM `"+order_table+"`  WHERE `type` = ? ORDER BY `id` LIMIT "+(perPage * page)+" , " + perPage, orderType);
+		}else{
+			results = executeQuery("SELECT * FROM `"+order_table+"` ORDER BY `id` LIMIT "+(perPage * page)+" , " + perPage);
+		}
 		ResultSet r = results.result;
 		
 		List<Order> orders = new ArrayList<Order>();

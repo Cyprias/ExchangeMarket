@@ -14,11 +14,11 @@ import com.cyprias.ExchangeMarket.Plugin;
 import com.cyprias.ExchangeMarket.configuration.Config;
 import com.cyprias.ExchangeMarket.database.Order;
 
-public class ListCommand implements Command {
+public class SellListCommand implements Command {
 
 	public void listCommands(CommandSender sender, List<String> list) {
 		if (Plugin.hasPermission(sender, Perm.LIST))
-			list.add("/%s list - List all orders.");
+			list.add("/%s selllist - List sell orders.");
 	}
 
 	public boolean execute(final CommandSender sender, org.bukkit.command.Command cmd, String[] args) throws IOException, InvalidConfigurationException, SQLException {
@@ -39,7 +39,7 @@ public class ListCommand implements Command {
 		
 		
 		
-			List<Order> orders = Plugin.database.list(sender, page);
+			List<Order> orders = Plugin.database.list(sender, Order.SELL_ORDER, page);
 			
 			if (orders == null || orders.size() <= 0){
 				ChatUtils.send(sender, "§7There are no orders present.");
@@ -74,8 +74,6 @@ public class ListCommand implements Command {
 	}
 
 	public void getCommands(CommandSender sender, org.bukkit.command.Command cmd) {
-		ChatUtils.sendCommandHelp(sender, Perm.LIST, "/%s list [page] - List all orders.", cmd);
-		ChatUtils.sendCommandHelp(sender, Perm.LIST, "/%s buylist [page] - List all buy orders.", cmd);
 		ChatUtils.sendCommandHelp(sender, Perm.LIST, "/%s selllist [page] - List all sell orders.", cmd);
 	}
 

@@ -31,7 +31,7 @@ public class CommandManager implements CommandExecutor, Listable {
 	
 	public boolean onCommand(CommandSender sender, org.bukkit.command.Command cmd, String label, String[] args) {
 		boolean help = false;
-		if (args.length == 0 || args[0].equals("?")) {
+		if (args.length == 0 || args[0].equals("?") || args[0].equals("help")) {
 			this.getCommands(sender, this, cmd);
 			help = true;
 		}

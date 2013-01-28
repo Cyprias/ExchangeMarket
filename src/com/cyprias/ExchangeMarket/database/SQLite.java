@@ -14,6 +14,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.inventory.ItemStack;
 
 import com.cyprias.ExchangeMarket.ChatUtils;
+import com.cyprias.ExchangeMarket.Logger;
 import com.cyprias.ExchangeMarket.Plugin;
 import com.cyprias.ExchangeMarket.Breeze.MaterialUtil;
 import com.cyprias.ExchangeMarket.configuration.Config;
@@ -208,30 +209,51 @@ public class SQLite implements Database {
 		return id;
 	}
 
-
 	public List<Order> list(CommandSender sender, int page) throws SQLException {
+		return list(sender, 0, page);
+	}
+	public List<Order> list(CommandSender sender, int orderType, int page) throws SQLException {
 
-		int rows = getResultCount("SELECT COUNT(*) FROM " + order_table);
-
+		int rows;
+		
+		if (orderType > 0){
+			rows = getResultCount("SELECT COUNT(*) FROM " + order_table + " WHERE `type` = ?", orderType);
+		}else{
+			rows = getResultCount("SELECT COUNT(*) FROM " + order_table);
+		}
+		
+		Logger.debug("rows: " +rows);
+		
 		int perPage = Config.getInt("properties.rows-per-page");
 
 		int max = (rows / perPage);// + 1;
+		Logger.debug("max 1: " +max);
 		
 		if (rows % perPage == 0)
 			max--;
-		
+		Logger.debug("max 2: " +max);
+		Logger.debug("page 1: " +page);
 		if (page < 0){
 			page = max - (Math.abs(page) - 1);
+			Logger.debug("page 2: " +page);
 		}else{
 			if (page > max)
 				page = max;
+			
+			Logger.debug("page 13: " +page);
 		}
-		if (rows == 0)
-			return null;
+
 		
 		ChatUtils.send(sender, "§7Page: §f" + (page+1) + "§7/§f" + (max+1));
-
-		queryReturn results = executeQuery("SELECT * FROM `"+order_table+"` ORDER BY `id` LIMIT "+(perPage * page)+" , " + perPage);
+		queryReturn results;
+		if (rows == 0)
+			return null;
+		if (orderType > 0){
+			results = executeQuery("SELECT * FROM `"+order_table+"`  WHERE `type` = ? ORDER BY `id` LIMIT "+(perPage * page)+" , " + perPage, orderType);
+		}else{
+			results = executeQuery("SELECT * FROM `"+order_table+"` ORDER BY `id` LIMIT "+(perPage * page)+" , " + perPage);
+		}
+		
 		ResultSet r = results.result;
 		
 		List<Order> orders = new ArrayList<Order>();
