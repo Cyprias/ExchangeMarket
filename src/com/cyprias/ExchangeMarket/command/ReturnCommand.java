@@ -19,7 +19,7 @@ public class ReturnCommand implements Command {
 
 	public void listCommands(CommandSender sender, List<String> list) {
 		if (Plugin.hasPermission(sender, Perm.RETURN))
-			list.add("/%s cancel - Cancel one of your orders.");
+			list.add("/%s return - Return items from your sell order.");
 	}
 
 	public CommandAccess getAccess() {
@@ -27,7 +27,7 @@ public class ReturnCommand implements Command {
 	}
 
 	public void getCommands(CommandSender sender, org.bukkit.command.Command cmd) {
-		ChatUtils.sendCommandHelp(sender, Perm.ORDERS, "/%s cancel <id> [amount]", cmd);
+		ChatUtils.sendCommandHelp(sender, Perm.ORDERS, "/%s return <item> [amount]", cmd);
 	}
 
 	public boolean hasValues() {
