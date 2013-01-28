@@ -18,7 +18,7 @@ import com.cyprias.ExchangeMarket.database.Order;
 public class ReturnCommand implements Command {
 
 	public void listCommands(CommandSender sender, List<String> list) {
-		if (Plugin.hasPermission(sender, Perm.CANCEL))
+		if (Plugin.hasPermission(sender, Perm.RETURN))
 			list.add("/%s cancel - Cancel one of your orders.");
 	}
 
@@ -35,7 +35,7 @@ public class ReturnCommand implements Command {
 	}
 
 	public boolean execute(final CommandSender sender, org.bukkit.command.Command cmd, String[] args) throws SQLException, IOException, InvalidConfigurationException {
-		if (!Plugin.checkPermission(sender, Perm.CANCEL)) 
+		if (!Plugin.checkPermission(sender, Perm.RETURN)) 
 			return false;
 		
 		if (args.length <= 0 || args.length >= 3) {
