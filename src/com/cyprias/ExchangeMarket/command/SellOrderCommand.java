@@ -181,7 +181,7 @@ public class SellOrderCommand implements Command {
 					double taxAmount = Config.getDouble("taxes.sellOrder") * (amount * preOrder.getPrice());
 					EconomyResponse r = Econ.withdrawPlayer(sender.getName(), taxAmount);
 					if (r.transactionSuccess()) {
-						ChatUtils.send(sender, String.format("$§f%s §7(§f%s§7%%) has been taxed from your account.", Plugin.Round(r.amount, Config.getInt("properties.price-decmial-places")), Plugin.Round(Config.getDouble("taxes.sellOrder") * 100)));
+						ChatUtils.send(sender, String.format("$§f%s §7(§f%s§7%%) tax has been withdrawn from your account.", Plugin.Round(r.amount, Config.getInt("properties.price-decmial-places")), Plugin.Round(Config.getDouble("taxes.sellOrder") * 100)));
 					} else {
 						ChatUtils.send(sender, String.format("An error occured: %s", r.errorMessage));
 					}
@@ -212,7 +212,7 @@ public class SellOrderCommand implements Command {
 					double taxAmount = Config.getDouble("taxes.sellOrder") * (amount * preOrder.getPrice());
 					EconomyResponse r = Econ.withdrawPlayer(sender.getName(), taxAmount);
 					if (r.transactionSuccess()) {
-						ChatUtils.send(sender, String.format("$§f%s §7(§f%s§7%%) has been taxed from your account.", Plugin.Round(r.amount, Config.getInt("properties.price-decmial-places")), Plugin.Round(Config.getDouble("taxes.sellOrder")*100)));
+						ChatUtils.send(sender, String.format("$§f%s §7(§f%s§7%%) tax has been withdrawn from your account.", Plugin.Round(r.amount, Config.getInt("properties.price-decmial-places")), Plugin.Round(Config.getDouble("taxes.sellOrder")*100)));
 					} else {
 						ChatUtils.send(sender, String.format("An error occured: %s", r.errorMessage));
 					}
