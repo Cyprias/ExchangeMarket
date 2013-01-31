@@ -146,12 +146,6 @@ public class ConfirmCommand implements Command {
 				if (traded <= 0)
 					break;
 
-				stock.setAmount(traded);
-
-				
-
-				//
-
 				//InventoryUtil.add(stock, pT.player.getInventory());
 				traded = order.giveAmount(pT.player, traded);
 				
