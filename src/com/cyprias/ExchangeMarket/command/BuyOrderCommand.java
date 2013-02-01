@@ -150,7 +150,7 @@ public class BuyOrderCommand implements Command {
 					Logger.debug("Checking matching order price " + (o.getPrice() > price));
 					
 					if (o.getPrice() > price)
-						continue;
+						break;
 					
 					int canTrade = amount;
 					if (!o.isInfinite())
@@ -198,6 +198,8 @@ public class BuyOrderCommand implements Command {
 		if (amount <= 0)
 			return true;
 		
+		preOrder.setAmount(amount);
+		
 		// Add the order to the DB.
 		Order matchingOrder = Plugin.database.findMatchingOrder(preOrder);
 		if (matchingOrder != null) {
@@ -213,7 +215,7 @@ public class BuyOrderCommand implements Command {
 				EconomyResponse r = Econ.withdrawPlayer(sender.getName(), price * amount);
 
 				if (r.transactionSuccess()) {
-					ChatUtils.send(sender, String.format("$§f%s §7has been withdrawnfrom your account, you now have $§f%s§7.", r.amount, r.balance));
+					ChatUtils.send(sender, String.format("$§f%s §7has been withdrawnfrom your account, you now have $§f%s§7.", Plugin.Round(r.amount, pl), Plugin.Round(r.balance, pl)));
 				} else {
 					ChatUtils.send(sender, String.format("An error occured: %s", r.errorMessage));
 				}
@@ -232,7 +234,7 @@ public class BuyOrderCommand implements Command {
 				EconomyResponse r = Econ.withdrawPlayer(sender.getName(), price * amount);
 
 				if (r.transactionSuccess()) {
-					ChatUtils.send(sender, String.format("$§f%s §7has been withdrawnfrom your account, you now have $§f%s§7.", r.amount, r.balance));
+					ChatUtils.send(sender, String.format("$§f%s §7has been withdrawnfrom your account, you now have $§f%s§7.", Plugin.Round(r.amount, pl), Plugin.Round(r.balance, pl)));
 				} else {
 					ChatUtils.send(sender, String.format("An error occured: %s", r.errorMessage));
 				}

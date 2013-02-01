@@ -159,7 +159,7 @@ public class SellOrderCommand implements Command {
 					o = orders.get(i);
 					
 					if (o.getPrice() < price)
-						continue;
+						break;
 					
 					traded = amount;
 					
@@ -227,6 +227,8 @@ public class SellOrderCommand implements Command {
 		}
 		if (amount <= 0)
 			return true;
+		
+		preOrder.setAmount(amount);
 		
 		if (Config.getDouble("taxes.sellOrder") > 0){
 			//Logger.debug("taxes.sellOrder: " + Config.getDouble("taxes.sellOrder"));
