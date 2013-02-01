@@ -132,6 +132,102 @@ public class SellOrderCommand implements Command {
 			return true;
 		}
 
+
+		int pl = Config.getInt("properties.price-decmial-places");
+		
+		
+		if (Config.getBoolean("properties.match-opposing-orders-before-posting")){
+			List<Order> orders = Plugin.database.search(stock, Order.BUY_ORDER);
+			Order o;
+			
+			if (!Config.getBoolean("properties.trade-to-yourself"))
+				for (int i = (orders.size() - 1); i >= 0; i--) {
+					o = orders.get(i); 
+					if (sender.getName().equalsIgnoreCase(o.getPlayer()))
+						orders.remove(o);
+				}
+			
+			Logger.debug( "Orders: " + orders.size());
+			
+			if (orders.size() > 0){
+				
+				int traded;
+				for (int i = (orders.size() - 1); i >= 0; i--) {
+					if (amount <= 0)
+						break;
+
+					o = orders.get(i);
+					
+					if (o.getPrice() < price)
+						continue;
+					
+					traded = amount;
+					
+					
+					
+					if (!o.isInfinite())
+						traded = Math.min(o.getAmount(), traded);
+
+					traded = Math.min(InventoryUtil.getAmount(stock, player.getInventory()), traded);
+
+					if (traded <= 0)
+						break;
+
+					stock.setAmount(traded);
+
+					// totalTraded = +po.amount;
+
+					//Remove items from player's inventory for the buy order.
+					InventoryUtil.remove(stock, player.getInventory());
+					//Note, don't use takeAmount().
+					
+					if (!o.isInfinite()) {
+						//Send the items to the orderer's mailbox.
+						o.sendAmountToMailbox(traded);
+						
+						//Reduce the buy order's amount.
+						o.reduceAmount(traded);
+						
+						//Notify the orderer of the transaction.
+						o.notifyPlayerOfTransaction(traded);
+					}
+					
+					
+					double profit = (traded * o.getPrice());
+					
+					Econ.depositPlayer(sender.getName(), profit);
+					o.insertTransaction(sender, traded);
+					
+					
+					
+					
+					
+					
+					
+					ChatUtils.send(
+						sender,
+						String.format("§7Sold §f%s§7x§f%s §7for $§f%s §7($§f%s§7e).", Plugin.getItemName(stock), traded, Plugin.Round(profit, pl),
+							Plugin.Round(o.getPrice(), pl)));
+					
+					
+					
+					
+					
+					
+					amount -= traded;
+					
+				}
+				
+				
+			}
+			
+			
+			
+			Plugin.database.cleanEmpties();
+		}
+		if (amount <= 0)
+			return true;
+		
 		if (Config.getDouble("taxes.sellOrder") > 0){
 			//Logger.debug("taxes.sellOrder: " + Config.getDouble("taxes.sellOrder"));
 			//Logger.debug("amount: " + amount);
@@ -145,8 +241,6 @@ public class SellOrderCommand implements Command {
 				return true;
 			}
 		}
-		
-		
 		
 		Order matchingOrder = Plugin.database.findMatchingOrder(preOrder);
 		if (matchingOrder != null) {
@@ -196,7 +290,6 @@ public class SellOrderCommand implements Command {
 
 				// ChatUtils.send(sender, "Created sell order " + id);
 
-				int pl = Config.getInt("properties.price-decmial-places");
 				ChatUtils.send(sender, String.format("§7Created sell order #§f%s §7for §f%s§7x§f%s §7@ §f%s §7(§f%s§7e)", id, Plugin.getItemName(stock),
 					preOrder.getAmount(), Plugin.Round(preOrder.getPrice() * preOrder.getAmount(), pl), Plugin.Round(preOrder.getPrice(), pl)));
 

@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Map;
 
+import net.milkbowl.vault.economy.EconomyResponse;
+
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
@@ -13,6 +15,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import com.cyprias.ExchangeMarket.ChatUtils;
+import com.cyprias.ExchangeMarket.Econ;
 import com.cyprias.ExchangeMarket.Logger;
 import com.cyprias.ExchangeMarket.Plugin;
 import com.cyprias.ExchangeMarket.Breeze.InventoryUtil;
@@ -287,5 +290,19 @@ public class Order {
 	public Boolean insertTransaction(CommandSender sender, int transAmount) throws SQLException, IOException, InvalidConfigurationException{
 		return Plugin.database.insertTransaction(type, sender.getName(), itemId, itemDur, itemEnchants, transAmount, price, player);
 	}
+
+	public EconomyResponse withdrawPlayer(double spend, CommandSender to){
+		Econ.depositPlayer(to.getName(), spend);
+		return Econ.withdrawPlayer(this.player, spend);
+	}
+	//public EconomyResponse withdrawPlayer2(double spend){
+	//}
 	
+	public EconomyResponse depositPlayer(double spend, CommandSender from){
+		Econ.withdrawPlayer(from.getName(), spend);
+		return Econ.depositPlayer(this.player, spend);
+	}
+	//public EconomyResponse depositPlayer2(double spend){
+		
+	//}
 }

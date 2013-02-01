@@ -106,7 +106,7 @@ public class CancelCommand implements Command {
 			//ChatUtils.send(sender, "Can't cancel buy yet.");
 			
 			double money = order.getPrice() * order.getAmount();
-			
+
 			Econ.depositPlayer(sender.getName(), money);
 			order.setAmount(0);
 			
