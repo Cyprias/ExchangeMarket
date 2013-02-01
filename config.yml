@@ -56,6 +56,7 @@ properties:
   # Allow exchange sign to be used once every x seconds.
   exchange-sign-throttle: 1
   
+  # Try to buy/sell to opposing orders before creating a new buy/sell order. Like issuing a /sell before /sellorder. 
   match-opposing-orders-before-posting: true
 taxes:
   # Charge the user a percentage of their asking price when placing a sell order. 1=100%, 0.15=15%, 0=0%, 
