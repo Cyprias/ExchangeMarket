@@ -42,7 +42,15 @@ public class BuyCommand implements Command {
 			return true;
 		}
 		
-		if (args.length < 1 || args.length > 2) {
+		
+		
+		
+		if (args.length > 2) {
+			if (Config.getBoolean("properties.include-price-to-post-new-order"))
+				return CommandManager.commands.get("buyorder").execute(sender, cmd, args);
+			getCommands(sender, cmd);
+			return true;
+		}else if (args.length < 1) {
 			getCommands(sender, cmd);
 			return true;
 		}
