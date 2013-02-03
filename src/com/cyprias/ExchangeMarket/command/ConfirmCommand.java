@@ -137,7 +137,8 @@ public class ConfirmCommand implements Command {
 
 				// removeOrderFromOthers(sender, po.order.getId());
 
-				traded = po.amount;
+				traded = (int) Math.floor(Math.min(po.amount, Econ.getBalance(sender.getName()) / order.getPrice()));
+
 				if (!order.isInfinite())
 					traded = Math.min(order.getAmount(), traded);
 

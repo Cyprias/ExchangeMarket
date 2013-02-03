@@ -183,11 +183,17 @@ public class BuyCommand implements Command {
 			}else{
 				stock.setAmount(1);
 				if (!InventoryUtil.fits(stock, player.getInventory())){
-					ChatUtils.send(sender, "You have no bag space available.");
+					ChatUtils.send(sender, "§7You have no bag space available.");
 				
 				}else{
 					
-					ChatUtils.send(sender, "Failed to buy any items, try creating a buy order.");
+					if (orders.size() > 0){
+						ChatUtils.send(sender, String.format("§7You cannot afford any §f%s§7.", Plugin.getItemName(stock)));
+					}else{
+						ChatUtils.send(sender, "§7Failed to buy any items, try creating a buy order.");
+					}
+					
+					
 				}
 			
 			}
