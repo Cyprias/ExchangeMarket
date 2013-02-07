@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 
+import net.milkbowl.vault.economy.EconomyResponse;
+
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.entity.Player;
@@ -88,17 +90,42 @@ public class CancelCommand implements Command {
 			ItemStack stock = order.getItemStack();
 			
 			int receive = Plugin.getFitAmount(stock, order.getAmount(), player.getInventory());
-			
+			if (receive <= 0){
+				ChatUtils.send(sender, "§7You have no bag space available.");
+				return true;
+			}
+
 			if (amount>0)
 				receive = Math.min(receive, amount);
 			
+
 			stock.setAmount(receive);
 			
+		
+			if (Config.getDouble("taxes.sellCancellation") > 0 && (!Config.getBoolean("taxes.exemptFullCancel") || args.length > 1)){
+				//Logger.debug("taxes.sellOrder: " + Config.getDouble("taxes.sellOrder"));
+				//Logger.debug("amount: " + amount);
+				//Logger.debug("getPrice: " + preOrder.getPrice());
+
+				double taxAmount = Config.getDouble("taxes.sellCancellation") * (amount * order.getPrice());
+				//Logger.debug("taxAmount: " + taxAmount);
+				
+				if (Econ.getBalance(sender.getName()) < taxAmount){
+					ChatUtils.send(sender, String.format("You do not have $§f%s §7(§f%s§7%%) needed to cancel that order.", Plugin.Round(taxAmount, Config.getInt("properties.price-decmial-places")), Plugin.Round(Config.getDouble("taxes.sellCancellation") * 100)));
+					return true;
+				}
+				
+				EconomyResponse r = Econ.withdrawPlayer(sender.getName(), taxAmount);
+				if (r.transactionSuccess()) {
+					ChatUtils.send(sender, String.format("$§f%s §7(§f%s§7%%) cancellation fee has been withdrawn from your account.", Plugin.Round(r.amount, Config.getInt("properties.price-decmial-places")), Plugin.Round(Config.getDouble("taxes.sellCancellation") * 100)));
+				} else {
+					ChatUtils.send(sender, String.format("An error occured: %s", r.errorMessage));
+				}
+			}
+			
+			
 			receive = order.giveAmount(player, receive);
-			
-			//InventoryUtil.add(stock, player.getInventory());
-			//order.reduceAmount(receive);
-			
+
 			ChatUtils.send(sender, String.format("§7Returned §f%s§7x§f%s§7, there's §f%s §7remaining in order #§f%s§7.", Plugin.getItemName(stock), receive, order.getAmount(), order.getId()));
 			
 			

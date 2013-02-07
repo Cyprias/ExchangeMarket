@@ -4,15 +4,19 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 
+import net.milkbowl.vault.economy.EconomyResponse;
+
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import com.cyprias.ExchangeMarket.ChatUtils;
+import com.cyprias.ExchangeMarket.Econ;
 import com.cyprias.ExchangeMarket.Perm;
 import com.cyprias.ExchangeMarket.Plugin;
 import com.cyprias.ExchangeMarket.Breeze.InventoryUtil;
+import com.cyprias.ExchangeMarket.configuration.Config;
 import com.cyprias.ExchangeMarket.database.Order;
 
 public class ReturnCommand implements Command {
@@ -72,6 +76,8 @@ public class ReturnCommand implements Command {
 			}
 		}
 		
+
+		
 		List<Order> orders = Plugin.database.search(stock, Order.SELL_ORDER, sender);
 		
 		if (orders.size() == 0){
@@ -91,17 +97,34 @@ public class ReturnCommand implements Command {
 
 			receive = Math.min(order.getAmount(), amount);
 
-			//receive = Plugin.getFitAmount(stock, receive, player.getInventory());
-			//if (receive <= 0)
-			//	break;
-			//stock.setAmount(receive);
-			//receive = order.giveAmount(player, receive);
+			receive = Math.min(receive, Plugin.getFitAmount(stock, player.getInventory()));
+			
+			if (receive <= 0)
+				break;
+			
+			if (Config.getDouble("taxes.sellCancellation") > 0){
+				//Logger.debug("taxes.sellOrder: " + Config.getDouble("taxes.sellOrder"));
+				//Logger.debug("amount: " + amount);
+				//Logger.debug("getPrice: " + preOrder.getPrice());
+
+				double taxAmount = Config.getDouble("taxes.sellCancellation") * (amount * order.getPrice());
+				//Logger.debug("taxAmount: " + taxAmount);
+				
+				if (Econ.getBalance(sender.getName()) < taxAmount){
+					continue;
+				}
+				
+				EconomyResponse r = Econ.withdrawPlayer(sender.getName(), taxAmount);
+				if (r.transactionSuccess()) {
+					ChatUtils.send(sender, String.format("$§f%s §7(§f%s§7%%) cancellation tax has been withdrawn from your account.", Plugin.Round(r.amount, Config.getInt("properties.price-decmial-places")), Plugin.Round(Config.getDouble("taxes.sellCancellation") * 100)));
+				} else {
+					ChatUtils.send(sender, String.format("An error occured: %s", r.errorMessage));
+				}
+			}
+			
 			
 			receive = order.giveAmount(player, receive);
 			
-			
-			//InventoryUtil.add(stock, player.getInventory());
-			//order.reduceAmount(receive);
 			
 			ChatUtils.send(sender, String.format("§7Returned §f%s§7x§f%s§7, there's §f%s §7remaining in order #§f%s§7.", Plugin.getItemName(stock), receive, order.getAmount(), order.getId()));
 			amount -= receive;
