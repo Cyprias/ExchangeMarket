@@ -36,7 +36,7 @@ public enum Perm {
 	RETURN("exchangemarket.return"),
 	USE_EXCHANGE_SIGN("exchangemarket.use-exchange-sign"),
 	SET_PRICE("exchangemarket.setprice"),
-	PARENT_USER("exchangemarket.user", SET_PRICE, RETURN, USE_EXCHANGE_SIGN, PARENT_INFO, SELL,BUY,SELL_ORDER,BUY_ORDER,COLLECT,SELL_HAND,CANCEL,CONFIRM),
+	PARENT_USER("exchangemarket.user", RETURN, USE_EXCHANGE_SIGN, PARENT_INFO, SELL,BUY,SELL_ORDER,BUY_ORDER,COLLECT,SELL_HAND,CANCEL,CONFIRM),
 	
 	INF_BUY("exchangemarket.infbuy"),
 	INF_SELL("exchangemarket.infsell"),
