@@ -553,14 +553,14 @@ public class SQLite implements Database {
 		if (stock != null){
 			String query = "SELECT COUNT(*) FROM " + order_table + " WHERE `player` LIKE ? AND `itemID` = ? AND `itemDur` = ?";
 			//rows = getResultCount(query, sender.getName());
+			/*
 			if (stock.getEnchantments().size() > 0){
 				query += " AND `itemEnchants` = ?";
 				rows = getResultCount(query, sender.getName(), stock.getTypeId(),stock.getDurability(), MaterialUtil.Enchantment.encodeEnchantment(stock));
-			
 			}else{
-				query += " AND `itemEnchants` IS NULL";
+				query += " AND `itemEnchants` IS NULL";*/
 				rows = getResultCount(query, sender.getName(), stock.getTypeId(),stock.getDurability());
-			}
+			//}
 
 		}else{
 			rows = getResultCount("SELECT COUNT(*) FROM " + order_table + " WHERE `player` LIKE ?", sender.getName());
@@ -602,16 +602,17 @@ public class SQLite implements Database {
 			
 			String query = "SELECT * FROM `" + order_table + "` WHERE `player` LIKE ? AND `itemID` = ? AND `itemDur` = ?";
 			//rows = getResultCount(query, sender.getName());
+			/*
 			if (stock.getEnchantments().size() > 0){
 				query += " AND `itemEnchants` = ?";
 				query += " ORDER BY `id` LIMIT "+(perPage * page)+" , " + perPage;
 				results = executeQuery(query, sender.getName(), stock.getTypeId(),stock.getDurability(), MaterialUtil.Enchantment.encodeEnchantment(stock));
 			
 			}else{
-				query += " AND `itemEnchants` IS NULL";
+				query += " AND `itemEnchants` IS NULL";*/
 				query += " ORDER BY `id` LIMIT "+(perPage * page)+" , " + perPage;
 				results = executeQuery(query, sender.getName(), stock.getTypeId(),stock.getDurability());
-			}
+			//}
 			
 		}else{
 			results =  executeQuery("SELECT * FROM `" + order_table + "` WHERE `player` LIKE ? ORDER BY `id` LIMIT "+(perPage * page)+" , " + perPage, sender.getName());
