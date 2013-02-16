@@ -51,8 +51,6 @@ public class VersionCommand implements Command {
 						} else {
 							ChatUtils.send(sender, "§7We're running version v§f" + curVersion);
 						}
-					} catch (SAXException e) {
-						e.printStackTrace();
 					} catch (IOException e) {
 						e.printStackTrace();
 					} catch (ParserConfigurationException e) {

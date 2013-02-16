@@ -223,8 +223,6 @@ public class Plugin extends JavaPlugin {
 							Logger.warning(info.getLink());
 						}
 					}
-				} catch (SAXException e) {
-					e.printStackTrace();
 				} catch (IOException e) {
 					e.printStackTrace();
 				} catch (ParserConfigurationException e) {
