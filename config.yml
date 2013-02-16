@@ -62,6 +62,9 @@ properties:
   # Adding a price to the buy/sell command executes it as a buy/sell order. Works best with match opposing enabled.
   include-price-to-post-new-order: true
   
+  # PRevent players from putting up the same item for too many different prices. 
+  identical-orders-per-player: 3
+  
 taxes:
   # Charge a percentage of their asking price when placing a sell order. 1=100%, 0.15=15%, 0=0%, 
   sellOrder: 0

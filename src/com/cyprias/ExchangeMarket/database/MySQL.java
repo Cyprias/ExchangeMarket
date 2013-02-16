@@ -645,25 +645,31 @@ public class MySQL implements Database {
 	public boolean cleanMailboxEmpties() throws SQLException {
 		return (executeUpdate("DELETE FROM `"+mailbox_table+"` WHERE `amount` = 0") > 0) ? true : false;
 	}
-
+	
 	public List<Order> getPlayerOrders(CommandSender sender, int page) throws SQLException, IOException, InvalidConfigurationException {
 		return getPlayerOrders(sender, null, page);
 	}
 
+	public int getPlayerOrderCount(CommandSender sender, ItemStack stock) throws SQLException{
+		String query = "SELECT COUNT(*) FROM " + order_table + " WHERE `player` LIKE ? AND `itemID` = ? AND `itemDur` = ?";
+		//rows = getResultCount(query, sender.getName());
+		int rows;
+		if (stock.getEnchantments().size() > 0){
+			query += " AND `itemEnchants` = ?";
+			rows = getResultCount(query, sender.getName(), stock.getTypeId(),stock.getDurability(), MaterialUtil.Enchantment.encodeEnchantment(stock));
+		
+		}else{
+			query += " AND `itemEnchants` IS NULL";
+			rows = getResultCount(query, sender.getName(), stock.getTypeId(),stock.getDurability());
+		}
+		
+		return rows;
+	}
+	
 	public List<Order> getPlayerOrders(CommandSender sender, ItemStack stock, int page) throws SQLException {
 		int rows = 0;
 		if (stock != null){
-			String query = "SELECT COUNT(*) FROM " + order_table + " WHERE `player` LIKE ? AND `itemID` = ? AND `itemDur` = ?";
-			//rows = getResultCount(query, sender.getName());
-			if (stock.getEnchantments().size() > 0){
-				query += " AND `itemEnchants` = ?";
-				rows = getResultCount(query, sender.getName(), stock.getTypeId(),stock.getDurability(), MaterialUtil.Enchantment.encodeEnchantment(stock));
-			
-			}else{
-				query += " AND `itemEnchants` IS NULL";
-				rows = getResultCount(query, sender.getName(), stock.getTypeId(),stock.getDurability());
-			}
-
+			rows = getPlayerOrderCount(sender, stock);
 		}else{
 			rows = getResultCount("SELECT COUNT(*) FROM " + order_table + " WHERE `player` LIKE ?", sender.getName());
 		}
