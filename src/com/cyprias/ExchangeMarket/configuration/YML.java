@@ -17,30 +17,30 @@ public class YML extends YamlConfiguration {
 		load(fileStream);
 	}
 	
-	public YML(File pluginDur, String fileName) throws FileNotFoundException, IOException, InvalidConfigurationException {
+	public YML(File pluginDir, String fileName) throws FileNotFoundException, IOException, InvalidConfigurationException {
 		//Load yml from directory.
-		YML.file = new File(pluginDur, fileName);
+		YML.file = new File(pluginDir, fileName);
 		load(YML.file);
 	}
 	
-	public YML(InputStream fileStream, File pluginDur, String fileName) throws FileNotFoundException, IOException, InvalidConfigurationException {
+	public YML(InputStream fileStream, File pluginDir, String fileName) throws FileNotFoundException, IOException, InvalidConfigurationException {
 		//Copy yml resource to directory then load it.
-		YML.file = new File(pluginDur, fileName);
+		YML.file = new File(pluginDir, fileName);
 		if (!YML.file.exists())
-			YML.file = toFile(fileStream, pluginDur, fileName);
+			YML.file = toFile(fileStream, pluginDir, fileName);
 		load(YML.file);
 	}
 	
-	public YML(InputStream fileStream, File pluginDur, String fileName, Boolean noLoad) throws IOException {
+	public YML(InputStream fileStream, File pluginDir, String fileName, Boolean noLoad) throws IOException {
 		//Just copy the stream to directory, no loading as YML. 
-		YML.file = new File(pluginDur, fileName);
+		YML.file = new File(pluginDir, fileName);
 		if (!YML.file.exists())
-			YML.file = toFile(fileStream, pluginDur, fileName);
+			YML.file = toFile(fileStream, pluginDir, fileName);
 	}
 	
 	//Write a stream to file on disk, return the file object.  
-	public static File toFile(InputStream in, File pluginDur, String fileName) throws IOException {
-		File file = new File(pluginDur, fileName);
+	public static File toFile(InputStream in, File pluginDir, String fileName) throws IOException {
+		File file = new File(pluginDir, fileName);
 		file.getParentFile().mkdirs();
 		OutputStream out = new FileOutputStream(file);
 		byte[] buf = new byte[1024];

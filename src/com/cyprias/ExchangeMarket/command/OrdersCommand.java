@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.InvalidConfigurationException;
+import org.bukkit.inventory.ItemStack;
 
 import com.cyprias.ExchangeMarket.ChatUtils;
 import com.cyprias.ExchangeMarket.Perm;
@@ -25,7 +26,7 @@ public class OrdersCommand implements Command {
 	}
 
 	public void getCommands(CommandSender sender, org.bukkit.command.Command cmd) {
-		ChatUtils.sendCommandHelp(sender, Perm.ORDERS, "/%s orders", cmd);
+		ChatUtils.sendCommandHelp(sender, Perm.ORDERS, "/%s orders [itemName] <page>", cmd);
 	}
 
 	public boolean hasValues() {
@@ -52,7 +53,7 @@ public class OrdersCommand implements Command {
 	public boolean execute(CommandSender sender, org.bukkit.command.Command cmd, String[] args) throws IllegalArgumentException, SQLException, IOException, InvalidConfigurationException {
 		if (!Plugin.checkPermission(sender, Perm.ORDERS)) 
 			return false;
-		
+		ItemStack stock = null;
 		int page = -1; //Default to last page.
 		if (args.length > 0) {// && args[1].equalsIgnoreCase("compact"))
 			if (Plugin.isInt(args[0])) {
@@ -60,13 +61,31 @@ public class OrdersCommand implements Command {
 				if (page>0)
 					page-=1;
 			} else {
-				ChatUtils.error(sender, "Invalid page: " +  args[0]);
-				return true;
+				stock = Plugin.getItemStack(args[0]);
+				
+				if (stock == null || stock.getTypeId() == 0) {
+					ChatUtils.error(sender, "Unknown input: " + args[0]);
+					return true;
+				}
+				
+				if (args.length > 1) {
+					if (Plugin.isInt(args[1])) {
+						page = Integer.parseInt(args[1]);
+						if (page>0)
+							page-=1;
+					}
+				}
 			}
 		}
 		
+		List<Order> orders;
+		if (stock != null){
+			orders = Plugin.database.getPlayerOrders(sender, stock, page);
+		}else{
+			orders = Plugin.database.getPlayerOrders(sender, page);
+		}
 		
-		List<Order> orders = Plugin.database.getPlayerOrders(sender, page);
+		
 		//ChatUtils.send(sender, "§7You have §f" + orders.size() + " §7orders.");
 		
 		if (orders == null || orders.size() == 0)

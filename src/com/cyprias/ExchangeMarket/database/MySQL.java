@@ -646,9 +646,30 @@ public class MySQL implements Database {
 		return (executeUpdate("DELETE FROM `"+mailbox_table+"` WHERE `amount` = 0") > 0) ? true : false;
 	}
 
-	@Override
-	public List<Order> getPlayerOrders(CommandSender sender, int page) throws SQLException {
-		int rows = getResultCount("SELECT COUNT(*) FROM " + order_table + " WHERE `player` LIKE ?", sender.getName());
+	public List<Order> getPlayerOrders(CommandSender sender, int page) throws SQLException, IOException, InvalidConfigurationException {
+		return getPlayerOrders(sender, null, page);
+	}
+
+	public List<Order> getPlayerOrders(CommandSender sender, ItemStack stock, int page) throws SQLException {
+		int rows = 0;
+		if (stock != null){
+			String query = "SELECT COUNT(*) FROM " + order_table + " WHERE `player` LIKE ? AND `itemID` = ? AND `itemDur` = ?";
+			//rows = getResultCount(query, sender.getName());
+			if (stock.getEnchantments().size() > 0){
+				query += " AND `itemEnchants` = ?";
+				rows = getResultCount(query, sender.getName(), stock.getTypeId(),stock.getDurability(), MaterialUtil.Enchantment.encodeEnchantment(stock));
+			
+			}else{
+				query += " AND `itemEnchants` IS NULL";
+				rows = getResultCount(query, sender.getName(), stock.getTypeId(),stock.getDurability());
+			}
+
+		}else{
+			rows = getResultCount("SELECT COUNT(*) FROM " + order_table + " WHERE `player` LIKE ?", sender.getName());
+		}
+		
+		
+		
 
 		int perPage = Config.getInt("properties.rows-per-page");
 		
@@ -676,7 +697,30 @@ public class MySQL implements Database {
 		
 		List<Order> orders = new ArrayList<Order>();
 		
-		queryReturn results = executeQuery("SELECT * FROM `" + order_table + "` WHERE `player` LIKE ? ORDER BY `id` LIMIT "+(perPage * page)+" , " + perPage, sender.getName());
+		queryReturn results = null;// = executeQuery("SELECT * FROM `" + order_table + "` WHERE `player` LIKE ? ORDER BY `id` LIMIT "+(perPage * page)+" , " + perPage, sender.getName());
+
+		
+		if (stock != null){
+			
+			String query = "SELECT * FROM `" + order_table + "` WHERE `player` LIKE ? AND `itemID` = ? AND `itemDur` = ?";
+			//rows = getResultCount(query, sender.getName());
+			if (stock.getEnchantments().size() > 0){
+				query += " AND `itemEnchants` = ?";
+				query += " ORDER BY `id` LIMIT "+(perPage * page)+" , " + perPage;
+				results = executeQuery(query, sender.getName(), stock.getTypeId(),stock.getDurability(), MaterialUtil.Enchantment.encodeEnchantment(stock));
+			
+			}else{
+				query += " AND `itemEnchants` IS NULL";
+				query += " ORDER BY `id` LIMIT "+(perPage * page)+" , " + perPage;
+				results = executeQuery(query, sender.getName(), stock.getTypeId(),stock.getDurability());
+			}
+			
+		}else{
+			results =  executeQuery("SELECT * FROM `" + order_table + "` WHERE `player` LIKE ? ORDER BY `id` LIMIT "+(perPage * page)+" , " + perPage, sender.getName());
+
+		}
+		
+		
 
 		ResultSet r = results.result;
 		
@@ -770,5 +814,7 @@ public class MySQL implements Database {
 		results.close();
 		return transactions;
 	}
+
+
 	
 }

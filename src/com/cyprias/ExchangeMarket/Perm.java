@@ -23,7 +23,8 @@ public enum Perm {
 	NOTIFIED_SELLORDER("exchangemarket.announceneworder.sell"),
 	NOTIFIED_BUYORDER("exchangemarket.announceneworder.buy"),
 	INFO("exchangemarket.info"),
-	PARENT_INFO("exchangemarket.user-safe", INFO, NOTIFIED_SELLORDER, NOTIFIED_BUYORDER, VERSION, SEARCH, PRICE,ORDERS, TRANSACTIONS, LIST, LOGIN_PENDING_COLLECT, ITEM_INFO,PASSWORD),
+	SET_PRICE("exchangemarket.setprice"),
+	PARENT_INFO("exchangemarket.user-safe", SET_PRICE, INFO, NOTIFIED_SELLORDER, NOTIFIED_BUYORDER, VERSION, SEARCH, PRICE,ORDERS, TRANSACTIONS, LIST, LOGIN_PENDING_COLLECT, ITEM_INFO,PASSWORD),
 	
 	SELL("exchangemarket.sell"),
 	BUY("exchangemarket.buy"),

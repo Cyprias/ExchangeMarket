@@ -51,6 +51,8 @@ public interface Database {
 
 	List<Order> findOrders(int orderType, ItemStack stock) throws SQLException, IOException, InvalidConfigurationException;
 	List<Order> getPlayerOrders(CommandSender sender, int page) throws SQLException, IOException, InvalidConfigurationException;
+	List<Order> getPlayerOrders(CommandSender sender, ItemStack stock, int page) throws SQLException, IOException, InvalidConfigurationException;
+	
 	List<Order> list(CommandSender sender, int page) throws SQLException, IOException, InvalidConfigurationException;
 	List<Order> list(CommandSender sender, int orderType, int page) throws SQLException, IOException, InvalidConfigurationException;
 	
