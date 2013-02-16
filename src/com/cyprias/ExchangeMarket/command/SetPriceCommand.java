@@ -65,6 +65,12 @@ public class SetPriceCommand implements Command {
 			return true;
 		}
 
+		if (order.getOrderType() == Order.BUY_ORDER){
+			// Todo: add support to withdraw funds from player to supply the buy order later.
+			ChatUtils.send(sender, "§7Cannot set price on buy orders, cancel the order and create it again.");
+			return true;
+		}
+		
 		double price = 0;
 		if (args.length > 1) {
 
