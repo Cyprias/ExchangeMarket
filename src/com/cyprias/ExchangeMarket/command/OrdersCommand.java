@@ -16,9 +16,10 @@ import com.cyprias.ExchangeMarket.database.Order;
 
 public class OrdersCommand implements Command {
 
-	public void listCommands(CommandSender sender, List<String> list) {
+	public void listCommands(CommandSender sender, List<String> list) throws SQLException {
 		if (Plugin.hasPermission(sender, Perm.ORDERS))
-			list.add("/%s orders - Confirm a pending transaction.");
+			if (Plugin.database.getPlayerOrderCount(sender) > 0)
+				list.add("/%s orders - Show your existing orders.");
 	}
 
 	public CommandAccess getAccess() {

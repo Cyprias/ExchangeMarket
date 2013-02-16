@@ -19,9 +19,10 @@ import com.cyprias.ExchangeMarket.database.Order;
 
 public class SetPriceCommand implements Command {
 
-	public void listCommands(CommandSender sender, List<String> list) {
+	public void listCommands(CommandSender sender, List<String> list) throws SQLException {
 		if (Plugin.hasPermission(sender, Perm.SET_PRICE))
-			list.add("/%s setprice - Set the price for an existing order.");
+			if (Plugin.database.getPlayerOrderCount(sender) > 0)
+				list.add("/%s setprice - Set the price for an existing order.");
 	}
 
 	public CommandAccess getAccess() {

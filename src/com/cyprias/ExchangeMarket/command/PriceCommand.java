@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.InvalidConfigurationException;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import com.cyprias.ExchangeMarket.ChatUtils;
@@ -38,16 +39,27 @@ public class PriceCommand implements Command {
 		if (!Plugin.checkPermission(sender, Perm.PRICE))
 			return false;
 
-		if (args.length <= 0 || args.length >= 3) {
+		if (args.length >= 3) {
 			getCommands(sender, cmd);
 			return true;
 		}
 
-		ItemStack stock = Plugin.getItemStack(args[0]);
-		if (stock == null || stock.getTypeId() == 0) {
-			ChatUtils.error(sender, "Unknown item: " + args[0]);
-			return true;
+		ItemStack stock;// = Plugin.getItemStack(args[0]);
+		if (args.length > 0){
+			stock = Plugin.getItemStack(args[0]);
+			if (stock == null || stock.getTypeId() == 0) {
+				ChatUtils.error(sender, "Unknown item: " + args[0]);
+				return true;
+			}
+		}else{
+		//	Player player = (Player) sender;
+			stock = ((Player) sender).getItemInHand();
+			if (stock == null || stock.getTypeId() == 0) {
+				ChatUtils.error(sender, "There's no item in your hand.");
+				return true;
+			}
 		}
+		
 
 		int amount = 1;// InventoryUtil.getAmount(item, player.getInventory());
 		if (args.length > 1) {

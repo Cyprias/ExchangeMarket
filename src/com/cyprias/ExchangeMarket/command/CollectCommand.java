@@ -19,9 +19,10 @@ import com.cyprias.ExchangeMarket.database.Parcel;
 
 public class CollectCommand  implements Command {
 
-	public void listCommands(CommandSender sender, List<String> list) {
+	public void listCommands(CommandSender sender, List<String> list) throws SQLException {
 		if (Plugin.hasPermission(sender, Perm.COLLECT))
-			list.add("/%s collect - Collect pending items in your mailbox.");
+			if (Plugin.database.getPlayerPackageCount(sender) > 0)
+				list.add("/%s collect - Collect pending items in your mailbox.");
 	}
 
 	public CommandAccess getAccess() {

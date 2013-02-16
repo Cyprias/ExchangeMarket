@@ -21,9 +21,10 @@ import com.cyprias.ExchangeMarket.database.Order;
 
 public class ReturnCommand implements Command {
 
-	public void listCommands(CommandSender sender, List<String> list) {
+	public void listCommands(CommandSender sender, List<String> list) throws SQLException {
 		if (Plugin.hasPermission(sender, Perm.RETURN))
-			list.add("/%s return - Return items from your sell order.");
+			if (Plugin.database.getPlayerOrderCount(sender) > 0)
+				list.add("/%s return - Return items from your sell order.");
 	}
 
 	public CommandAccess getAccess() {

@@ -544,8 +544,13 @@ public class SQLite implements Database {
 	public boolean cleanMailboxEmpties() throws SQLException {
 		return (executeUpdate("DELETE FROM `"+mailbox_table+"` WHERE `amount` = 0") > 0) ? true : false;
 	}
+	public int getPlayerOrderCount(CommandSender sender) throws SQLException{
+		String query = "SELECT COUNT(*) FROM " + order_table + " WHERE `player` LIKE ?";
+		//rows = getResultCount(query, sender.getName());
+		return getResultCount(query, sender.getName());
+	}
 	
-	public int getPlayerOrderCount(CommandSender sender, ItemStack stock) throws SQLException{
+	public int getPlayerItemOrderCount(CommandSender sender, ItemStack stock) throws SQLException{
 		String query = "SELECT COUNT(*) FROM " + order_table + " WHERE `player` LIKE ? AND `itemID` = ? AND `itemDur` = ?";
 		//rows = getResultCount(query, sender.getName());
 		int rows;
@@ -562,6 +567,7 @@ public class SQLite implements Database {
 	}
 	
 	
+	
 	public List<Order> getPlayerOrders(CommandSender sender, int page) throws SQLException, IOException, InvalidConfigurationException {
 		return getPlayerOrders(sender, null, page);
 	}
@@ -569,7 +575,7 @@ public class SQLite implements Database {
 	public List<Order> getPlayerOrders(CommandSender sender, ItemStack stock, int page) throws SQLException {
 		int rows = 0;
 		if (stock != null){
-			rows = getPlayerOrderCount(sender, stock);
+			rows = getPlayerItemOrderCount(sender, stock);
 		}else{
 			rows = getResultCount("SELECT COUNT(*) FROM " + order_table + " WHERE `player` LIKE ?", sender.getName());
 		}
@@ -720,5 +726,12 @@ public class SQLite implements Database {
 		return transactions;
 	}
 
+	public int getPlayerTransactionCount(CommandSender sender) throws SQLException{
+		return getResultCount("SELECT COUNT(*) FROM " + transaction_table + " WHERE `seller` LIKE ? ", sender.getName());
+	}
+
+	public int getPlayerPackageCount(CommandSender sender) throws SQLException {
+		return getResultCount("SELECT COUNT(*) FROM " + order_table + " WHERE `player` LIKE ?", sender.getName());
+	}
 
 }

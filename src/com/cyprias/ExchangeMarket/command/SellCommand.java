@@ -24,7 +24,7 @@ public class SellCommand implements Command {
 
 	public void listCommands(CommandSender sender, List<String> list) {
 		if (Plugin.hasPermission(sender, Perm.SELL))
-			list.add("/%s sell - Buy items from sell orders.");
+			list.add("/%s sell - Sell items to existing buy orders.");
 	}
 
 	public CommandAccess getAccess() {

@@ -21,8 +21,8 @@ import com.cyprias.ExchangeMarket.database.Order;
 public class ConfirmCommand implements Command {
 
 	public void listCommands(CommandSender sender, List<String> list) {
-		if (Plugin.hasPermission(sender, Perm.CONFIRM))
-			list.add("/%s confirm - Confirm a pending transaction.");
+		//if (Plugin.hasPermission(sender, Perm.CONFIRM))
+		//	list.add("/%s confirm - Confirm a pending transaction.");
 	}
 
 	public CommandAccess getAccess() {

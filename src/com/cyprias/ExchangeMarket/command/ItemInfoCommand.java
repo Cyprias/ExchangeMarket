@@ -73,8 +73,6 @@ public class ItemInfoCommand implements Command {
 		}
 		//ChatUtils.send(sender, "Item: %s, id: %s");
 		
-		
-		
-		return true;
+		return CommandManager.commands.get("price").execute(sender, cmd, args);
 	}
 }

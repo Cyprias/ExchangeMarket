@@ -616,7 +616,10 @@ public class MySQL implements Database {
 		return amount;
 	}
 
-	@Override
+	public int getPlayerPackageCount(CommandSender sender) throws SQLException {
+		return getResultCount("SELECT COUNT(*) FROM " + order_table + " WHERE `player` LIKE ?", sender.getName());
+	}
+	
 	public List<Parcel> getPackages(CommandSender sender) throws SQLException {
 		// TODO Auto-generated method stub
 		List<Parcel> packages = new ArrayList<Parcel>();
@@ -650,7 +653,13 @@ public class MySQL implements Database {
 		return getPlayerOrders(sender, null, page);
 	}
 
-	public int getPlayerOrderCount(CommandSender sender, ItemStack stock) throws SQLException{
+	public int getPlayerOrderCount(CommandSender sender) throws SQLException{
+		String query = "SELECT COUNT(*) FROM " + order_table + " WHERE `player` LIKE ?";
+		//rows = getResultCount(query, sender.getName());
+		return getResultCount(query, sender.getName());
+	}
+	
+	public int getPlayerItemOrderCount(CommandSender sender, ItemStack stock) throws SQLException{
 		String query = "SELECT COUNT(*) FROM " + order_table + " WHERE `player` LIKE ? AND `itemID` = ? AND `itemDur` = ?";
 		//rows = getResultCount(query, sender.getName());
 		int rows;
@@ -669,7 +678,7 @@ public class MySQL implements Database {
 	public List<Order> getPlayerOrders(CommandSender sender, ItemStack stock, int page) throws SQLException {
 		int rows = 0;
 		if (stock != null){
-			rows = getPlayerOrderCount(sender, stock);
+			rows = getPlayerItemOrderCount(sender, stock);
 		}else{
 			rows = getResultCount("SELECT COUNT(*) FROM " + order_table + " WHERE `player` LIKE ?", sender.getName());
 		}
@@ -759,10 +768,14 @@ public class MySQL implements Database {
 		return (executeUpdate("INSERT INTO "+ transaction_table+ " (`type`, `buyer`, `itemID`, `itemDur`, `itemEnchants`, `amount`, `price`, `seller`, `timestamp`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP);", type, orderer, itemID, itemDur, itemEnchants, amount, price, owner) > 0) ? true : false;
 	}
 
-	@Override
+
+	public int getPlayerTransactionCount(CommandSender sender) throws SQLException{
+		return getResultCount("SELECT COUNT(*) FROM " + transaction_table + " WHERE `seller` LIKE ? ", sender.getName());
+	}
+	
 	public List<Transaction> listTransactions(CommandSender sender, int page) throws SQLException {
 
-		int rows = getResultCount("SELECT COUNT(*) FROM " + transaction_table + " WHERE `seller` LIKE ? ", sender.getName());
+		int rows = getPlayerTransactionCount(sender);
 
 		//Logger.info("rows: " + rows);
 		

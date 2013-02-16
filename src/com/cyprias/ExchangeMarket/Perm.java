@@ -23,8 +23,7 @@ public enum Perm {
 	NOTIFIED_SELLORDER("exchangemarket.announceneworder.sell"),
 	NOTIFIED_BUYORDER("exchangemarket.announceneworder.buy"),
 	INFO("exchangemarket.info"),
-	SET_PRICE("exchangemarket.setprice"),
-	PARENT_INFO("exchangemarket.user-safe", SET_PRICE, INFO, NOTIFIED_SELLORDER, NOTIFIED_BUYORDER, VERSION, SEARCH, PRICE,ORDERS, TRANSACTIONS, LIST, LOGIN_PENDING_COLLECT, ITEM_INFO,PASSWORD),
+	PARENT_INFO("exchangemarket.user-safe", INFO, NOTIFIED_SELLORDER, NOTIFIED_BUYORDER, VERSION, SEARCH, PRICE,ORDERS, TRANSACTIONS, LIST, LOGIN_PENDING_COLLECT, ITEM_INFO,PASSWORD),
 	
 	SELL("exchangemarket.sell"),
 	BUY("exchangemarket.buy"),
@@ -36,8 +35,8 @@ public enum Perm {
 	CONFIRM("exchangemarket.confirm"),
 	RETURN("exchangemarket.return"),
 	USE_EXCHANGE_SIGN("exchangemarket.use-exchange-sign"),
-	
-	PARENT_USER("exchangemarket.user", RETURN, USE_EXCHANGE_SIGN, PARENT_INFO, SELL,BUY,SELL_ORDER,BUY_ORDER,COLLECT,SELL_HAND,CANCEL,CONFIRM),
+	SET_PRICE("exchangemarket.setprice"),
+	PARENT_USER("exchangemarket.user", SET_PRICE, RETURN, USE_EXCHANGE_SIGN, PARENT_INFO, SELL,BUY,SELL_ORDER,BUY_ORDER,COLLECT,SELL_HAND,CANCEL,CONFIRM),
 	
 	INF_BUY("exchangemarket.infbuy"),
 	INF_SELL("exchangemarket.infsell"),

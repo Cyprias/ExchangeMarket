@@ -21,9 +21,12 @@ import com.cyprias.ExchangeMarket.database.Order;
 
 public class CancelCommand implements Command {
 
-	public void listCommands(CommandSender sender, List<String> list) {
+	public void listCommands(CommandSender sender, List<String> list) throws SQLException {
 		if (Plugin.hasPermission(sender, Perm.CANCEL))
-			list.add("/%s cancel - Cancel one of your orders.");
+			if (Plugin.database.getPlayerOrderCount(sender) > 0)
+				list.add("/%s cancel - Cancel one of your orders.");
+		
+		
 	}
 
 	public CommandAccess getAccess() {

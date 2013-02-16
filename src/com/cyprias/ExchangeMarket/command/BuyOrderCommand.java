@@ -228,7 +228,7 @@ public class BuyOrderCommand implements Command {
 			}
 		} else {
 			if (Config.getInt("properties.identical-orders-per-player") > 0){
-				int existingOrders = Plugin.database.getPlayerOrderCount(sender, stock);
+				int existingOrders = Plugin.database.getPlayerItemOrderCount(sender, stock);
 				if (existingOrders >= Config.getInt("properties.identical-orders-per-player")){
 					ChatUtils.send(sender, String.format("§7You have too many orders for §f%s§7, remove one and try again.", Plugin.getItemName(stock)));
 					return true;

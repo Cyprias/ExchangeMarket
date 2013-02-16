@@ -17,8 +17,8 @@ import com.cyprias.ExchangeMarket.database.Order;
 public class SellListCommand implements Command {
 
 	public void listCommands(CommandSender sender, List<String> list) {
-		if (Plugin.hasPermission(sender, Perm.LIST))
-			list.add("/%s selllist - List sell orders.");
+		//if (Plugin.hasPermission(sender, Perm.LIST))
+		//	list.add("/%s selllist - List sell orders.");
 	}
 
 	public boolean execute(final CommandSender sender, org.bukkit.command.Command cmd, String[] args) throws IOException, InvalidConfigurationException, SQLException {

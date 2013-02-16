@@ -17,11 +17,12 @@ import com.cyprias.ExchangeMarket.Breeze.MaterialUtil;
 import com.cyprias.ExchangeMarket.configuration.Config;
 import com.cyprias.ExchangeMarket.database.Order;
 
-public class InfoCommand implements Command {
+public class OrderInfoCommand implements Command {
 
-	public void listCommands(CommandSender sender, List<String> list) {
+	public void listCommands(CommandSender sender, List<String> list) throws SQLException {
 		if (Plugin.hasPermission(sender, Perm.INFO))
-			list.add("/%s info - Get info on a specific order.");
+			if (Plugin.database.getPlayerOrderCount(sender) > 0)
+				list.add("/%s orderinfo - Get info on a specific order.");
 	}
 	
 	public CommandAccess getAccess() {
@@ -29,7 +30,7 @@ public class InfoCommand implements Command {
 	}
 
 	public void getCommands(CommandSender sender, org.bukkit.command.Command cmd) {
-		ChatUtils.sendCommandHelp(sender, Perm.INFO, "/%s info <orderID>", cmd);
+		ChatUtils.sendCommandHelp(sender, Perm.INFO, "/%s orderinfo <orderID>", cmd);
 	}
 
 	public boolean execute(final CommandSender sender, org.bukkit.command.Command cmd, String[] args) throws SQLException, IOException, InvalidConfigurationException {

@@ -16,9 +16,10 @@ import com.cyprias.ExchangeMarket.database.Transaction;
 
 public class TransactionsCommand implements Command {
 
-	public void listCommands(CommandSender sender, List<String> list) {
+	public void listCommands(CommandSender sender, List<String> list) throws SQLException {
 		if (Plugin.hasPermission(sender, Perm.TRANSACTIONS))
-			list.add("/%s transactions - Show transactions for your orders.");
+			if (Plugin.database.getPlayerTransactionCount(sender) > 0)
+				list.add("/%s transactions - Show transactions for your orders.");
 	}
 
 	public CommandAccess getAccess() {

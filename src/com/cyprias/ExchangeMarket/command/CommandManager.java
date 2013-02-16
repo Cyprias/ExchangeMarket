@@ -1,5 +1,6 @@
 package com.cyprias.ExchangeMarket.command;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -32,7 +33,12 @@ public class CommandManager implements CommandExecutor, Listable {
 	public boolean onCommand(CommandSender sender, org.bukkit.command.Command cmd, String label, String[] args) {
 		boolean help = false;
 		if (args.length == 0 || args[0].equals("?") || args[0].equals("help")) {
-			this.getCommands(sender, this, cmd);
+			try {
+				this.getCommands(sender, this, cmd);
+			} catch (SQLException e) {
+				ChatUtils.error(sender, e.getMessage());
+				e.printStackTrace();
+			}
 			help = true;
 		}
 		if (!help) {
@@ -92,7 +98,7 @@ public class CommandManager implements CommandExecutor, Listable {
 		return false;
 	}
 
-	public void listCommands(CommandSender sender, List<String> list) {
+	public void listCommands(CommandSender sender, List<String> list) throws SQLException {
 		for (Command command : commands.values()) {
 			if (command.getAccess().hasAccess(sender))
 				command.listCommands(sender, list);
@@ -103,11 +109,11 @@ public class CommandManager implements CommandExecutor, Listable {
 		list.addAll(set);
 	}
 
-	protected void getCommands(CommandSender sender, Listable listable, org.bukkit.command.Command cmd) {
+	protected void getCommands(CommandSender sender, Listable listable, org.bukkit.command.Command cmd) throws SQLException {
 		getCommands(sender, listable, cmd, 1);
 	}
 
-	protected void getCommands(CommandSender sender, Listable listable, org.bukkit.command.Command cmd, int page) {
+	protected void getCommands(CommandSender sender, Listable listable, org.bukkit.command.Command cmd, int page) throws SQLException {
 		List<String> list = new ArrayList<String>();
 		listable.listCommands(sender, list);
 		int len = list.size();
